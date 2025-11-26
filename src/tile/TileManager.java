@@ -19,7 +19,7 @@ public class TileManager {
 	public TileManager(GamePanel gp) {
 		
 		this.gp = gp;
-		mapTileNum = new int[gp.maxScreenCol][gp.maxScreenRow];
+		mapTileNum = new int[gp.maxWorldCol][gp.maxWorldRow];
 		
 		tile = new Tile[10];
 		
@@ -41,7 +41,17 @@ public class TileManager {
 			tile[2].image = ImageIO.read(getClass().getResourceAsStream("/tiles/airtengah.png"));
 			
 			tile[3] = new Tile();
-			tile[3].image = ImageIO.read(getClass().getResourceAsStream("/tiles/tanahtengah.png")); 		
+			tile[3].image = ImageIO.read(getClass().getResourceAsStream("/tiles/tanahtengah.png"));
+			
+			tile[4] = new Tile();
+			tile[4].image = ImageIO.read(getClass().getResourceAsStream("/tiles/pohontop.png")); 
+			
+			tile[5] = new Tile();
+			tile[5].image = ImageIO.read(getClass().getResourceAsStream("/tiles/pohonbot.png"));
+			
+			tile[6] = new Tile();
+			tile[6].image = ImageIO.read(getClass().getResourceAsStream("/tiles/stone.png"));
+			
 		}catch(IOException e) {
 			e.printStackTrace();
 		}
