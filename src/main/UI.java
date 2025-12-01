@@ -25,7 +25,7 @@ public class UI {
         
         arial_40 = new Font("Monospaced", Font.PLAIN, 40);
         arial_80B = new Font("Monospaced", Font.BOLD, 80);
-        OBJ_Key key = new OBJ_Key();
+        OBJ_Key key = new OBJ_Key(gp);
         keyImage = key.image;
     }
     

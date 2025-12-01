@@ -95,12 +95,11 @@ public class GamePanel extends JPanel implements Runnable {
             }
 
             // FPS counter (opsional)
-            
-            if (timer >= 1000000000) {  // Jika sudah 1 detik
-                System.out.println("FPS: " + drawCount);
-                drawCount = 0;
-                timer = 0;
-            }
+//            if (timer >= 1000000000) {  // Jika sudah 1 detik
+//                System.out.println("FPS: " + drawCount);
+//                drawCount = 0;
+//                timer = 0;
+//            }
         }
     }
     
@@ -111,10 +110,14 @@ public class GamePanel extends JPanel implements Runnable {
     }
     
     public void paintComponent(Graphics g) {
-        
         super.paintComponent(g);
-        
         Graphics2D g2 = (Graphics2D)g;
+        
+        // Debug
+        long drawStart = 0;
+        if(keyH.checkDrawTime == true) {
+        	drawStart = System.nanoTime();
+        }
         
        
         tileM.draw(g2);    //background
@@ -129,6 +132,16 @@ public class GamePanel extends JPanel implements Runnable {
         
         // UI
         ui.draw(g2);
+        
+        //Debug
+        if(keyH.checkDrawTime == true) {
+        	long drawEnd = System.nanoTime();
+            long passed = drawEnd - drawStart;
+            g2.setColor(Color.white);
+            g2.drawString("Draw time = "+ passed, 40, 400);
+            System.out.println("Draw time = "+ passed);
+        }
+        
         
         g2.dispose();      //dispose graphics object
     }

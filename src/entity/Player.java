@@ -10,6 +10,7 @@ import javax.imageio.ImageIO;
 
 import main.GamePanel;
 import main.KeyHandler;
+import main.UtilityTool;
 
 public class Player extends Entity {
 	
@@ -19,6 +20,9 @@ public class Player extends Entity {
 	public final int screenX;
 	public final int screenY;
 	public int hasKey = 0;
+	int standCounter = 0;
+	boolean moving = false;
+	int pixelCounter = 0;
 	
 	public Player(GamePanel gp, KeyHandler keyH) {
 		
@@ -29,12 +33,12 @@ public class Player extends Entity {
 		screenY = gp.screenHeight/2 - (gp.tileSize/2);
 		
 		solidArea = new Rectangle();
-		solidArea.x = 8;
-		solidArea.y = 16;
+		solidArea.x = 1;
+		solidArea.y = 1;
 		solidAreaDefaultX = solidArea.x;
 		solidAreaDefaultY = solidArea.y;
-		solidArea.width = 24;
-		solidArea.height = 24;
+		solidArea.width = 46;
+		solidArea.height = 46;
 		
 		setDefaultValues();
 		getPlayerImage();
@@ -50,83 +54,155 @@ public class Player extends Entity {
 	
 	public void getPlayerImage() {
 		
-		try {
-			
-			up1 = ImageIO.read(getClass().getResourceAsStream("/player/upjalan1.png"));
-			up2 = ImageIO.read(getClass().getResourceAsStream("/player/upjalan2.png"));
-			down1 = ImageIO.read(getClass().getResourceAsStream("/player/bawahdiam.png"));
-			down2 = ImageIO.read(getClass().getResourceAsStream("/player/bawahdiam2.png"));
-			left1 = ImageIO.read(getClass().getResourceAsStream("/player/kirijalan.png"));
-			left2 = ImageIO.read(getClass().getResourceAsStream("/player/kirijalan.png"));
-			right1 = ImageIO.read(getClass().getResourceAsStream("/player/kananjalan1.png"));
-			right2 = ImageIO.read(getClass().getResourceAsStream("/player/kananjalan2.png"));
-			
-		}catch(IOException e) {
-			e.printStackTrace();
-		}
+		up1 = setup("upjalan1");
+	    up2 = setup("upjalan2");
+	    down1 = setup("bawahdiam"); 
+	    down2 = setup("bawahdiam2");
+	    left1 = setup("kirijalan");
+	    left2 = setup("kirijalan");
+		right1 = setup("kananjalan1");
+		right2 = setup("kananjalan2");
+	}
+	
+	public BufferedImage setup(String imageName) {
+		
+	    UtilityTool uTool = new UtilityTool();
+	    BufferedImage image = null;
+	    
+	    try {
+	        image = ImageIO.read(getClass().getResourceAsStream("/player/" + imageName + ".png"));
+	        image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
+	        
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	    return image;
 	}
 	
 	public void update() {
-		
-		if(keyH.upPressed == true || keyH.downPressed == true || 
-				keyH.leftPressed == true || keyH.rightPressed == true) {
-			
-			if(keyH.upPressed == true) {
-				direction = "up";
-			}
-			else if (keyH.downPressed == true) {
-				direction = "down";
-			}
-			else if (keyH.leftPressed == true) {
-				direction = "left";
-			}
-			else if (keyH.rightPressed == true) {
-				direction = "right";
-			}
-			
-			//Check Tile Collision
-			collisionOn = false;
-			gp.cChecker.checkTile(this);
-			
-			//Check Object Collision
-			int objIndex = gp.cChecker.checkObject(this, true);
-			pickUpObject(objIndex);
-			
-			// If  Collision  Is False, Player Can Move
-			if(collisionOn == false) {
+	    
+	    // Kita hanya menerima input jika karakter sedang TIDAK bergerak
+	    if (moving == false) {
+	        
+	        if (keyH.upPressed == true || keyH.downPressed == true || 
+	            keyH.leftPressed == true || keyH.rightPressed == true) {
+	            
+	            if (keyH.upPressed == true) {
+	                direction = "up";
+	            } else if (keyH.downPressed == true) {
+	                direction = "down";
+	            } else if (keyH.leftPressed == true) {
+	                direction = "left";
+	            } else if (keyH.rightPressed == true) {
+	                direction = "right";
+	            }
+	            
+	            if (moving == true) {
+	                
+	                // Gerakkan karakter berdasarkan arah
+	                switch(direction) {
+	                    case "up":
+	                        worldY -= speed;
+	                        break;
+	                    case "down":
+	                        worldY += speed;
+	                        break;
+	                    case "left":
+	                        worldX -= speed;
+	                        break;
+	                    case "right":
+	                        worldX += speed;
+	                        break;
+	                }
+	                
+	                // Tambahkan counter pixel yang sudah ditempuh
+	                pixelCounter += speed;
+	                
+	                // Jika sudah bergerak sejauh 48 pixel (1 tile) ATAU LEBIH
+	                if (pixelCounter >= gp.tileSize) { // Gunakan >= (lebih besar dari atau sama dengan)
+	                    
+	                    // 1. Hitung sisa pergerakan (kelebihan piksel)
+	                    int remainder = pixelCounter - gp.tileSize;
+	                    
+	                    // 2. Terapkan sisa pergerakan (untuk memastikan karakter berhenti tepat di grid berikutnya)
+	                    switch(direction) {
+	                        case "up":
+	                            worldY += remainder; // Mundurkan Y sebeser sisanya
+	                            break;
+	                        case "down":
+	                            worldY -= remainder; // Mundurkan Y sebeser sisanya
+	                            break;
+	                        case "left":
+	                            worldX += remainder; // Mundurkan X sebeser sisanya
+	                            break;
+	                        case "right":
+	                            worldX -= remainder; // Mundurkan X sebeser sisanya
+	                            break;
+	                    }
+
+	                    moving = false;
+	                    pixelCounter = 0;
+	                }
+	            }
+	            
+	          //Check Tile Collision
+				collisionOn = false;
+				gp.cChecker.checkTile(this);
 				
-				switch(direction) {
-				case "up":
-					worldY  -= speed;
-					break;
-				case "down":
-					worldY  += speed;
-					break;
-				case "left":
-					worldX  -= speed;
-					break;
-				case "right":
-					worldX  += speed;
-					break;
-				
-					
-				}
-			}
-			
-			spriteCounter++;
-			if (spriteCounter > 14) {
-				if (spriteNum == 1) {
-					spriteNum = 2;
-				}
-				else if (spriteNum == 2) {
-					spriteNum = 1;
-				}
-				spriteCounter = 0;
-			}
-			
-		}
-		
-		
+				//Check Object Collision
+				int objIndex = gp.cChecker.checkObject(this, true);
+				pickUpObject(objIndex);
+	            
+	            // Jika tidak menabrak, mulai pergerakan
+	            if (collisionOn == false) {
+	                moving = true;
+	            }
+	        }
+	    }
+	    
+	    // Logika Pergerakan Grid
+	    if (moving == true) {
+	        
+	        // Gerakkan karakter berdasarkan arah
+	        switch(direction) {
+	            case "up":
+	                worldY -= speed;
+	                break;
+	            case "down":
+	                worldY += speed;
+	                break;
+	            case "left":
+	                worldX -= speed;
+	                break;
+	            case "right":
+	                worldX += speed;
+	                break;
+	        }
+	        
+	        // Tambahkan counter pixel yang sudah ditempuh
+	        pixelCounter += speed;
+	        
+	        // Jika sudah bergerak sejauh 48 pixel (1 tile), berhenti
+	        if (pixelCounter >= 48) {
+	            moving = false;
+	            pixelCounter = 0;
+	        }
+	    }
+	    
+	    // Logika Sprite Animation (Hanya berjalan jika tombol ditekan / sedang bergerak)
+	    if (keyH.upPressed == true || keyH.downPressed == true || 
+	        keyH.leftPressed == true || keyH.rightPressed == true || moving == true) {
+	            
+	        spriteCounter++;
+	        if (spriteCounter > 12) {
+	            if (spriteNum == 1) {
+	                spriteNum = 2;
+	            } else if (spriteNum == 2) {
+	                spriteNum = 1;
+	            }
+	            spriteCounter = 0;
+	        }
+	    }
 	}
 	public void pickUpObject(int i) {
 		
@@ -208,7 +284,7 @@ public class Player extends Entity {
 			}
 			break;
 		}
-		g2.drawImage(image, screenX, screenY,  gp.tileSize, gp.tileSize,null);
+		g2.drawImage(image, screenX, screenY, null);
 			
 	}
 }
