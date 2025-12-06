@@ -4,29 +4,23 @@ package entity;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
 
 import main.GamePanel;
 import main.KeyHandler;
-import main.UtilityTool;
 
 public class Player extends Entity {
 	
-	GamePanel gp;
 	KeyHandler keyH;
-	
 	public final int screenX;
 	public final int screenY;
-	public int hasKey = 0;
 	int standCounter = 0;
 	boolean moving = false;
 	int pixelCounter = 0;
 	
 	public Player(GamePanel gp, KeyHandler keyH) {
 		
-		this.gp = gp;
+		super(gp);
+		
 		this.keyH = keyH;
 		
 		screenX = gp.screenWidth/2 - (gp.tileSize/2);
@@ -54,30 +48,16 @@ public class Player extends Entity {
 	
 	public void getPlayerImage() {
 		
-		up1 = setup("upjalan1");
-	    up2 = setup("upjalan2");
-	    down1 = setup("bawahdiam"); 
-	    down2 = setup("bawahdiam2");
-	    left1 = setup("kirijalan");
-	    left2 = setup("kirijalan");
-		right1 = setup("kananjalan1");
-		right2 = setup("kananjalan2");
+		up1 = setup("/player/upjalan1");
+	    up2 = setup("/player/upjalan2");
+	    down1 = setup("/player/bawahdiam"); 
+	    down2 = setup("/player/bawahdiam2");
+	    left1 = setup("/player/kirijalan");
+	    left2 = setup("/player/kirijalan");
+		right1 = setup("/player/kananjalan1");
+		right2 = setup("/player/kananjalan2");
 	}
 	
-	public BufferedImage setup(String imageName) {
-		
-	    UtilityTool uTool = new UtilityTool();
-	    BufferedImage image = null;
-	    
-	    try {
-	        image = ImageIO.read(getClass().getResourceAsStream("/player/" + imageName + ".png"));
-	        image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
-	        
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    }
-	    return image;
-	}
 	
 	public void update() {
 	    
@@ -119,7 +99,7 @@ public class Player extends Entity {
 	                pixelCounter += speed;
 	                
 	                // Jika sudah bergerak sejauh 48 pixel (1 tile) ATAU LEBIH
-	                if (pixelCounter >= gp.tileSize) { // Gunakan >= (lebih besar dari atau sama dengan)
+	                if (pixelCounter >= gp.tileSize) {
 	                    
 	                    // 1. Hitung sisa pergerakan (kelebihan piksel)
 	                    int remainder = pixelCounter - gp.tileSize;
@@ -152,6 +132,10 @@ public class Player extends Entity {
 				//Check Object Collision
 				int objIndex = gp.cChecker.checkObject(this, true);
 				pickUpObject(objIndex);
+				
+				//Check NPC Collision
+				int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
+				interactNPC(npcIndex);
 	            
 	            // Jika tidak menabrak, mulai pergerakan
 	            if (collisionOn == false) {
@@ -208,39 +192,16 @@ public class Player extends Entity {
 		
 		if(i != 999) {
 			
-			String objectName = gp.obj[i].name;
 			
-			switch(objectName) {
-		    case "Key":
-		    	gp.playSE(1);
-		        hasKey++;
-		        gp.obj[i] = null;
-		        gp.ui.showMessage("You got a key!");
-		        break;
-		    case "Door":
-		    	if (hasKey > 0) {
-                    gp.playSE(3);
-                    gp.obj[i] = null;
-                    hasKey--;
-                    gp.ui.showMessage("You opened the door!");
-                } else {
-                    gp.ui.showMessage("You need a key!");
-                }
-		        break;
-		    case "Boots":
-		    	gp.playSE(1);
-		    	speed += 1;
-		    	gp.obj[i] = null;
-		    	gp.ui.showMessage("Speed up!");
-		    	break;
-		    case "Chest":
-                gp.ui.gameFinished = true;
-                gp.stopMusic();
-                gp.playSE(4); 
-                break;
-			}
 		}
 		
+	}
+	public void interactNPC(int i) {
+		
+		if(i != 999) {
+			
+			
+		}
 	}
 
 	public void draw(Graphics2D g2) {
