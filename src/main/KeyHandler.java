@@ -6,7 +6,7 @@ import java.awt.event.KeyListener;
 public class KeyHandler implements KeyListener {
 
 	GamePanel gp;
-	public boolean upPressed, downPressed, leftPressed, rightPressed;
+	public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed;
 	
 	//Debug
 	boolean checkDrawTime = false;
@@ -27,37 +27,50 @@ public class KeyHandler implements KeyListener {
 		// TODO Auto-generated method stub
 		int code = e.getKeyCode();
 		
-		if(code == KeyEvent.VK_W) {
-			upPressed = true;
-		}
-		if(code == KeyEvent.VK_S) {
-			downPressed = true;
-		}
-		if(code == KeyEvent.VK_A) {
-			leftPressed = true;
-		}
-		if(code == KeyEvent.VK_D) {
-			rightPressed = true;
-		}
-		if(code == KeyEvent.VK_P) {
-			if(gp.gameState == gp.playState) {
+		//Play State
+		if(gp.gameState == gp.playState) {
+			if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+				upPressed = true;
+			}
+			if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
+				downPressed = true;
+			}
+			if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) {
+				leftPressed = true;
+			}
+			if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
+				rightPressed = true;
+			}
+			if(code == KeyEvent.VK_P || code == KeyEvent.VK_ESCAPE) {
 				gp.gameState = gp.pauseState;
 			}
-			else if (gp.gameState == gp.pauseState) {
+			if(code == KeyEvent.VK_ENTER) {
+				enterPressed = true;
+			}
+			
+			//Debug
+			if(code == KeyEvent.VK_T) {
+				if (checkDrawTime == false) {
+			        checkDrawTime = true;
+			    } else {
+			        checkDrawTime = false;
+			    }
+			}
+		}
+		//Pause State
+		else if(gp.gameState == gp.pauseState) {
+			if(code == KeyEvent.VK_P || code == KeyEvent.VK_ESCAPE) {
 				gp.gameState = gp.playState;
 			}
-				
 		}
 		
-		//Debug
-		if(code == KeyEvent.VK_T) {
-			if (checkDrawTime == false) {
-		        checkDrawTime = true;
-		    } else {
-		        checkDrawTime = false;
-		    }
+		//Dialogue State
+		else if(gp.gameState == gp.dialogueState) {
+			if(code == KeyEvent.VK_ENTER) {
+				gp.gameState = gp.playState;
+			}
+			
 		}
-		
 	}
 
 	@Override
@@ -65,17 +78,20 @@ public class KeyHandler implements KeyListener {
 		// TODO Auto-generated method stub
 		int code = e.getKeyCode();
 		
-		if(code == KeyEvent.VK_W) {
+		if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
 			upPressed = false;
 		}
-		if(code == KeyEvent.VK_S) {
+		if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
 			downPressed = false;
 		}
-		if(code == KeyEvent.VK_A) {
+		if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) {
 			leftPressed = false;
 		}
-		if(code == KeyEvent.VK_D) {
+		if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
 			rightPressed = false;
+		}
+		if(code == KeyEvent.VK_ENTER) {
+			enterPressed = false;
 		}
 	}
 }

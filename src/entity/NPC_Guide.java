@@ -13,6 +13,7 @@ public class NPC_Guide extends Entity {
 		speed = 1;
 		
 		getImage();
+		setDialogue();
 	}
 	public void getImage() {
 		
@@ -24,6 +25,15 @@ public class NPC_Guide extends Entity {
 	    left2 = setup("/npc/idle-removebg-preview");
 		right1 = setup("/npc/idle-removebg-preview");
 		right2 = setup("/npc/idle-removebg-preview");
+	}
+	public void setDialogue() {
+		
+		
+		dialogues[0] = "Hello World";
+		dialogues[1] = "Hello World 2";
+		dialogues[2] = "Hello World 3";
+		dialogues[3] = "Hello World 4";
+		dialogues[4] = "Hello World 5";
 	}
 	public void setAction() {
 		
@@ -49,8 +59,9 @@ public class NPC_Guide extends Entity {
 			
 			actionLockCounter = 0;
 		}
-		
-		
 	}
-	
+	public void speak() {
+		
+		super.speak();
+	}
 }

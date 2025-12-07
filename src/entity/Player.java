@@ -48,14 +48,14 @@ public class Player extends Entity {
 	
 	public void getPlayerImage() {
 		
-		up1 = setup("/player/upjalan1");
-	    up2 = setup("/player/upjalan2");
-	    down1 = setup("/player/bawahdiam"); 
-	    down2 = setup("/player/bawahdiam2");
-	    left1 = setup("/player/kirijalan");
-	    left2 = setup("/player/kirijalan");
-		right1 = setup("/player/kananjalan1");
-		right2 = setup("/player/kananjalan2");
+		up1 = setup("/player/top1");
+	    up2 = setup("/player/top2");
+	    down1 = setup("/player/bot1"); 
+	    down2 = setup("/player/bot2");
+	    left1 = setup("/player/left1");
+	    left2 = setup("/player/left2");
+		right1 = setup("/player/right1");
+		right2 = setup("/player/right2");
 	}
 	
 	
@@ -200,8 +200,12 @@ public class Player extends Entity {
 		
 		if(i != 999) {
 			
-			
+			if(gp.keyH.enterPressed == true) {
+				gp.gameState = gp.dialogueState;
+				gp.npc[i].speak();
+			}
 		}
+		gp.keyH.enterPressed = false;
 	}
 
 	public void draw(Graphics2D g2) {
