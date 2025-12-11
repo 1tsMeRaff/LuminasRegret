@@ -27,7 +27,38 @@ public class KeyHandler implements KeyListener {
 		// TODO Auto-generated method stub
 		int code = e.getKeyCode();
 		
-		//Play State
+		// Title State
+		if(gp.gameState == gp.titleState) {
+			
+			if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+				gp.ui.commandNum--;
+				if(gp.ui.commandNum < 0) {
+					gp.ui.commandNum = 2;
+				}
+			}
+			if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
+				gp.ui.commandNum++;
+				if(gp.ui.commandNum > 2) {
+					gp.ui.commandNum = 0;
+				}
+			}
+			if(code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE) {
+				if(gp.ui.commandNum == 0) {
+					gp.gameState = gp.playState;
+					gp.playMusic(0);
+					
+				}
+				if(gp.ui.commandNum == 1) {
+					
+					
+				}
+				if(gp.ui.commandNum == 2) {
+					System.exit(code);
+					
+				}
+			}
+		}
+		// Play State
 		if(gp.gameState == gp.playState) {
 			if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
 				upPressed = true;
