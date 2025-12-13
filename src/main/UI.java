@@ -97,7 +97,7 @@ public class UI {
     	while(i < gp.player.maxLife/2) {
     		g2.drawImage(heart_blank, x, y, null);
     		i++;
-    		x += gp.tileSize/1.5;
+    		x += gp.tileSize + 10;
     	}
     	
     	//Reset
@@ -113,7 +113,7 @@ public class UI {
     			g2.drawImage(heart_full, x, y, null);
     		}
     		i++;
-    		x += gp.tileSize/1.5;
+    		x += gp.tileSize + 10;
     	}
     	
     }
