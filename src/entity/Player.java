@@ -67,23 +67,41 @@ public class Player extends Entity {
         int tempWorldX = worldX;
         int tempWorldY = worldY;
         
-        // Cek input untuk menentukan arah dan pergerakan
+        // Gunakan float/double untuk perhitungan akurat
+        float moveX = 0;
+        float moveY = 0;
+        
+        // Cek input dan hitung vektor
         if (keyH.upPressed == true) {
             direction = "up";
-            worldY -= speed;
+            moveY -= speed;
         }
         if (keyH.downPressed == true) {
             direction = "down";
-            worldY += speed;
+            moveY += speed;
         }
         if (keyH.leftPressed == true) {
             direction = "left";
-            worldX -= speed;
+            moveX -= speed;
         }
         if (keyH.rightPressed == true) {
             direction = "right";
-            worldX += speed;
+            moveX += speed;
         }
+        
+        // Normalize diagonal movement (jika bergerak diagonal)
+        if (moveX != 0 && moveY != 0) {
+            float length = (float)Math.sqrt(moveX * moveX + moveY * moveY);
+            float normalizedSpeed = speed; // Target speed
+            
+            // Skala vektor untuk mendapatkan kecepatan yang tepat
+            moveX = (moveX / length) * normalizedSpeed;
+            moveY = (moveY / length) * normalizedSpeed;
+        }
+        
+        // Terapkan pergerakan (dengan rounding untuk posisi integer)
+        worldX += Math.round(moveX);
+        worldY += Math.round(moveY);
         
         // Check Tile Collision
         gp.cChecker.checkTile(this);
@@ -114,11 +132,7 @@ public class Player extends Entity {
         if (isMoving) {
             spriteCounter++;
             if (spriteCounter > 12) {
-                if (spriteNum == 1) {
-                    spriteNum = 2;
-                } else if (spriteNum == 2) {
-                    spriteNum = 1;
-                }
+                spriteNum = (spriteNum == 1) ? 2 : 1;
                 spriteCounter = 0;
             }
         } else {

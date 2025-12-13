@@ -17,14 +17,14 @@ public class NPC_Guide extends Entity {
 	}
 	public void getImage() {
 		
-		up1 = setup("/npc/idle-removebg-preview");
-	    up2 = setup("/npc/idle-removebg-preview");
-	    down1 = setup("/npc/idle-removebg-preview"); 
-	    down2 = setup("/npc/idle-removebg-preview");
-	    left1 = setup("/npc/idle-removebg-preview");
-	    left2 = setup("/npc/idle-removebg-preview");
-		right1 = setup("/npc/idle-removebg-preview");
-		right2 = setup("/npc/idle-removebg-preview");
+		up1 = setup("/npc/up1");
+	    up2 = setup("/npc/up2");
+	    down1 = setup("/npc/down1"); 
+	    down2 = setup("/npc/down2");
+	    left1 = setup("/npc/left1");
+	    left2 = setup("/npc/left2");
+		right1 = setup("/npc/right1");
+		right2 = setup("/npc/right2");
 	}
 	public void setDialogue() {
 		
