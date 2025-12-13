@@ -1,5 +1,6 @@
 package entity;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -71,82 +72,104 @@ public class Player extends Entity {
         float moveX = 0;
         float moveY = 0;
         
-        // Cek input dan hitung vektor
-        if (keyH.upPressed == true) {
-            direction = "up";
-            moveY -= speed;
-        }
-        if (keyH.downPressed == true) {
-            direction = "down";
-            moveY += speed;
-        }
-        if (keyH.leftPressed == true) {
-            direction = "left";
-            moveX -= speed;
-        }
-        if (keyH.rightPressed == true) {
-            direction = "right";
-            moveX += speed;
-        }
-        
-        // Normalize diagonal movement (jika bergerak diagonal)
-        if (moveX != 0 && moveY != 0) {
-            float length = (float)Math.sqrt(moveX * moveX + moveY * moveY);
-            float normalizedSpeed = speed; // Target speed
+        if(keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true ||
+        		keyH.rightPressed == true || keyH.enterPressed == true) {
+        	
+        	// Cek input dan hitung vektor
+            if (keyH.upPressed == true) {
+                direction = "up";
+                moveY -= speed;
+            }
+            if (keyH.downPressed == true) {
+                direction = "down";
+                moveY += speed;
+            }
+            if (keyH.leftPressed == true) {
+                direction = "left";
+                moveX -= speed;
+            }
+            if (keyH.rightPressed == true) {
+                direction = "right";
+                moveX += speed;
+            }
             
-            // Skala vektor untuk mendapatkan kecepatan yang tepat
-            moveX = (moveX / length) * normalizedSpeed;
-            moveY = (moveY / length) * normalizedSpeed;
-        }
-        
-        // Terapkan pergerakan (dengan rounding untuk posisi integer)
-        worldX += Math.round(moveX);
-        worldY += Math.round(moveY);
-        
-        // Check Tile Collision
-        gp.cChecker.checkTile(this);
-        
-        // Check Object Collision
-        int objIndex = gp.cChecker.checkObject(this, true);
-        pickUpObject(objIndex);
-        
-        // Check NPC Collision
-        int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
-        interactNPC(npcIndex);
-        
-        // Check Event
-        gp.eHandler.checkEvent();
-        
-        // Reset enterPressed
-        gp.keyH.enterPressed = false;
-        
-        // Jika ada collision, kembalikan ke posisi sebelumnya
-        if (collisionOn == true) {
-            worldX = tempWorldX;
-            worldY = tempWorldY;
-        }
-        
-        // Sprite Animation Logic
-        boolean isMoving = keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed;
-        
-        if (isMoving) {
-            spriteCounter++;
-            if (spriteCounter > 12) {
-                spriteNum = (spriteNum == 1) ? 2 : 1;
+            // Normalize diagonal movement (jika bergerak diagonal)
+            if (moveX != 0 && moveY != 0) {
+                float length = (float)Math.sqrt(moveX * moveX + moveY * moveY);
+                float normalizedSpeed = speed; // Target speed
+                
+                // Skala vektor untuk mendapatkan kecepatan yang tepat
+                moveX = (moveX / length) * normalizedSpeed;
+                moveY = (moveY / length) * normalizedSpeed;
+            }
+            
+            // Terapkan pergerakan (dengan rounding untuk posisi integer)
+            worldX += Math.round(moveX);
+            worldY += Math.round(moveY);
+            
+            // Check Tile Collision
+            gp.cChecker.checkTile(this);
+            
+            // Check Object Collision
+            int objIndex = gp.cChecker.checkObject(this, true);
+            pickUpObject(objIndex);
+            
+            // Check NPC Collision
+            int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
+            interactNPC(npcIndex);
+            
+            // Check Monster Collision
+            int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
+            contactMonster(monsterIndex);
+            
+            // Check Event
+            gp.eHandler.checkEvent();
+            
+            // Reset enterPressed
+            gp.keyH.enterPressed = false;
+            
+            // Jika ada collision, kembalikan ke posisi sebelumnya
+            if (collisionOn == true) {
+                worldX = tempWorldX;
+                worldY = tempWorldY;
+            }
+            
+            // Sprite Animation Logic
+            boolean isMoving = keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed;
+            
+            if (isMoving) {
+                spriteCounter++;
+                if (spriteCounter > 12) {
+                    spriteNum = (spriteNum == 1) ? 2 : 1;
+                    spriteCounter = 0;
+                }
+            } else {
+                // Reset to default sprite when not moving
+                spriteNum = 1;
                 spriteCounter = 0;
             }
-        } else {
-            // Reset to default sprite when not moving
-            spriteNum = 1;
-            spriteCounter = 0;
+        }
+        
+        
+        
+        // Invincible Counter
+        if(invincible == true) {
+        	invincibleCounter++;
+        	if(invincibleCounter > 60) {
+        		invincible = false;
+        		invincibleCounter = 0;
+        	}
         }
     }
+    
+    
     
     public void pickUpObject(int i) {
         if (i != 999) {
             // Handle object pickup logic here
         }
     }
+    
     
     public void interactNPC(int i) {
         if (i != 999) {
@@ -155,6 +178,18 @@ public class Player extends Entity {
                 gp.npc[i].speak();
             }
         }
+    }
+    public void contactMonster(int i) {
+    	
+    	if(i != 999) {
+    		
+    		if(invincible == false) {
+    			life -= 1;
+    			invincible = true;
+    		}
+    		
+    		
+    	}
     }
 
     public void draw(Graphics2D g2) {
@@ -176,7 +211,14 @@ public class Player extends Entity {
                 break;
         }
         
+        if(invincible == true) {
+        	g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+        }
+        
         // Gambar player di tengah screen
         g2.drawImage(image, screenX, screenY, null);
+        
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        
     }
 }
