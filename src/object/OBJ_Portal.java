@@ -9,7 +9,7 @@ public class OBJ_Portal extends Entity {
 		super(gp);
 		
 		name = "Door";
-		down1 = setup("/objects/portal");
+		down1 = setup("/objects/portal", gp.tileSize, gp.tileSize);
 		collision = true;
 		
 		solidArea.x = 0;

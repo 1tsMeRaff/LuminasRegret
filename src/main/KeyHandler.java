@@ -9,7 +9,7 @@ public class KeyHandler implements KeyListener {
 	public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed;
 	
 	//Debug
-	boolean checkDrawTime = false;
+	boolean showDebugText= false;
 	
 	
 	public KeyHandler(GamePanel gp) {
@@ -29,78 +29,116 @@ public class KeyHandler implements KeyListener {
 		
 		// Title State
 		if(gp.gameState == gp.titleState) {
-			
-			if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
-				gp.ui.commandNum--;
-				if(gp.ui.commandNum < 0) {
-					gp.ui.commandNum = 2;
-				}
-			}
-			if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
-				gp.ui.commandNum++;
-				if(gp.ui.commandNum > 2) {
-					gp.ui.commandNum = 0;
-				}
-			}
-			if(code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE) {
-				if(gp.ui.commandNum == 0) {
-					gp.gameState = gp.playState;
-					//gp.playMusic(0);
-					
-				}
-				if(gp.ui.commandNum == 1) {
-					
-					
-				}
-				if(gp.ui.commandNum == 2) {
-					System.exit(code);
-					
-				}
-			}
+			titleState(code);
 		}
+	
 		// Play State
-		if(gp.gameState == gp.playState) {
-			if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
-				upPressed = true;
-			}
-			if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
-				downPressed = true;
-			}
-			if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) {
-				leftPressed = true;
-			}
-			if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
-				rightPressed = true;
-			}
-			if(code == KeyEvent.VK_P || code == KeyEvent.VK_ESCAPE) {
-				gp.gameState = gp.pauseState;
-			}
-			if(code == KeyEvent.VK_ENTER) {
-				enterPressed = true;
-			}
-			
-			//Debug
-			if(code == KeyEvent.VK_T) {
-				if (checkDrawTime == false) {
-			        checkDrawTime = true;
-			    } else {
-			        checkDrawTime = false;
-			    }
-			}
+		else if(gp.gameState == gp.playState) {
+			playState(code);
 		}
 		//Pause State
 		else if(gp.gameState == gp.pauseState) {
-			if(code == KeyEvent.VK_P || code == KeyEvent.VK_ESCAPE) {
-				gp.gameState = gp.playState;
-			}
+			pauseState(code);
 		}
 		
 		//Dialogue State
 		else if(gp.gameState == gp.dialogueState) {
-			if(code == KeyEvent.VK_ENTER) {
-				gp.gameState = gp.playState;
+			dialogueState(code);
+		}
+		
+		// CharacterState
+		else if(gp.gameState == gp.characterState) {
+			characterState(code);
+		}
+	}
+
+	
+	public void titleState(int code) {
+		
+		if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+			gp.ui.commandNum--;
+			if(gp.ui.commandNum < 0) {
+				gp.ui.commandNum = 2;
 			}
-			
+		}
+		if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
+			gp.ui.commandNum++;
+			if(gp.ui.commandNum > 2) {
+				gp.ui.commandNum = 0;
+			}
+		}
+		if(code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE) {
+			if(gp.ui.commandNum == 0) {
+				gp.gameState = gp.playState;
+				//gp.playMusic(0);
+				
+			}
+			if(gp.ui.commandNum == 1) {
+				
+				
+			}
+			if(gp.ui.commandNum == 2) {
+				System.exit(code);
+				
+			}
+		}
+	}
+	
+	public void playState(int code) {
+		
+		if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+			upPressed = true;
+		}
+		if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
+			downPressed = true;
+		}
+		if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) {
+			leftPressed = true;
+		}
+		if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
+			rightPressed = true;
+		}
+		if(code == KeyEvent.VK_P || code == KeyEvent.VK_ESCAPE) {
+			gp.gameState = gp.pauseState;
+		}
+		if(code == KeyEvent.VK_C) {
+			gp.gameState = gp.characterState;
+		}
+		if(code == KeyEvent.VK_E) {
+			enterPressed = true;
+		}
+		
+		//Debug
+		if(code == KeyEvent.VK_T) {
+			if (showDebugText == false) {
+		        showDebugText = true;
+		    } else {
+		        showDebugText = false;
+		    }
+		}
+		if(code == KeyEvent.VK_R) {
+			gp.tileM.loadMap("/maps/world01.txt");
+		}
+	}
+	
+	public void pauseState(int code) {
+		
+		if(code == KeyEvent.VK_P || code == KeyEvent.VK_ESCAPE) {
+			gp.gameState = gp.playState;
+		}
+	}
+	
+	public void dialogueState(int code) {
+		
+		if(code == KeyEvent.VK_ENTER) {
+			gp.gameState = gp.playState;
+		}
+	}
+
+	public void characterState(int code) {
+	
+		if(code == KeyEvent.VK_C) {
+			gp.gameState = gp.playState;
 		}
 	}
 

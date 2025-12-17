@@ -18,6 +18,10 @@ public class Sound {
 		soundURL[2] = getClass().getResource("/sound/Theme.wav"); //sfx
 		soundURL[3] = getClass().getResource("/sound/Theme.wav"); //sfx
 		soundURL[4] = getClass().getResource("/sound/Theme.wav"); //sfx
+		soundURL[5] = getClass().getResource("/sound/bonk.wav"); //sfx
+		soundURL[6] = getClass().getResource("/sound/receivedamage.wav"); //sfx
+		soundURL[7] = getClass().getResource("/sound/swingweapon.wav"); //sfx
+		soundURL[8] = getClass().getResource("/sound/levelup.wav"); //sfx
 	}
 	
 	public void setFile(int i) {
@@ -27,7 +31,7 @@ public class Sound {
             clip = AudioSystem.getClip();
             clip.open(ais);
         } catch(Exception e) {
-            // Error handling
+            e.printStackTrace();
         }
 		
 	}
