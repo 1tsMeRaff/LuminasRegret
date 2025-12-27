@@ -28,6 +28,6 @@ public class OBJ_Bread extends Entity {
 	    if(gp.player.life > gp.player.maxLife) {
 	        gp.player.life = gp.player.maxLife;
 	    }
-	    gp.playSE(2);
+	    gp.playSE(8);
 	}
 }

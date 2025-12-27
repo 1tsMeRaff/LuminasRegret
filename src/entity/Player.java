@@ -10,6 +10,7 @@ import main.GamePanel;
 import main.KeyHandler;
 import object.OBJ_Key;
 import object.OBJ_Shield_Wood;
+import object.OBJ_Slash;
 import object.OBJ_Sword_Standard;
 
 public class Player extends Entity {
@@ -69,6 +70,7 @@ public class Player extends Entity {
         coin = 0;
         currentWeapon = new OBJ_Sword_Standard(gp);
         currentShield = new OBJ_Shield_Wood(gp);
+        projectile = new OBJ_Slash(gp);
         attack = getAttack(); // The total attack value is decided by strength and weapon
         defense = getDefense(); // The total defense value is decided by dexterity and shield
     }
@@ -243,7 +245,7 @@ public class Player extends Entity {
             
             // Sprite Animation Logic
                 spriteCounter++;
-                if (spriteCounter > 15) {
+                if (spriteCounter > 12) {
                 	if(spriteNum == 1) {
                 		spriteNum = 2;
                 	}
@@ -254,6 +256,18 @@ public class Player extends Entity {
                 }
         }
         
+        if(gp.keyH.rangeKeyPressed == true && projectile.alive == false && rangeAvailableCounter == 30) {
+        	
+        	projectile.set(worldX, worldY, direction, true, this);
+        	
+        	gp.projectileList.add(projectile);
+        	
+        	rangeAvailableCounter = 0;
+        	
+//        	gp.playSE(10);
+        }
+        
+        
         // Invincible Counter
         if(invincible == true) {
         	invincibleCounter++;
@@ -261,6 +275,9 @@ public class Player extends Entity {
         		invincible = false;
         		invincibleCounter = 0;
         	}
+        }
+        if(rangeAvailableCounter < 30) {
+        	rangeAvailableCounter++;
         }
     }
     public void attacking() {
@@ -293,7 +310,7 @@ public class Player extends Entity {
     	    
     	    // Check Monster di SolidArea
     	    int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
-    	    damageMonster(monsterIndex);
+    	    damageMonster(monsterIndex, attack);
     	    
     	    // Setelah Cek, Kembalikan Nilai
     	    worldX = currentWorldX;
@@ -349,7 +366,7 @@ public class Player extends Entity {
     	
     	if(i != 999) {
     		
-    		if(invincible == false) {
+    		if(invincible == false && gp.monster[i].dying == false) {
     			gp.playSE(6);
     			
     			int damage = gp.monster[i].attack - defense;
@@ -362,7 +379,7 @@ public class Player extends Entity {
     	}
     }
     
-    public void damageMonster(int i) {
+    public void damageMonster(int i, int attack) {
     	
     	if(i != 999) {
     		
@@ -397,6 +414,7 @@ public class Player extends Entity {
             level++; 
             nextLevelExp = nextLevelExp*2; 
             maxLife += 2; 
+            life += 2;
             strength++; 
             dexterity++; 
             attack = getAttack(); 
