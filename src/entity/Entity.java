@@ -116,6 +116,7 @@ public class Entity {
 	public void use(Entity entity) {
 		
 	}
+	
 	public void update() {
 		
 		setAction();
@@ -129,17 +130,8 @@ public class Entity {
 		
 		
 		if(this.type == type_monster && contactPlayer == true) {
-			if(gp.player.invincible == false) {
-				gp.playSE(7);
-				
-				int damage = attack - gp.player.defense;
-    			if(damage < 0) {
-    				damage = 0;
-    			}
-    			gp.player.life -= damage;
-				gp.player.invincible = true;
-			}
 			
+			damagePlayer(attack);
 		}
 		
 		// IF COLLISION IS FALSE, PLAYER CAN MOVE
@@ -179,8 +171,23 @@ public class Entity {
         		invincibleCounter = 0;
         	}
         }
+        if(rangeAvailableCounter < 30) {
+        	rangeAvailableCounter++;
+        }
 	}
 	
+	public void damagePlayer(int attack) {
+		if(gp.player.invincible == false) {
+			gp.playSE(6);
+			
+			int damage = attack - gp.player.defense;
+			if(damage < 0) {
+				damage = 0;
+			}
+			gp.player.life -= damage;
+			gp.player.invincible = true;
+		}
+	}
 	public void draw(Graphics2D g2) {
 		
 		BufferedImage image = null;

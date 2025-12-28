@@ -63,6 +63,8 @@ public class Player extends Entity {
         level = 1;
         maxLife = 6;
         life = maxLife;
+        maxMana = 4;
+        mana = maxMana;
         strength = 1;
         dexterity = 1;
         exp = 0;
@@ -256,9 +258,13 @@ public class Player extends Entity {
                 }
         }
         
-        if(gp.keyH.rangeKeyPressed == true && projectile.alive == false && rangeAvailableCounter == 30) {
+        if(gp.keyH.rangeKeyPressed == true && projectile.alive == false 
+        		&& rangeAvailableCounter == 30 && projectile.haveResource(this) == true) {
         	
         	projectile.set(worldX, worldY, direction, true, this);
+        	
+        	// Saat Player RangeAttack, kurangi mana
+        	projectile.substractResource(this);
         	
         	gp.projectileList.add(projectile);
         	
@@ -276,9 +282,9 @@ public class Player extends Entity {
         		invincibleCounter = 0;
         	}
         }
-        if(rangeAvailableCounter < 30) {
-        	rangeAvailableCounter++;
-        }
+	        if(rangeAvailableCounter < 30) {
+	        	rangeAvailableCounter++;
+	        }
     }
     public void attacking() {
     	
