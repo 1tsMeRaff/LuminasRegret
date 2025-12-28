@@ -25,9 +25,6 @@ public class OBJ_Bread extends Entity {
 	    gp.ui.currentDialogue = "Kamu memakan " + name + "\n"
 	    						+ "hp bertambah " + value + ".";
 	    entity.life += value;
-	    if(gp.player.life > gp.player.maxLife) {
-	        gp.player.life = gp.player.maxLife;
-	    }
 	    gp.playSE(8);
 	}
 }

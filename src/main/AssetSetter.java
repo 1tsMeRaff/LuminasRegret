@@ -6,6 +6,7 @@ import object.OBJ_Axe;
 import object.OBJ_Bread;
 import object.OBJ_Coin_Bronze;
 import object.OBJ_Key;
+import object.OBJ_PlayerMana;
 import object.OBJ_Portal;
 import object.OBJ_Shield_Iron;
 
@@ -29,6 +30,11 @@ public class AssetSetter {
 		gp.obj[i] = new OBJ_Coin_Bronze(gp);
 		gp.obj[i].worldX = gp.tileSize*21;
 		gp.obj[i].worldY = gp.tileSize*19;
+		i++;
+		
+		gp.obj[i] = new OBJ_PlayerMana(gp);
+		gp.obj[i].worldX = gp.tileSize*30;
+		gp.obj[i].worldY = gp.tileSize*20;
 		i++;
 		
 		gp.obj[i] = new OBJ_Key(gp);

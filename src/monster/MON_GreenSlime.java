@@ -5,7 +5,10 @@ import java.util.Random;
 import entity.Entity;
 import entity.Projectile;
 import main.GamePanel;
+import object.OBJ_Coin_Bronze;
 import object.OBJ_GreenProjectile;
+import object.OBJ_Heart;
+import object.OBJ_PlayerMana;
 
 public class MON_GreenSlime extends Entity {
 	
@@ -80,5 +83,21 @@ public class MON_GreenSlime extends Entity {
 		
 		actionLockCounter = 0;
 		direction = gp.player.direction;
+	}
+	public void checkDrop() {
+		
+		//Cast a Die
+		int i = new Random().nextInt(100)+1;
+		
+		//Set the Monster Drop
+		if(i < 50) {
+			dropItems(new OBJ_Coin_Bronze (gp));
+		}
+		if(i >= 50 && i < 75) {
+			dropItems(new OBJ_Heart(gp));
+		}
+		if(i >= 75 && i < 100) {
+			dropItems(new OBJ_PlayerMana(gp));
+		}
 	}
 }
