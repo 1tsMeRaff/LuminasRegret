@@ -6,7 +6,6 @@ import main.GamePanel;
 public class OBJ_Bread extends Entity {
 
 	GamePanel gp;
-	int value = 3;
 
 	public OBJ_Bread(GamePanel gp) {
 	    super(gp);
@@ -15,6 +14,7 @@ public class OBJ_Bread extends Entity {
 	    
 	    type = type_consumable;
 	    name = "Red Potion";
+	    value = 3;
 	    down1 = setup("/objects/bread", gp.tileSize, gp.tileSize);
 	    description = "[" + name + "]\n Hanya roti biasa.";
 	}

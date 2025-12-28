@@ -338,20 +338,30 @@ public class Player extends Entity {
     public void pickUpObject(int i) {
     	
         if (i != 999) {
-        
-        	String text;
         	
-        	if(inventory.size() != maxInventorySize) {
+        	//Pickup Only Items
+        	if(gp.obj[i].type == type_pickupOnly) {
         		
-        		inventory.add(gp.obj[i]);
-        		gp.playSE(1);
-        		text = "Mendapat" + gp.obj[i].name + "!";
+        		gp.obj[i].use(this);
+        		gp.obj[i] = null;
         	}
+        	
+        	//Inventory Items
         	else {
-        		text = "Inventory penuh!!!";
+        		String text;
+            	
+            	if(inventory.size() != maxInventorySize) {
+            		
+            		inventory.add(gp.obj[i]);
+            		gp.playSE(1);
+            		text = "Mendapat" + gp.obj[i].name + "!";
+            	}
+            	else {
+            		text = "Inventory penuh!!!";
+            	}
+            	gp.ui.addMessage(text);
+            	gp.obj[i] = null;
         	}
-        	gp.ui.addMessage(text);
-        	gp.obj[i] = null;
         	
         }
     }
