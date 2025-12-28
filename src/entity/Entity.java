@@ -126,8 +126,8 @@ public class Entity {
 		for(int i = 0; i < gp.obj.length; i++) {
 			if(gp.obj[i] == null) {
 				gp.obj[i] = droppedItem;
-				gp.obj[1].worldX = worldX; //the dead monsters worldX
-				gp.obj[1].worldY = worldY;
+				gp.obj[i].worldX = worldX; //the dead monsters worldX
+				gp.obj[i].worldY = worldY;
 				break;
 			}
 		}
