@@ -118,6 +118,20 @@ public class Entity {
 	public void use(Entity entity) {
 		
 	}
+	public void checkDrop() {
+		
+	}
+	public void dropItems(Entity droppedItem) {
+		
+		for(int i = 0; i < gp.obj.length; i++) {
+			if(gp.obj[i] == null) {
+				gp.obj[i] = droppedItem;
+				gp.obj[1].worldX = worldX; //the dead monsters worldX
+				gp.obj[1].worldY = worldY;
+				break;
+			}
+		}
+	}
 	
 	public void update() {
 		

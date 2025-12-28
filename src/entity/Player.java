@@ -285,6 +285,12 @@ public class Player extends Entity {
 	        if(rangeAvailableCounter < 30) {
 	        	rangeAvailableCounter++;
 	        }
+	        if (life > maxLife) {
+			    life = maxLife;
+			}
+	        if (mana > maxMana) {
+			    mana = maxMana;
+			}
     }
     public void attacking() {
     	
