@@ -197,6 +197,9 @@ public class Player extends Entity {
             int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
             contactMonster(monsterIndex);
             
+            // CHECK INTERACTIVE TILE COLLISION
+            int iTileIndex = gp.cChecker.checkEntity(this, gp.iTile);
+            
             // Check Event
             gp.eHandler.checkEvent();
             
@@ -324,6 +327,9 @@ public class Player extends Entity {
     	    int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
     	    damageMonster(monsterIndex, attack);
     	    
+    	    int iTileIndex = gp.cChecker.checkEntity(this, gp.iTile);
+    	    damageInteractiveTile(iTileIndex);
+    	    
     	    // Setelah Cek, Kembalikan Nilai
     	    worldX = currentWorldX;
     	    worldY = currentWorldY;
@@ -428,6 +434,14 @@ public class Player extends Entity {
     		}
     	}
     }
+    public void damageInteractiveTile(int i) {
+
+        if (i != 999 && gp.iTile[i].destructible == true && gp.iTile[i].isCorrectItem(this) == true) {
+        	
+        	gp.iTile[i] = null;
+        }
+    }
+
 
     public void checkLevelUp() {
     	

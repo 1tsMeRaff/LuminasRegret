@@ -37,7 +37,7 @@ public class TileManager {
 			setup(3, "sungai01", true); //dipakai
 			setup(4, "jembatan1", false); //dipakai
 //			setup(5, "pohon1", true);
-//			setup(6, "batu6", false);
+			setup(6, "pohon3", true); //dipakai
 			setup(7, "jalan01", false); //dipakai
 			setup(8, "jalan02", false);
 			setup(9, "jalan03", false);
@@ -94,7 +94,8 @@ public class TileManager {
 			setup(60, "sungai6", true); //dipakai
 			setup(61, "sungai7", true); //dipakai
 			setup(62, "sungai3", true); //dipakai
-			setup(63, "tanah", true); //dipakai
+			setup(63, "pohon2", true); //dipakai
+			setup(64, "trunk", false); //dipakai
 
 	}
 	
