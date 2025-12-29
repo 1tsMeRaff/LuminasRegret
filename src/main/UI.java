@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 import object.OBJ_Heart;
 import object.OBJ_Key;
+import object.OBJ_ManaBar;
 import object.OBJ_PlayerMana;
 
 public class UI {
@@ -58,9 +59,10 @@ public class UI {
         heart_half = heart.image2;
         heart_blank = heart.image3;
         
-        Entity PlayerMana = new OBJ_PlayerMana(gp);
-        PlayerMana_Full = PlayerMana.image;
-        PlayerMana_Blank = PlayerMana.image2;
+        Entity mana = new OBJ_ManaBar(gp);
+        PlayerMana_Full = mana.image;
+        PlayerMana_Blank = mana.image2;
+        
     }
     
     public void addMessage(String text) {
@@ -103,53 +105,60 @@ public class UI {
     		drawInventory();
     	}
     }
+    
     public void drawPlayerLife() {
-    	
-    	int x = gp.tileSize/2;
-    	int y = gp.tileSize/2;
-    	int i = 0;
-    	
-    	// Draw Max Life
-    	while(i < gp.player.maxLife/2) {
-    		g2.drawImage(heart_blank, x, y, null);
-    		i++;
-    		x += gp.tileSize + 10;
-    	}
-    	
-    	//Reset
-    	x = gp.tileSize/2;
-    	y = gp.tileSize/2;
-    	i = 0;
-    	
-    	// Draw Current Life
-    	while(i < gp.player.life) {
-    		g2.drawImage(heart_half, x, y, null);
-    		i++;
-    		if(i < gp.player.life) {
-    			g2.drawImage(heart_full, x, y, null);
-    		}
-    		i++;
-    		x += gp.tileSize + 10;
-    	}
-    	
-    	// Draw Max Mana
-    	x = (gp.tileSize / 2) - 5;
-    	y = (int) (gp.tileSize * 1.5);
-    	i = 0;
-    	while (i < gp.player.maxMana) {
-    	    g2.drawImage(PlayerMana_Blank, x, y, null);
-    	    i++;
-    	    x += 35;
-    	}
+        
+        int x = gp.tileSize / 2;
+        int y = gp.tileSize / 2;
+        int i = 0;
 
-    	x = (gp.tileSize / 2) - 5;
-    	y = (int) (gp.tileSize * 1.5);
-    	i = 0;
-    	while (i < gp.player.mana) {
-    	    g2.drawImage(PlayerMana_Full, x, y, null);
-    	    i++;
-    	    x += 35;
-    	}
+        // Simpan posisi awal X
+        int startX = x; 
+        
+        // 1. Gambar Hati Kosong (Background)
+        while(i < gp.player.maxLife / 2) {
+            g2.drawImage(heart_blank, x, y, null);
+            i++;
+            x += gp.tileSize + 10;
+        }
+        
+        int endX = x - 10; 
+        int totalHudWidth = endX - startX;
+        
+        x = gp.tileSize / 2;
+        y = gp.tileSize / 2;
+        i = 0;
+        
+        while(i < gp.player.life) {
+            g2.drawImage(heart_half, x, y, null);
+            i++;
+            if(i < gp.player.life) {
+                g2.drawImage(heart_full, x, y, null);
+            }
+            i++;
+            x += gp.tileSize + 10;
+        }
+
+        int manaWidth = totalHudWidth / gp.player.maxMana; 
+        
+        // Posisi Y Mana Bar
+        y = (int) (gp.tileSize * 1.5); 
+        
+        x = startX;
+        i = 0;
+        while (i < gp.player.maxMana) {
+            g2.drawImage(PlayerMana_Blank, x, y, manaWidth, gp.tileSize, null);
+            i++;
+            x += manaWidth - 1; 
+        }
+
+        x = startX;
+        i = 0;
+        while (i < gp.player.mana) {
+            g2.drawImage(PlayerMana_Full, x, y, manaWidth, gp.tileSize, null);
+            i++;
+            x += manaWidth - 1;
+        }
     }
     
     public void drawMessage(){

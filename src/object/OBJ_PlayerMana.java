@@ -15,10 +15,7 @@ public class OBJ_PlayerMana extends Entity {
 		type = type_pickupOnly;
 		value = 1;
 		name = "PlayerMana";
-		down1 = setup("/objects/heart_full", gp.tileSize, gp.tileSize);
-		image = setup("/objects/heart_full", gp.tileSize, gp.tileSize);
-		image2 = setup("/objects/heart_half", gp.tileSize, gp.tileSize);
-		image3 = setup("/objects/heart_blank", gp.tileSize, gp.tileSize);
+		down1 = setup("/objects/mana_collect", gp.tileSize, gp.tileSize);
 	}
 	public void use(Entity entity) {
 		
