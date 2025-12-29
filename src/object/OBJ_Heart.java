@@ -5,9 +5,11 @@ import main.GamePanel;
 
 public class OBJ_Heart extends Entity {
 	
-
+	GamePanel gp;
+	
 	public OBJ_Heart(GamePanel gp) {
 		super(gp);
+		this.gp = gp;
 		
 		type = type_pickupOnly;
 		name = "Heart";

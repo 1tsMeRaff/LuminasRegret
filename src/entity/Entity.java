@@ -14,7 +14,7 @@ import main.UtilityTool;
 
 public class Entity {
 	
-	protected GamePanel gp;
+	GamePanel gp;
 	public BufferedImage up1, up2, down1, down2, left1, left2, right1, right2;
 	public BufferedImage attackUp1, attackUp2, attackUp3, attackDown1,
 						 attackDown2, attackDown3, attackLeft1, attackLeft2, 
