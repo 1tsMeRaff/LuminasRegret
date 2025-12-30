@@ -439,6 +439,9 @@ public class Player extends Entity {
         if (i != 999 && gp.iTile[i].destructible == true && gp.iTile[i].isCorrectItem(this) == true) {
         	
         	gp.iTile[i] = null;
+        	
+        	//Generate Particle
+        	generateParticle(gp.iTile[i],gp.iTile[i]);
         }
     }
 
