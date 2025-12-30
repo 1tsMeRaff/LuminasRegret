@@ -435,13 +435,13 @@ public class Player extends Entity {
     	}
     }
     public void damageInteractiveTile(int i) {
-
         if (i != 999 && gp.iTile[i].destructible == true && gp.iTile[i].isCorrectItem(this) == true) {
-        	
-        	gp.iTile[i] = null;
-        	
-        	//Generate Particle
-        	generateParticle(gp.iTile[i],gp.iTile[i]);
+            
+            Entity destroyedTile = gp.iTile[i];
+            
+            gp.iTile[i] = null;
+            
+            generateParticle(destroyedTile, destroyedTile);
         }
     }
 
