@@ -40,7 +40,7 @@ public class TileManager {
 			setup(6, "pohon3", true); //dipakai
 			setup(7, "jalan01", false); //dipakai
 			setup(8, "pohon5", true); //dipakai
-			setup(9, "batu4", false);
+			setup(9, "batu4", false); //dipakai
 			setup(10, "jalan04", false);
 			setup(11, "jalan4", false); //dipakai
 			setup(12, "jalan11", false); //dipakai
@@ -90,7 +90,7 @@ public class TileManager {
 			setup(56, "sungai2", true); //dipakai
 			setup(57, "sungai8", true);  //dipakai
 			setup(58, "sungai4", true); //dipakai
-			setup(59, "tanah", true); //dipakai
+			setup(59, "tanah", false); //dipakai
 			setup(60, "sungai6", true); //dipakai
 			setup(61, "sungai7", true); //dipakai
 			setup(62, "sungai3", true); //dipakai
