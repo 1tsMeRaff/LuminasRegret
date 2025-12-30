@@ -36,11 +36,11 @@ public class TileManager {
 			setup(2, "sungai11", true); //dipakai
 			setup(3, "sungai01", true); //dipakai
 			setup(4, "jembatan1", false); //dipakai
-//			setup(5, "pohon1", true);
+			setup(5, "rumah", true); //dipakai
 			setup(6, "pohon3", true); //dipakai
 			setup(7, "jalan01", false); //dipakai
-			setup(8, "jalan02", false);
-			setup(9, "jalan03", false);
+			setup(8, "pohon5", true); //dipakai
+			setup(9, "batu4", false);
 			setup(10, "jalan04", false);
 			setup(11, "jalan4", false); //dipakai
 			setup(12, "jalan11", false); //dipakai
@@ -48,11 +48,11 @@ public class TileManager {
 			setup(14, "jalan13", false); //dipakai
 			setup(15, "jalan14", false); //dipakai
 			setup(16, "jalan15", false); //dipakai
-//			setup(17, "jalan7", true);
-//			setup(18, "jalan8", true);
-//			setup(19, "jalan2", true);
-//			setup(20, "jalan12", true);
-//			setup(21, "jalan13", true);
+			setup(17, "jalan4", true); //dipakai
+			setup(18, "batu2", true);
+			setup(19, "batu3", true);
+			setup(20, "semak1", false); //dipakai
+			setup(21, "semak2", false);
 //			setup(22, "jalan14", true);
 			setup(23, "jalan2", false); //dipakai
 			setup(24, "jalan3", false); //dipakai
@@ -90,7 +90,7 @@ public class TileManager {
 			setup(56, "sungai2", true); //dipakai
 			setup(57, "sungai8", true);  //dipakai
 			setup(58, "sungai4", true); //dipakai
-//			setup(59, "hitam3", true);
+			setup(59, "tanah", true); //dipakai
 			setup(60, "sungai6", true); //dipakai
 			setup(61, "sungai7", true); //dipakai
 			setup(62, "sungai3", true); //dipakai
