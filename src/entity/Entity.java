@@ -132,6 +132,35 @@ public class Entity {
 			}
 		}
 	}
+	public Color getParticleColor() {
+    	Color color = null;
+    	return color;
+    }
+    
+    public int getParticleSize() {
+    	int size = 0; //6 pixels
+    	return size;
+    }
+    
+    public int getParticleSpeed() {
+    	int speed = 0;
+    	return speed;
+    }
+    
+    public int getParticleMaxLife() {
+    	int maxLife = 0;
+    	return maxLife;
+    }
+    public void generateParticle(Entity generator, Entity target) {
+    	
+    	Color color = generator.getParticleColor();
+    	int size = generator.getParticleSize();
+    	int speed = generator.getParticleSpeed();
+    	int maxLife = generator.getParticleMaxLife();
+    	
+    	Particle p1 = new Particle(gp, generator, color, size, speed, maxLife, -1, -1);
+    	gp.particleList.add(p1);
+    }
 	
 	public void update() {
 		
