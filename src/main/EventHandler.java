@@ -55,8 +55,8 @@ public class EventHandler {
 	    if(canTouchEvent == true) {
 	        if(hit(0,27,16,"right") == true) {damagePit(gp.dialogueState);}
 	        else if(hit(0,23,12,"up") == true) {healingPool(gp.dialogueState);}
-	        else if(hit(0,10,39,"any") == true){teleport(1,12,13);}
-	        else if(hit(0,12,13,"any") == true){teleport(0,10,39);}
+	        else if(hit(0,36,35,"any") == true){teleport(1,8,39);}
+	        else if(hit(1,8,39,"any") == true){teleport(0,36,35);}
 //	        else if(hit(1,12,9,"up") == true) {speak(gp.npc[0]);}
 	    }
 	}
@@ -94,7 +94,7 @@ public class EventHandler {
 		gp.gameState = gameState;
 		gp.ui.currentDialogue = "Damage";
 		gp.player.life -= 1;
-		eventRect[col][row].eventDone = true;
+		eventRect[map][col][row].eventDone = true;
 		canTouchEvent = false;
 	}
 	public void healingPool(int gameState) {
