@@ -556,6 +556,8 @@ public class UI {
         g2.drawRect(controlX, baseY - 20, 120, 24);
         volumeWidth = 24 * gp.se.volumeScale;
         g2.fillRect(controlX, baseY - 20, volumeWidth, 24);
+        
+        gp.config.saveConfig();
     }
 
     public void options_control(int frameX, int frameY) {
@@ -563,12 +565,12 @@ public class UI {
         int textY;
 
         String text = "Control";
-        textX = getXforCenteredText(text);
+        textX = getXforCenteredText(text) - 8;
         textY = frameY + gp.tileSize;
         g2.drawString(text, textX, textY);
 
         int itemDy = gp.tileSize - 12;
-        textX = frameX + gp.tileSize;
+        textX = frameX + gp.tileSize - 20;
         textY += gp.tileSize;
 
         // Kolom Kiri
@@ -580,7 +582,7 @@ public class UI {
         g2.drawString("Options", textX, textY);
 
         // Kolom Kanan
-        textX = frameX + gp.tileSize * 5;
+        textX = (frameX + gp.tileSize * 5) - 18;
         textY = frameY + gp.tileSize * 2;
         g2.drawString("WASD", textX, textY); textY += itemDy;
         g2.drawString("E / ENTER", textX, textY); textY += itemDy;
