@@ -29,7 +29,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int maxScreenCol = 16;
     public final int maxScreenRow = 9;
     public final int screenWidth = tileSize * maxScreenCol; // 768px 
-    public final int screenHeight = tileSize * maxScreenRow; // 576px
+    public final int screenHeight = tileSize * maxScreenRow; // 432px
     
     // WORLD SETTINGS
     public final int maxWorldCol = 50;
@@ -40,6 +40,7 @@ public class GamePanel extends JPanel implements Runnable {
     int screenHeight2 = screenHeight;
     BufferedImage tempScreen;
     Graphics2D g2;
+    public boolean fullScreenOn = false;
     
     //FPS
     int FPS = 60;
@@ -72,6 +73,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int pauseState = 2;
     public final int dialogueState = 3;
     public final int characterState = 4; 
+    public final int optionsState = 5;
     
     
     public GamePanel() {
@@ -89,7 +91,6 @@ public class GamePanel extends JPanel implements Runnable {
     	aSetter.setNPC();
     	aSetter.setMonster();
     	aSetter.setInteractiveTile();
-//    	playMusic(0);
     	gameState = titleState;
     	
     	tempScreen = new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_ARGB);
@@ -158,6 +159,9 @@ public class GamePanel extends JPanel implements Runnable {
     		player.update();
     		
     		//NPC 
+    		
+    	
+    		
     		for(int i = 0; i < npc.length; i++) {
     			if(npc[i] != null) {
     				npc[i].update();
@@ -203,7 +207,13 @@ public class GamePanel extends JPanel implements Runnable {
     	if(gameState == pauseState) {
     		
     	}
-        
+    	
+    	if(gameState == dialogueState) {
+            if(keyH.enterPressed == true) {
+                gameState = playState;
+                keyH.enterPressed = false; // Segera matikan agar tidak tembus ke frame selanjutnya
+            }
+        }
         
     }
     
@@ -313,6 +323,11 @@ public class GamePanel extends JPanel implements Runnable {
     	g.dispose();
     }
     
+    public void playMusic(int i) {
+    	music.setFile(i);
+    	music.play();
+    	music.loop();
+    }
     // Metode untuk menghentikan musik
     public void stopMusic() {
         music.stop();
@@ -321,6 +336,7 @@ public class GamePanel extends JPanel implements Runnable {
     // Metode untuk memutar Sound Effect (sekali main)
     public void playSE(int i) {
         se.setFile(i);
+        se.checkVolume();
         se.play();
     }
 }

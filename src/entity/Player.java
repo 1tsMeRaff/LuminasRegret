@@ -160,7 +160,7 @@ public class Player extends Entity {
         }
         
         else if(keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true ||
-        		keyH.rightPressed == true || keyH.enterPressed == true) {
+        		keyH.rightPressed == true || keyH.actionPressed == true) {
         	
         	// Cek input dan hitung vektor
             if (keyH.upPressed == true) {
@@ -218,7 +218,7 @@ public class Player extends Entity {
             worldY += Math.round(moveY);
             
             // Jika ada collision, kembalikan ke posisi sebelumnya
-            if (collisionOn == true && keyH.enterPressed == false) {
+            if (collisionOn == true && keyH.actionPressed == false) {
             	
             	switch(direction) {
             	case "up":
@@ -238,15 +238,13 @@ public class Player extends Entity {
                 worldY = tempWorldY;
             }
             
-            if(keyH.enterPressed == true && attackCanceled == false) {
+            if(keyH.actionPressed == true && attackCanceled == false) {
             	gp.playSE(7);
             	attacking = true;
             	spriteCounter = 0;
             }
             
             attackCanceled = false;
-            // Reset enterPressed
-            gp.keyH.enterPressed = false;
             
             // Sprite Animation Logic
                 spriteCounter++;
@@ -381,11 +379,12 @@ public class Player extends Entity {
     
     public void interactNPC(int i) {
     	
-    	if(gp.keyH.enterPressed == true) {
+    	if(gp.keyH.actionPressed == true) {
     		if (i != 999) {
     			attackCanceled = true;
     			gp.gameState = gp.dialogueState;
                 gp.npc[i].speak();
+        		gp.keyH.actionPressed = false;
             }
     	}
     }
