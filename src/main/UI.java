@@ -32,6 +32,8 @@ public class UI {
     public int slotRow = 0;
     int subState = 0;
     
+    public Entity npc;
+    
     
     public UI(GamePanel gp) {
         this.gp = gp;
@@ -105,9 +107,17 @@ public class UI {
         if(gp.gameState == gp.optionsState) {
             drawOptionsScreen();
         }
-      //Game Over State
+        //Game Over State
         if(gp.gameState == gp.gameOverState) {
-            drawGameOverState();
+            drawGameOverScreen();
+        }
+        //Transition State
+        if(gp.gameState == gp.gameOverState) {
+            drawGameOverScreen();
+        }
+        //Trade State
+        if(gp.gameState == gp.tradeState) {
+//            drawTradeScreen();
         }
     }
     
@@ -265,11 +275,10 @@ public class UI {
     
     public void drawDialogueScreen() {
         
-        // Window - Pindahkan ke bawah agar tidak menutupi Player di layar pendek
         int x = gp.tileSize * 2;
-        int y = gp.tileSize * 5; // Posisi Y di bawah (baris ke-5 dari 9)
+        int y = gp.tileSize * 5;
         int width = gp.screenWidth - (gp.tileSize * 4);
-        int height = gp.tileSize * 3; // Tinggi dikurangi dari 4 jadi 3
+        int height = gp.tileSize * 3;
         
         drawSubWindow(x, y, width, height);
         
@@ -279,7 +288,7 @@ public class UI {
         
         for(String line : currentDialogue.split("\n")) {
             g2.drawString(line, x, y);
-            y += 35; // Line spacing sedikit dirapatkan
+            y += 35;
         }
         
     }
@@ -288,7 +297,7 @@ public class UI {
         
         // FRAME
         final int frameX = gp.tileSize;
-        final int frameY = (int)(gp.tileSize * 0.4); // Naikkan sedikit ke atas
+        final int frameY = (int)(gp.tileSize * 0.4);
         final int frameWidth = gp.tileSize * 5;
         final int frameHeight = gp.tileSize * 8;
 
@@ -449,44 +458,44 @@ public class UI {
             }
         }
     }
-    public void drawGameOverState() {
-    	
-    	g2.setColor(new Color(0,0,0,150));
-    	g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
-    	
-    	int x;
-    	int y;
-    	String text;
-    	g2.setFont(g2.getFont().deriveFont(Font.BOLD,110f));
-    	text = "Game Over";
-    	// Shadow
-    	g2.setColor(Color.black);
-    	x = getXforCenteredText(text);
-    	y = gp.tileSize*4;
-    	g2.drawString(text, x, y);
-    	// Main
-    	g2.setColor(Color.white);
-    	g2.drawString(text, x-4, y-4);
-    	
-    	// Retry
-    	g2.setFont(g2.getFont().deriveFont(50f));
-    	text = "Retry";
-    	x = getXforCenteredText(text);
-    	y += gp.tileSize*4;
-    	g2.drawString(text, x, y);
-    	if(commandNum == 0){
-    		g2.drawString(">", x-40, y);
-    	}
-    	
-    	// Back to The Title Screen
-    	text = "Quit";
-    	x = getXforCenteredText(text);
-    	y += 55;
-    	g2.drawString(text, x, y);
-    	if(commandNum == 1){
-    		g2.drawString(">", x-40, y);
-    	}
-    	
+    public void drawGameOverScreen() {
+        g2.setColor(new Color(0,0,0,150)); //Half-black
+        g2.fillRect(0,0,gp.screenWidth,gp.screenHeight);
+
+        int x;
+        int y;
+        String text;
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD,110f));
+        text = "Game Over";
+
+        //Shadow
+        g2.setColor(Color.BLACK);
+        x = getXforCenteredText(text);
+        y = gp.tileSize * 2;
+        g2.drawString(text,x,y);
+        //Text
+        g2.setColor(Color.white);
+        g2.drawString(text,x-4,y-4);
+
+        //RETRY
+        g2.setFont(g2.getFont().deriveFont(50f));
+        text = "Retry";
+        x = getXforCenteredText(text);
+        y += gp.tileSize * 4;
+        g2.drawString(text,x,y);
+        if(commandNum == 0) {
+            g2.drawString(">", x-40, y);
+        }
+
+        //BACK TO THE TITLE SCREEN
+        text = "Quit";
+        x = getXforCenteredText(text);
+        y += 55;
+        g2.drawString(text,x,y);
+        if(commandNum == 1) {
+            g2.drawString(">", x-40, y);
+        }
+
     }
     public void drawOptionsScreen() {
         

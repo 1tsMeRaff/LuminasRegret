@@ -20,8 +20,6 @@ public class Player extends Entity {
     public final int screenY;
     int standCounter = 0;
     public boolean attackCanceled = false;
-    public ArrayList<Entity> inventory = new ArrayList<>();
-    public final int maxInventorySize = 20;
     
     public Player(GamePanel gp, KeyHandler keyH) {
         
@@ -307,6 +305,7 @@ public class Player extends Entity {
 			}
 	        if (life <= 0) {
 	        	gp.gameState = gp.gameOverState;
+	        	gp.stopMusic();
 	        	gp.playSE(10);
 	        }
     }

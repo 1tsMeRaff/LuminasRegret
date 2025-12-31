@@ -39,26 +39,21 @@ public class EventHandler {
 	}
 	
 	public void checkEvent() {
-		
-		// Check If The Player Character Is More Than 1 Tile Away From The Last Event
-		int xDistance = Math.abs(gp.player.worldX - previousEventX);
-		int yDistance = Math.abs(gp.player.worldY - previousEventY);
-		int distance = Math.max(xDistance, yDistance);
-		if(distance > gp.tileSize) {
-			canTouchEvent = true;
-		}
-		
-		if(canTouchEvent == true) {
-			
-			if(hit(27,16,"right") == true) {damagePit(27, 16, gp.dialogueState);}
-			if(hit(23,12,"up") == true ) {healingPool(23, 16, gp.dialogueState);}
-		}
-		
-	
-		
-		
-	
-	
+	    // Check if the player character is more than 1 tile away from the last event
+	    int xDistance = Math.abs(gp.player.worldX - previousEventX);
+	    int yDistance = Math.abs(gp.player.worldY - previousEventY);
+	    int distance = Math.max(xDistance, yDistance);
+	    if(distance > gp.tileSize) {
+	        canTouchEvent = true;
+	    }
+
+	    if(canTouchEvent == true) {
+//	        if(hit(0,27,16,"right") == true) {damagePit(gp.dialogueState);}
+//	        else if(hit(0,23,12,"up") == true) {healingPool(gp.dialogueState);}
+//	        else if(hit(0,10,39,"any") == true){teleport(1,12,13);}
+//	        else if(hit(1,12,13,"any") == true){teleport(0,10,39);}
+//	        else if(hit(1,12,9,"up") == true) {speak(gp.npc[0]);}
+	    }
 	}
 	public boolean hit(int col, int row, String reqDirection) {
 		
@@ -107,6 +102,12 @@ public class EventHandler {
 		}
 	}
 	
-	
-	
+//	public void teleport(int map, int col, int row) {
+//	    gp.gameState = gp.transitionState;
+//	    tempMap = map;
+//	    tempCol = col;
+//	    tempRow = row;
+//	    canTouchEvent = false;
+//	    gp.playSB(13);
+//	}
 }
