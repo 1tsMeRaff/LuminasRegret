@@ -288,8 +288,8 @@ public class KeyHandler implements KeyListener {
 	}
 
 	public void tradeState(int code) {
-	    if(code == KeyEvent.VK_ENTER) {
-	        enterPressed = true;
+	    if(code == KeyEvent.VK_E) {
+	        actionPressed = true;
 	    }
 	    
 	    if(gp.ui.subState == 0) {
@@ -306,8 +306,8 @@ public class KeyHandler implements KeyListener {
 	    }
 	    
 	    if(gp.ui.subState == 1) {
-	        npcInventory(code); 
-	        
+	    	
+	        npcInventory(code);
 	        if(code == KeyEvent.VK_ESCAPE) {
 	            gp.ui.subState = 0;
 	        }
@@ -315,8 +315,7 @@ public class KeyHandler implements KeyListener {
 	    
 	    if(gp.ui.subState == 2) {
 	    	
-	        playerInventory(code); 
-	        
+	        playerInventory(code);
 	        if(code == KeyEvent.VK_ESCAPE) {
 	            gp.ui.subState = 0;
 	        }

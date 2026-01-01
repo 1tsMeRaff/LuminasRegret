@@ -296,7 +296,6 @@ public class UI {
             g2.drawString(line, x, y);
             y += 35;
         }
-        
     }
     
     public void drawCharacterScreen() {
@@ -473,7 +472,7 @@ public class UI {
             
             // Sesuaikan posisi description frame agar tidak keluar dari layar bawah
             if (dFrameY + dFrameHeight > gp.screenHeight) {
-                dFrameY = frameY - dFrameHeight;  // Taruh di atas jika tidak muat di bawah
+                dFrameY = frameY - dFrameHeight;
             }
 
             //DRAW DESCRIPTION TEXT
@@ -537,11 +536,9 @@ public class UI {
         g2.setColor(Color.white);
         g2.setFont(g2.getFont().deriveFont(32F));
 
-        // 1. HITUNG UKURAN FRAME
         int frameWidth = gp.tileSize * 8;
         int frameHeight = gp.tileSize * 8;
 
-        // 2. HITUNG POSISI FRAME AGAR TEPAT DI TENGAH LAYAR
         int frameX = (gp.screenWidth - frameWidth) / 2;
         int frameY = (gp.screenHeight - frameHeight) / 2;
         
@@ -789,21 +786,28 @@ public class UI {
         g2.drawString("Beli", x, y);
         if(commandNum == 0) {
             g2.drawString(">", x-24, y);
-            if(gp.keyH.enterPressed) subState = 1;
+            if(gp.keyH.actionPressed) { 
+            	subState = 1;
+            	gp.keyH.actionPressed = false;
+            }
         }
         y += gp.tileSize;
         g2.drawString("Jual", x, y);
         if(commandNum == 1) {
             g2.drawString(">", x-24, y);
-            if(gp.keyH.enterPressed) subState = 2;
+            if(gp.keyH.actionPressed) {
+            	subState = 2;
+            	gp.keyH.actionPressed = false;
+            }
         }
         y += gp.tileSize;
         g2.drawString("Keluar", x, y);
         if(commandNum == 2) {
             g2.drawString(">", x-24, y);
-            if(gp.keyH.enterPressed) {
+            if(gp.keyH.actionPressed) {
                 commandNum = 0;
                 gp.gameState = gp.playState;
+                gp.keyH.actionPressed = false;
             }
         }
     }
@@ -831,69 +835,97 @@ public class UI {
             int priceX = gp.tileSize * 4;
             int priceY = (int)(gp.tileSize * 5.5);
             drawSubWindow(priceX - 24, priceY - 24, gp.tileSize * 3, gp.tileSize);
-            g2.drawImage(coin, priceX - 16, priceY - 19, 32, 32, null); // Asumsi ada coinImage
+            g2.drawImage(coin, priceX - 16, priceY - 19, 32, 32, null);
             g2.drawString("" + price, priceX + 24, priceY + 8);
 
             // Proses Pembelian saat Enter ditekan
-            if(gp.keyH.actionPressed) {
+            if(gp.keyH.actionPressed == true) {
                 if(price > gp.player.coin) {
-                    subState = 0; // Kembali ke menu utama
+                    subState = 0;
                     gp.gameState = gp.dialogueState;
                     currentDialogue = "Koinmu tidak cukup untuk membeli itu!";
                     gp.playSE(10);
+                    gp.keyH.actionPressed = false;
                 }
                 else if(gp.player.inventory.size() == gp.player.maxInventorySize) {
                     subState = 0;
                     gp.gameState = gp.dialogueState;
                     currentDialogue = "Tasmu sudah penuh!";
+                    gp.keyH.actionPressed = false;
                 }
                 else {
                     gp.player.coin -= price;
                     gp.player.inventory.add(npc.inventory.get(itemIndex));
                     gp.playSE(12);
+                    gp.keyH.actionPressed = false;
                 }
             }
         }
     }
 
     public void trade_sell() {
+        // Gambar inventory player dengan cursor
         drawInventory(gp.player, true);
 
-        int hintY = gp.tileSize * 7;
-        drawSubWindow(gp.tileSize * 2, hintY, gp.tileSize * 8, gp.tileSize * 2);
-        g2.drawString("[ESC] Kembali", gp.tileSize * 3, hintY + gp.tileSize);
+        // Window untuk hint di bagian bawah kiri
+        int hintX = gp.tileSize * 2;
+        int hintY = gp.tileSize * 7; // 336
+        int hintWidth = gp.tileSize * 6; // 288
+        int hintHeight = gp.tileSize * 2; // 96
+        drawSubWindow(hintX, hintY, hintWidth, hintHeight);
+        g2.drawString("[ESC] Kembali", hintX + 24, hintY + 60);
 
-        int coinX = gp.tileSize * 11;
-        drawSubWindow(coinX, hintY, gp.tileSize * 4, gp.tileSize * 2);
-        g2.drawString("Koin: " + gp.player.coin, coinX + 20, hintY + gp.tileSize);
+        // Window untuk koin di bagian bawah kanan
+        int coinX = gp.tileSize * 9;
+        int coinY = gp.tileSize * 7;
+        int coinWidth = gp.tileSize * 4;
+        int coinHeight = gp.tileSize * 2;
+        drawSubWindow(coinX, coinY, coinWidth, coinHeight);
+        g2.drawString("Koin: " + gp.player.coin, coinX + 20, coinY + 60);
 
         int itemIndex = getItemIndexOnSlot(playerSlotCol, playerSlotRow);
 
         if(itemIndex < gp.player.inventory.size()) {
-            // Tampilkan Harga Jual (Setengah Harga)
+            // Tampilkan Harga Jual (Setengah Harga) - PERBAIKI POSISI
             int price = gp.player.inventory.get(itemIndex).price / 2;
-            int priceX = gp.tileSize * 11;
+            int priceX = gp.tileSize * 2;
             int priceY = (int)(gp.tileSize * 5.5);
-            drawSubWindow(priceX, priceY, gp.tileSize * 3, gp.tileSize);
-            g2.drawString("" + price, priceX + 50, priceY + 32);
+            int priceWidth = gp.tileSize * 3;
+            int priceHeight = gp.tileSize;
+            
+            drawSubWindow(priceX, priceY, priceWidth, priceHeight);
+            g2.drawString("Harga: " + price, priceX + 20, priceY + 32);
 
-            if(gp.keyH.enterPressed) {
+            if(gp.keyH.actionPressed) {
+                // Reset enterPressed dulu
+                gp.keyH.actionPressed = false;
+                
                 // Cek apakah item sedang dipakai (Equipped)
                 if(gp.player.inventory.get(itemIndex) == gp.player.currentWeapon || 
-                   gp.player.inventory.get(itemIndex) == gp.player.currentShield) {
+                   gp.player.inventory.get(itemIndex) == gp.player.currentShield ||
+                   gp.player.inventory.get(itemIndex) == gp.player.currentLight) {
+                	
                     subState = 0;
                     gp.gameState = gp.dialogueState;
                     currentDialogue = "Lepaskan item sebelum menjualnya!";
+                    gp.playSE(10); 
+                    gp.keyH.actionPressed = false;
+                    
                 } else {
                     gp.player.coin += price;
                     gp.player.inventory.remove(itemIndex);
                     gp.playSE(12);
+                    gp.keyH.actionPressed = false;
+                    
+                    if(playerSlotCol > 0 && itemIndex % 5 == 0) {
+                        playerSlotCol--;
+                    }
                 }
             }
         }
     }
     
-public int getItemIndexOnSlot(int slotCol, int slotRow) {
+    public int getItemIndexOnSlot(int slotCol, int slotRow) {
 	
         int itemIndex = slotCol + (slotRow * 5);
         return itemIndex;
