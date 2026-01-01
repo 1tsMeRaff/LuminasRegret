@@ -38,8 +38,6 @@ public class NPC_Guide extends Entity {
 	public void setAction() {
 		
 		actionLockCounter ++;
-		
-		
 		if(actionLockCounter == 120) {
 			Random random = new Random();
 			int i = random.nextInt(100)+1;

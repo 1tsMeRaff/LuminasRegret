@@ -77,6 +77,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int optionsState = 5;
     public final int gameOverState = 6;
     
+    public final int tradeState = 8;
     
     public GamePanel() {
         
@@ -326,7 +327,7 @@ public class GamePanel extends JPanel implements Runnable {
             g2.setFont(new Font("Arial", Font.PLAIN, 20));
             g2.setColor(Color.white);
             int x = 10;
-            int y = 400;
+            int y = 200;
             int lineHeight = 20;
             
             g2.drawString("WorldX" + player.worldX, x, y); y += lineHeight;
