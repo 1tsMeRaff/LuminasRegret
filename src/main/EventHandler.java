@@ -1,5 +1,6 @@
 package main;
 
+import entity.Entity;
 
 public class EventHandler {
 	
@@ -8,6 +9,7 @@ public class EventHandler {
 	
 	int previousEventX, previousEventY;
 	boolean canTouchEvent = true;
+	int tempMap, tempCol, tempRow;
 	
 	
 	public EventHandler(GamePanel gp) {
@@ -57,7 +59,7 @@ public class EventHandler {
 	        else if(hit(0,23,12,"up") == true) {healingPool(gp.dialogueState);}
 	        else if(hit(0,36,35,"any") == true){teleport(1,8,39);}
 	        else if(hit(1,8,39,"any") == true){teleport(0,36,35);}
-//	        else if(hit(1,12,9,"up") == true) {speak(gp.npc[0]);}
+//	        else if(hit(1,23,19,"up") == true) {speak(gp.npc[1][0]);}
 	    }
 	}
 	public boolean hit(int map, int col, int row, String reqDirection) {
@@ -94,7 +96,7 @@ public class EventHandler {
 		gp.gameState = gameState;
 		gp.ui.currentDialogue = "Damage";
 		gp.player.life -= 1;
-		eventRect[map][col][row].eventDone = true;
+//		eventRect[map][col][row].eventDone = true;
 		canTouchEvent = false;
 	}
 	public void healingPool(int gameState) {
@@ -112,6 +114,11 @@ public class EventHandler {
 	
 	public void teleport(int map, int col, int row) {
 		
+		gp.gameState = gp.transitionState;
+		tempMap = map;
+		tempCol = col;
+		tempRow = row;
+				
 		gp.currentMap = map;
 		gp.player.worldX = gp.tileSize * col;
 		gp.player.worldY = gp.tileSize * row;
@@ -121,4 +128,11 @@ public class EventHandler {
 		gp.playSE(13);
 	}
 
+	public void speak(Entity entity) {
+        if(gp.keyH.actionPressed == true) {
+            gp.gameState = gp.dialogueState;
+            gp.player.attackCanceled = true;
+            entity.speak();
+        }
+    }
 }

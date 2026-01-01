@@ -60,6 +60,11 @@ public class KeyHandler implements KeyListener {
 		else if(gp.gameState == gp.gameOverState) {
 			gameOverState(code);
 		}
+		
+		// Trade State
+		else if(gp.gameState == gp.tradeState) {
+			tradeState(code);
+		}
 	}  
 
 	
@@ -166,37 +171,10 @@ public class KeyHandler implements KeyListener {
 			gp.gameState = gp.playState;
 		}
 		
-		if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
-			if(gp.ui.slotRow != 0) {
-				gp.ui.slotRow--;
-				gp.playSE(9);
-			}
-		}
-		
-		if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) {
-			if(gp.ui.slotCol != 0) {
-				gp.ui.slotCol--;
-				gp.playSE(9);
-			}
-		}
-		
-		if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
-			if(gp.ui.slotRow != 3) {
-				gp.ui.slotRow++;
-				gp.playSE(9);
-			}
-		}
-		
-		if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
-			if(gp.ui.slotCol != 4) {
-				gp.ui.slotCol++;
-				gp.playSE(9);
-			}
-		}
-		
 		if(code == KeyEvent.VK_ENTER) {
 			gp.player.selectItem();
 		}
+		playerInventory(code);
 	}
 	
 	public void optionsState(int code) {
@@ -208,26 +186,25 @@ public class KeyHandler implements KeyListener {
 	        enterPressed = true;
 	    }
 
-	 // Tentukan maxCommandNum berdasarkan subState
+	    // Tentukan maxCommandNum berdasarkan subState
 	    int maxCommandNum = 0;
 	    switch(gp.ui.subState) {
 	        case 0: // Main options
 	            maxCommandNum = 5; 
 	            break;
-	        case 1: // Full screen notification (hanya "Back")
+	        case 1:
 	            maxCommandNum = 0;
 	            break;
-	        case 2: // Control screen (hanya "Back")
+	        case 2: 
 	            maxCommandNum = 0;
 	            break;
-	        case 3: // End game confirmation ("Yes" dan "No")
+	        case 3:
 	            maxCommandNum = 1;
 	            break;
 	    }
 
-	 // Navigasi dengan W/S (hanya untuk subState yang memiliki >1 pilihan)
 	    if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
-	        if (maxCommandNum > 0) { // Hanya jika ada lebih dari 1 pilihan
+	        if (maxCommandNum > 0) {
 	            gp.ui.commandNum--;
 	            gp.playSE(9);
 	            if (gp.ui.commandNum < 0) {
@@ -237,7 +214,7 @@ public class KeyHandler implements KeyListener {
 	    }
 	    
 	    if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
-	        if (maxCommandNum > 0) { // Hanya jika ada lebih dari 1 pilihan
+	        if (maxCommandNum > 0) {
 	            gp.ui.commandNum++;
 	            gp.playSE(9);
 	            if (gp.ui.commandNum > maxCommandNum) {
@@ -310,6 +287,103 @@ public class KeyHandler implements KeyListener {
 		}
 	}
 
+	public void tradeState(int code) {
+	    if(code == KeyEvent.VK_ENTER) {
+	        enterPressed = true;
+	    }
+	    
+	    if(gp.ui.subState == 0) {
+	        if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+	            gp.ui.commandNum--;
+	            gp.playSE(9);
+	            if(gp.ui.commandNum < 0) gp.ui.commandNum = 2;
+	        }
+	        if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
+	            gp.ui.commandNum++;
+	            gp.playSE(9);
+	            if(gp.ui.commandNum > 2) gp.ui.commandNum = 0;
+	        }
+	    }
+	    
+	    if(gp.ui.subState == 1) {
+	        npcInventory(code); 
+	        
+	        if(code == KeyEvent.VK_ESCAPE) {
+	            gp.ui.subState = 0;
+	        }
+	    }
+	    
+	    if(gp.ui.subState == 2) {
+	    	
+	        playerInventory(code); 
+	        
+	        if(code == KeyEvent.VK_ESCAPE) {
+	            gp.ui.subState = 0;
+	        }
+	    }
+	}
+	
+	public void playerInventory(int code) {
+		
+		if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+			if(gp.ui.playerSlotRow != 0) {
+				gp.ui.playerSlotRow--;
+				gp.playSE(9);
+			}
+		}
+		
+		if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) {
+			if(gp.ui.playerSlotCol != 0) {
+				gp.ui.playerSlotCol--;
+				gp.playSE(9);
+			}
+		}
+		
+		if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
+			if(gp.ui.playerSlotRow != 3) {
+				gp.ui.playerSlotRow++;
+				gp.playSE(9);
+			}
+		}
+		
+		if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
+			if(gp.ui.playerSlotCol != 4) {
+				gp.ui.playerSlotCol++;
+				gp.playSE(9);
+			}
+		}
+	}
+	
+	public void npcInventory(int code) {
+		
+		if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+			if(gp.ui.npcSlotRow != 0) {
+				gp.ui.npcSlotRow--;
+				gp.playSE(9);
+			}
+		}
+		
+		if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) {
+			if(gp.ui.npcSlotCol != 0) {
+				gp.ui.npcSlotCol--;
+				gp.playSE(9);
+			}
+		}
+		
+		if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
+			if(gp.ui.npcSlotRow != 3) {
+				gp.ui.npcSlotRow++;
+				gp.playSE(9);
+			}
+		}
+		
+		if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
+			if(gp.ui.npcSlotCol != 4) {
+				gp.ui.npcSlotCol++;
+				gp.playSE(9);
+			}
+		}
+	}
 	@Override
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub

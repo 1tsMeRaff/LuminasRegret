@@ -183,7 +183,7 @@ public class TileManager {
 //			setup(73, "portal", false);
 //			setup(74, "portal", false);
 //			setup(75, "portal", false);
-			setup(76, "tile111", false);
+			setup(76, "tile111", true);
 //			setup(77, "portal", false);
 //			setup(78, "portal", false);
 //			setup(79, "portal", false);

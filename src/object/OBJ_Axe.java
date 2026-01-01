@@ -12,6 +12,7 @@ public class OBJ_Axe extends Entity {
 		name = "Kapak";
 		down1 = setup("/objects/axe", gp.tileSize, gp.tileSize);
 		attackValue = 2;
+		price = 10;
 		attackArea.width = 36;
 	    attackArea.height = 36;
 	    description = "[" + name + "]\n Hanya kapak biasa.";

@@ -75,6 +75,7 @@ public class Entity {
 	public int defenseValue;
 	public String description = "";
 	public int useCost;
+	public int price;
 	
 	// Tipe Equipment
 	public int type; // 0 = player, 1 = npc, 2 = monster
@@ -86,6 +87,7 @@ public class Entity {
 	public final int type_shield = 5;
 	public final int type_consumable = 6;
 	public final int type_pickupOnly = 7;
+	public Entity currentLight;
 	
 	public Entity(GamePanel gp) {
 		this.gp = gp;

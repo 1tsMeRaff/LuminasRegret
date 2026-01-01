@@ -69,7 +69,7 @@ public class Player extends Entity {
         dexterity = 1;
         exp = 0;
         nextLevelExp = 5;
-        coin = 0;
+        coin = 500;
         currentWeapon = new OBJ_Sword_Standard(gp);
         currentShield = new OBJ_Shield_Wood(gp);
         projectile = new OBJ_Slash(gp);
@@ -198,7 +198,7 @@ public class Player extends Entity {
             // Reset collision status
             collisionOn = false;
             // Check Tile Collision
- //           gp.cChecker.checkTile(this);
+            gp.cChecker.checkTile(this);
             
             // Check Object Collision
             int objIndex = gp.cChecker.checkObject(this, true);
@@ -486,7 +486,7 @@ public class Player extends Entity {
     }
     
     public void selectItem() {
-    	int itemIndex = gp.ui.getItemIndexOnSlot();
+    	int itemIndex = gp.ui.getItemIndexOnSlot(gp.ui.playerSlotCol, gp.ui.playerSlotRow);
     	
     	if(itemIndex < inventory.size()) {
     		
