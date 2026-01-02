@@ -14,7 +14,7 @@ import main.UtilityTool;
 public class TileManager {
     
     GamePanel gp;
-    public Tile[][] tile;  // Array 2D: [mapIndex][tileIndex]
+    public Tile[][] tile;
     public int mapTileNum[][][];
     
     public TileManager(GamePanel gp) {
@@ -103,7 +103,7 @@ public class TileManager {
         setup(0, 62, "sungai3", true); // dipakai
         setup(0, 63, "pohon2", true); // dipakai
         setup(0, 64, "trunk", false); // dipakai
-        setup(0, 65, "portal", false);
+        setup(0, 65, "portal", false); // dipakai
     }
     
     private void setupWorld1() {

@@ -29,10 +29,10 @@ public class MON_GreenSlime extends Entity {
 		exp = 2;
 		projectile = new OBJ_GreenProjectile(gp);
 		
-		solidArea.x = 3;
-		solidArea.y = 18;
-		solidArea.width = 42;
-		solidArea.height = 30;
+		solidArea.x = 12;
+		solidArea.y = 12;
+		solidArea.width = 24;
+		solidArea.height = 24;
 		solidAreaDefaultX = solidArea.x;
 		solidAreaDefaultY = solidArea.y;
 		

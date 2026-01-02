@@ -39,10 +39,10 @@ public class NPC_Guide extends Entity {
 		
 		if(onPath == true) {
 			
-			int goalCol;
-			int goalRow;
+			int goalCol = 28;
+			int goalRow = 29;
 			
-//			searchPath(goalCol, goalRow);
+			searchPath(goalCol, goalRow);
 		}
 		else {
 			

@@ -178,11 +178,9 @@ public class Entity {
     	gp.particleList.add(p4);
     }
 	
-	public void update() {
-		
-		setAction();
-		
-		collisionOn = false;
+    public void checkCollision() {
+    	
+    	collisionOn = false;
 		gp.cChecker.checkTile(this);
 		gp.cChecker.checkObject(this, false);
 		gp.cChecker.checkEntity(this, gp.npc);
@@ -194,7 +192,13 @@ public class Entity {
 			
 			damagePlayer(attack);
 		}
+
+    }
+	public void update() {
 		
+		setAction();
+		checkCollision();
+				
 		// IF COLLISION IS FALSE, PLAYER CAN MOVE
 		if (collisionOn == false) {
 		    switch (direction) {
@@ -352,4 +356,118 @@ public class Entity {
 	    }
 	    return image;
 	}
+	
+	public void searchPath(int goalCol, int goalRow) {
+		
+        int startCol = (worldX + solidArea.x) / gp.tileSize;
+        int startRow = (worldY + solidArea.y) / gp.tileSize;
+        gp.pFinder.setNodes(startCol,startRow,goalCol,goalRow,this);
+        if(gp.pFinder.search() == true) {
+            //Next WorldX and WorldY
+            int nextX = gp.pFinder.pathList.get(0).col * gp.tileSize;
+            int nextY = gp.pFinder.pathList.get(0).row * gp.tileSize;
+
+            //Entity's solidArea position
+            int enLeftX = worldX + solidArea.x;
+            int enRightX = worldX + solidArea.x + solidArea.width;
+            int enTopY = worldY + solidArea.y;
+            int enBottomY = worldY + solidArea.y + solidArea.height;
+
+            // TOP PATH
+            if(enTopY > nextY && enLeftX >= nextX && enRightX < nextX + gp.tileSize) {
+                direction = "up";
+            }
+            // BOTTOM PATH
+            else if(enTopY < nextY && enLeftX >= nextX && enRightX < nextX + gp.tileSize) {
+                direction = "down";
+            }
+            // RIGHT - LEFT PATH
+            else if(enTopY >= nextY && enBottomY < nextY + gp.tileSize) {
+                //either left or right
+                // LEFT PATH
+                if(enLeftX > nextX) {
+                    direction = "left";
+                }
+                // RIGHT PATH
+                if(enLeftX < nextX) {
+                    direction = "right";
+                }
+            }
+            //OTHER EXCEPTIONS
+            else if(enTopY > nextY && enLeftX > nextX) {
+                // up or left
+                direction = "up";
+                checkCollision();
+                if(collisionOn == true)
+                {
+                    direction = "left";
+                }
+            }
+            else if(enTopY > nextY && enLeftX < nextX) {
+                // up or right
+                direction = "up";
+                checkCollision();
+                if(collisionOn == true)
+                {
+                    direction = "right";
+                }
+            }
+            else if(enTopY < nextY && enLeftX > nextX) {
+                // down or left
+                direction = "down";
+                checkCollision();
+                if(collisionOn == true) {
+                    direction = "left";
+                }
+            }
+            else if(enTopY < nextY && enLeftX < nextX) {
+                // down or right
+                direction = "down";
+                checkCollision();
+                if(collisionOn == true) {
+                    direction = "right";
+                }
+            }
+            // for following player, disable this. It should be enabled when npc walking to specified location
+//            int nextCol = gp.pFinder.pathList.get(0).col;
+//            int nextRow = gp.pFinder.pathList.get(0).row;
+//            if(nextCol == goalCol && nextRow == goalRow) {
+//                onPath = false;
+//            }
+        }
+    }
+//    public int getDetected(Entity user, Entity target[][], String targetName)
+//    {
+//        int index = 999;
+//
+//        //Check the surrounding object
+//        int nextWorldX = user.getLeftX();
+//        int nextWorldY = user.getTopY();
+//
+//        switch (user.direction)
+//        {
+//            case "up" : nextWorldY = user.getTopY() - gp.player.speed; break;
+//            case "down": nextWorldY = user.getBottomY() + gp.player.speed; break;
+//            case "left": nextWorldX = user.getLeftX() - gp.player.speed; break;
+//            case "right": nextWorldX = user.getRightX() + gp.player.speed; break;
+//        }
+//        int col = nextWorldX/gp.tileSize;
+//        int row = nextWorldY/gp.tileSize;
+//
+//        for(int i = 0; i < target[1].length; i++)
+//        {
+//            if(target[gp.currentMap][i] != null)
+//            {
+//                if (target[gp.currentMap][i].getCol() == col                                //checking if player 1 tile away from target (key etc.) (must be same direction)
+//                        && target[gp.currentMap][i].getRow() == row
+//                            && target[gp.currentMap][i].name.equals(targetName))
+//                {
+//                    index = i;
+//                    break;
+//                }
+//            }
+//
+//        }
+//        return  index;
+//    }
 }
