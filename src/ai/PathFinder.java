@@ -73,7 +73,6 @@ public class PathFinder {
         int row = 0;
         while(col < gp.maxWorldCol && row < gp.maxWorldRow) {
             //SET SOLID NODE
-            //CHECK TILES - PERBAIKAN DI SINI
             int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
             if(gp.tileM.tile[gp.currentMap][tileNum] != null && 
                gp.tileM.tile[gp.currentMap][tileNum].collision == true) {
@@ -133,11 +132,11 @@ public class PathFinder {
                 openNode(node[col-1][row]);
             }
             //open the DOWN node
-            if(row + 1 < gp.maxWorldRow) {  // PERBAIKAN: gunakan < bukan <=
+            if(row + 1 < gp.maxWorldRow) {
                 openNode(node[col][row+1]);
             }
             //open the RIGHT node
-            if(col + 1 < gp.maxWorldCol) {  // PERBAIKAN: gunakan < bukan <=
+            if(col + 1 < gp.maxWorldCol) {
                 openNode(node[col+1][row]);
             }
 

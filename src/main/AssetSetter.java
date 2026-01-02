@@ -68,8 +68,8 @@ public class AssetSetter {
 		
 		// Map 0
 		gp.npc[mapNum][i] = new NPC_Guide(gp);
-		gp.npc[mapNum][i].worldX = gp.tileSize*28;
-		gp.npc[mapNum][i].worldY = gp.tileSize*28;
+		gp.npc[mapNum][i].worldX = gp.tileSize*24;
+		gp.npc[mapNum][i].worldY = gp.tileSize*24;
 		i++;
 		
 		gp.npc[mapNum][i] = new NPC_Merchant(gp);
@@ -125,6 +125,8 @@ public class AssetSetter {
 		
 		int mapNum = 0;
 		int i = 0;
+		
+		int maxTiles = gp.iTile[mapNum].length;
 		
 		//kiri atas
 		gp.iTile[mapNum][i] = new IT_DryTree(gp,12,11);i++;

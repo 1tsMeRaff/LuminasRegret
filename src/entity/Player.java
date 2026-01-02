@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import main.GamePanel;
 import main.KeyHandler;
+import object.OBJ_Axe;
 import object.OBJ_Key;
 import object.OBJ_Shield_Wood;
 import object.OBJ_Slash;
@@ -33,7 +34,7 @@ public class Player extends Entity {
         // Solid Area
         solidArea = new Rectangle();
         solidArea.x = 8;
-        solidArea.y = 16;
+        solidArea.y = 10;
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
         solidArea.width = 32;
@@ -53,7 +54,7 @@ public class Player extends Entity {
     public void setDefaultValues() {
         
         worldX = gp.tileSize * 23;
-        worldY = gp.tileSize * 21;
+        worldY = gp.tileSize * 23;
         speed = 4;
         direction = "down";
         
@@ -77,7 +78,7 @@ public class Player extends Entity {
     public void setDefaultPositions() {
     	
         worldX = gp.tileSize * 23;
-        worldY = gp.tileSize * 21;
+        worldY = gp.tileSize * 23;
         direction = "down";
     }
     public void restoreLifeAndMana() {
@@ -92,6 +93,7 @@ public class Player extends Entity {
     	inventory.clear();
     	inventory.add(currentWeapon);
     	inventory.add(currentShield);
+    	inventory.add(new OBJ_Axe(gp));
     	inventory.add(new OBJ_Key(gp));
     	inventory.add(new OBJ_Key(gp));
     }
@@ -103,7 +105,6 @@ public class Player extends Entity {
     public int getDefense() {
         return defense = dexterity * currentShield.defenseValue;
     }
-
     
     public void getPlayerImage() {
         
@@ -153,7 +154,6 @@ public class Player extends Entity {
         	attackRight2 = setup("/player/attright2", gp.tileSize, gp.tileSize);
         	attackRight3 = setup("/player/attright3", gp.tileSize, gp.tileSize);
     	}
-    	
     }
     
     public void update() {
@@ -271,19 +271,17 @@ public class Player extends Entity {
         }
         
         if(gp.keyH.rangeKeyPressed == true && projectile.alive == false 
-        		&& rangeAvailableCounter == 30 && projectile.haveResource(this) == true) {
-        	
-        	projectile.set(worldX, worldY, direction, true, this);
-        	
-        	// Saat Player RangeAttack, kurangi mana
-        	projectile.substractResource(this);
-        	
-        	gp.projectileList.add(projectile);
-        	
-        	rangeAvailableCounter = 0;
-        	
-//        	gp.playSE(10);
-        }
+        	    && rangeAvailableCounter == 30 && projectile.haveResource(this) == true) {
+        	    
+        	    // PERBAIKAN: Pastikan ini memanggil set() yang sudah diperbaiki
+        	    projectile.set(worldX, worldY, direction, true, this);
+        	    
+        	    projectile.substractResource(this);
+        	    
+        	    gp.projectileList.add(projectile);
+        	    
+        	    rangeAvailableCounter = 0;
+        	}
         
         
         // Invincible Counter
@@ -310,57 +308,60 @@ public class Player extends Entity {
 	        }
     }
     public void attacking() {
-    	
-    	spriteCounter++;
+        spriteCounter++;
 
-    	if(spriteCounter <= 5) {
-    	    spriteNum = 1;
-    	}
-    	if(spriteCounter > 5 && spriteCounter <= 20) {
-    	    spriteNum = 2;
-    	    
-    	    // Current Player Position
-    	    int currentWorldX = worldX;
-    	    int currentWorldY = worldY;
-    	    int solidAreaWidth = solidArea.width;
-    	    int solidAreaHeight = solidArea.height;
-    	    
-    	    // Adjust Player Position For attackArea
-    	    switch(direction) {
-    	    case "up": worldY -= attackArea.height; break;
-    	    case "down": worldY += attackArea.height; break;
-    	    case "left": worldX -= attackArea.width; break;
-    	    case "right": worldX += attackArea.width; break;
-    	    }
-    	    
-    	    // AttackArea menjadi SolidArea
-    	    solidArea.width = attackArea.width;
-    	    solidArea.height = attackArea.height;
-    	    
-    	    // Check Monster di SolidArea
-    	    int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
-    	    damageMonster(monsterIndex, attack);
-    	    
-    	    int iTileIndex = gp.cChecker.checkEntity(this, gp.iTile);
-    	    damageInteractiveTile(iTileIndex);
-    	    
-    	    // Setelah Cek, Kembalikan Nilai
-    	    worldX = currentWorldX;
-    	    worldY = currentWorldY;
-    	    solidArea.width = solidAreaWidth;
-    	    solidArea.height = solidAreaHeight;
-    	}
-    	
-    	if(spriteCounter > 20 && spriteCounter <= 35) {
-    	    spriteNum = 3;
-    	}
-    	
-    	if(spriteCounter > 35) {
-    	    spriteNum = 1;
-    	    spriteCounter = 0;
-    	    attacking = false;
-    	}
+        if(spriteCounter <= 5) {
+            spriteNum = 1;
+        }
+        if(spriteCounter > 5 && spriteCounter <= 20) {
+            spriteNum = 2;
+            
+            // Current Player Position
+            int currentWorldX = worldX;
+            int currentWorldY = worldY;
+            int solidAreaWidth = solidArea.width;
+            int solidAreaHeight = solidArea.height;
+            
+            // Adjust Player Position For attackArea
+            switch(direction) {
+                case "up": worldY -= attackArea.height; break;
+                case "down": worldY += attackArea.height; break;
+                case "left": worldX -= attackArea.width; break;
+                case "right": worldX += attackArea.width; break;
+            }
+            
+            // AttackArea becomes SolidArea
+            solidArea.width = attackArea.width;
+            solidArea.height = attackArea.height;
+            
+            // Check Monster collision
+            int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
+            damageMonster(monsterIndex, attack);
+            
+            // Check Interactive Tile collision (PERBAIKAN DI SINI)
+            int iTileIndex = gp.cChecker.checkInteractiveTile(this);
+            if (iTileIndex != 999) {
+                damageInteractiveTile(iTileIndex);
+            }
+            
+            // Restore values
+            worldX = currentWorldX;
+            worldY = currentWorldY;
+            solidArea.width = solidAreaWidth;
+            solidArea.height = solidAreaHeight;
+        }
+        
+        if(spriteCounter > 20 && spriteCounter <= 35) {
+            spriteNum = 3;
+        }
+        
+        if(spriteCounter > 35) {
+            spriteNum = 1;
+            spriteCounter = 0;
+            attacking = false;
+        }
     }
+    
     public void pickUpObject(int i) {
     	
         if (i != 999) {
@@ -455,7 +456,7 @@ public class Player extends Entity {
             
             Entity destroyedTile = gp.iTile[gp.currentMap][i];
             
-            gp.iTile[i] = null;
+            gp.iTile[gp.currentMap][i] = null;
             
             generateParticle(destroyedTile, destroyedTile);
         }

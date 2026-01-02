@@ -6,9 +6,11 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
+import ai.Node;
 import main.GamePanel;
 import main.UtilityTool;
 
@@ -68,6 +70,8 @@ public class Entity {
 	public Projectile projectile;
 	
 	// Item Attributes
+    public ArrayList<Entity> inventory = new ArrayList<>();
+    public final int maxInventorySize = 20;
 	public int value;
 	public int attackValue;
 	public int defenseValue;
@@ -121,9 +125,11 @@ public class Entity {
 	public void use(Entity entity) {
 		
 	}
+	
 	public void checkDrop() {
 		
 	}
+	
 	public void dropItems(Entity droppedItem) {
 		
 		for(int i = 0; i < gp.obj[1].length; i++) {
@@ -135,6 +141,7 @@ public class Entity {
 			}
 		}
 	}
+	
 	public Color getParticleColor() {
     	Color color = null;
     	return color;
@@ -154,6 +161,7 @@ public class Entity {
     	int maxLife = 0;
     	return maxLife;
     }
+    
     public void generateParticle(Entity generator, Entity target) {
     	
     	Color color = generator.getParticleColor();
@@ -161,21 +169,19 @@ public class Entity {
     	int speed = generator.getParticleSpeed();
     	int maxLife = generator.getParticleMaxLife();
     	
-    	Particle p1 = new Particle(gp, generator, color, size, speed, maxLife, -2, -1);
-    	Particle p2 = new Particle(gp, generator, color, size, speed, maxLife, 2, -1);
-    	Particle p3 = new Particle(gp, generator, color, size, speed, maxLife, -2, 1);
-    	Particle p4 = new Particle(gp, generator, color, size, speed, maxLife, 2, 1);
+    	Particle p1 = new Particle(gp, target, color, size, speed, maxLife, -2, -1);
+    	Particle p2 = new Particle(gp, target, color, size, speed, maxLife, 2, -1);
+    	Particle p3 = new Particle(gp, target, color, size, speed, maxLife, -2, 1);
+    	Particle p4 = new Particle(gp, target, color, size, speed, maxLife, 2, 1);
     	gp.particleList.add(p1);
     	gp.particleList.add(p2);
     	gp.particleList.add(p3);
     	gp.particleList.add(p4);
     }
 	
-	public void update() {
-		
-		setAction();
-		
-		collisionOn = false;
+    public void checkCollision() {
+    	
+    	collisionOn = false;
 		gp.cChecker.checkTile(this);
 		gp.cChecker.checkObject(this, false);
 		gp.cChecker.checkEntity(this, gp.npc);
@@ -187,7 +193,13 @@ public class Entity {
 			
 			damagePlayer(attack);
 		}
+
+    }
+	public void update() {
 		
+		setAction();
+		checkCollision();
+				
 		// IF COLLISION IS FALSE, PLAYER CAN MOVE
 		if (collisionOn == false) {
 		    switch (direction) {
@@ -291,8 +303,6 @@ public class Entity {
 			        hpBarOn = false;
 			    }
 			}
-
-			
 			
 			if(invincible == true) {
 				hpBarOn = true;
@@ -345,4 +355,102 @@ public class Entity {
 	    }
 	    return image;
 	}
+	
+	public void searchPath(int goalCol, int goalRow) {
+	    
+	    // Cek posisi saat ini
+	    int currentCol = (worldX + solidArea.x) / gp.tileSize;
+	    int currentRow = (worldY + solidArea.y) / gp.tileSize;
+	    
+	    // Jika path kosong, hitung path baru
+	    if(gp.pFinder.pathList.isEmpty()) {
+	        gp.pFinder.setNodes(currentCol, currentRow, goalCol, goalRow, this);
+	        
+	        if(!gp.pFinder.search()) {
+	            onPath = false;
+	            return;
+	        }
+	        
+	        // Hapus node pertama jika NPC sudah di posisinya
+	        if(!gp.pFinder.pathList.isEmpty()) {
+	            Node firstNode = gp.pFinder.pathList.get(0);
+	            if(firstNode.col == currentCol && firstNode.row == currentRow) {
+	                gp.pFinder.pathList.remove(0);
+	            }
+	        }
+	    }
+	    
+	    // Jika path masih ada
+	    if(!gp.pFinder.pathList.isEmpty()) {
+	        Node nextNode = gp.pFinder.pathList.get(0);
+	        
+	        // Simple direction berdasarkan grid
+	        if(nextNode.row < currentRow) {
+	            direction = "up";
+	        } 
+	        else if(nextNode.row > currentRow) {
+	            direction = "down";
+	        }
+	        else if(nextNode.col < currentCol) {
+	            direction = "left";
+	        }
+	        else if(nextNode.col > currentCol) {
+	            direction = "right";
+	        }
+	        
+	        // Cek jika sudah mendekati node
+	        int nextCenterX = nextNode.col * gp.tileSize + gp.tileSize/2;
+	        int nextCenterY = nextNode.row * gp.tileSize + gp.tileSize/2;
+	        int currentCenterX = worldX + solidArea.x + solidArea.width/2;
+	        int currentCenterY = worldY + solidArea.y + solidArea.height/2;
+	        
+	        // Jika sudah dekat, hapus node
+	        if(Math.abs(currentCenterX - nextCenterX) <= speed * 2 && 
+	           Math.abs(currentCenterY - nextCenterY) <= speed * 2) {
+	            gp.pFinder.pathList.remove(0);
+	            
+	            // Cek jika sudah mencapai tujuan
+	            if(nextNode.col == goalCol && nextNode.row == goalRow) {
+	                onPath = false;
+	                gp.pFinder.pathList.clear();
+	            }
+	        }
+	    } else {
+	        onPath = false;
+	    }
+	}
+//    public int getDetected(Entity user, Entity target[][], String targetName)
+//    {
+//        int index = 999;
+//
+//        //Check the surrounding object
+//        int nextWorldX = user.getLeftX();
+//        int nextWorldY = user.getTopY();
+//
+//        switch (user.direction)
+//        {
+//            case "up" : nextWorldY = user.getTopY() - gp.player.speed; break;
+//            case "down": nextWorldY = user.getBottomY() + gp.player.speed; break;
+//            case "left": nextWorldX = user.getLeftX() - gp.player.speed; break;
+//            case "right": nextWorldX = user.getRightX() + gp.player.speed; break;
+//        }
+//        int col = nextWorldX/gp.tileSize;
+//        int row = nextWorldY/gp.tileSize;
+//
+//        for(int i = 0; i < target[1].length; i++)
+//        {
+//            if(target[gp.currentMap][i] != null)
+//            {
+//                if (target[gp.currentMap][i].getCol() == col                                //checking if player 1 tile away from target (key etc.) (must be same direction)
+//                        && target[gp.currentMap][i].getRow() == row
+//                            && target[gp.currentMap][i].name.equals(targetName))
+//                {
+//                    index = i;
+//                    break;
+//                }
+//            }
+//
+//        }
+//        return  index;
+//    }
 }
