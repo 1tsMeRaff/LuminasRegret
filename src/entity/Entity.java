@@ -411,7 +411,6 @@ public class Entity {
 	    gp.pFinder.setNodes(startCol, startRow, goalCol, goalRow);
 	    
 	    if(gp.pFinder.search() == true && gp.pFinder.pathList.size() > 1) {
-	        // AMBIL TITIK BERIKUTNYA (bukan yang pertama!)
 	        // Biasanya: index 0 = start, index 1 = next step
 	        int nextCol = gp.pFinder.pathList.get(1).col;
 	        int nextRow = gp.pFinder.pathList.get(1).row;
@@ -475,7 +474,7 @@ public class Entity {
 	                checkCollision();
 	                if(collisionOn) {
 	                    // Tidak bisa ke arah manapun
-	                    direction = ""; // idle
+	                    direction = "down"; // idle
 	                }
 	            }
 	        }

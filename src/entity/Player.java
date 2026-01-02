@@ -280,9 +280,10 @@ public class Player extends Entity {
         	    projectile.substractResource(this);
         	    
         	    // Get Vacancy
-        	    for(int i = 0; i < gp.projectile[i].length; i++) {
+        	    for(int i = 0; i < gp.projectile[gp.currentMap].length; i++) {
         	    	if(gp.projectile[gp.currentMap][i] == null) {
         	    		gp.projectile[gp.currentMap][i] = projectile;
+        	    		break;
         	    	}
         	    }
         	    

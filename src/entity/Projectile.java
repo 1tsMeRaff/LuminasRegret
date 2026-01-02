@@ -16,8 +16,6 @@ public class Projectile extends Entity {
         this.user = user;
         this.life = this.maxLife;
         
-        // PERHITUNGAN POSISI YANG TEPAT UNTUK SEMUA PROJECTILE
-        // Asumsi: projectile memiliki ukuran tileSize penuh (48x48)
         int projectileWidth = (image != null) ? image.getWidth() : gp.tileSize;
         int projectileHeight = (image != null) ? image.getHeight() : gp.tileSize;
         
@@ -48,15 +46,6 @@ public class Projectile extends Entity {
                 this.worldY = playerCenterY - (projectileHeight / 2);
                 break;
         }
-        
-//        // DEBUG
-//        System.out.println("DEBUG Projectile.set():");
-//        System.out.println("  Type: " + this.name);
-//        System.out.println("  Player pos: " + worldX + ", " + worldY);
-//        System.out.println("  Direction: " + direction);
-//        System.out.println("  Projectile pos: " + this.worldX + ", " + this.worldY);
-//        System.out.println("  Projectile size: " + projectileWidth + "x" + projectileHeight);
-//        System.out.println("  TileSize: " + gp.tileSize);
     }
 
     public void update() {

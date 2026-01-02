@@ -3,6 +3,7 @@ package ai;
 import entity.Entity;
 import main.GamePanel;
 import java.util.ArrayList;
+import tile.Tile;
 
 public class PathFinder {
 
@@ -60,45 +61,76 @@ public class PathFinder {
     }
     
     public void setNodes(int startCol, int startRow, int goalCol, int goalRow) {
-        
         resetNodes();
-        
-        //set Start and Goal node
+
         startNode = node[startCol][startRow];
         currentNode = startNode;
         goalNode = node[goalCol][goalRow];
         openList.add(currentNode);
 
+        // OPTIMASI: Jangan loop seluruh map di sini. 
+        // Tandai solid node hanya saat diperlukan atau buat method terpisah 
+        // untuk update solid status jika ada perubahan tile (seperti pintu terbuka).
+        
         int col = 0;
         int row = 0;
         while(col < gp.maxWorldCol && row < gp.maxWorldRow) {
-            //SET SOLID NODE
-            int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
-            if(gp.tileM.tile[gp.currentMap][tileNum] != null && 
-               gp.tileM.tile[gp.currentMap][tileNum].collision == true) {
-                node[col][row].solid = true;
-            }
             
-            //CHECK INTERACTIVE TILES
-            for(int i = 0; i < gp.iTile[1].length; i++) {
-                if(gp.iTile[gp.currentMap][i] != null &&
-                        gp.iTile[gp.currentMap][i].destructible == true) {
-                    int itCol = gp.iTile[gp.currentMap][i].worldX / gp.tileSize;
-                    int itRow = gp.iTile[gp.currentMap][i].worldY / gp.tileSize;
-                    node[itCol][itRow].solid = true;
-                }
-            }
-            //SET COST
-            getCost(node[col][row]);
+            // SET SOLID TILE
+        	// PERBAIKAN (Benar):
+//        	int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
+        	// Cek apakah tile tersebut ada dan apakah memiliki properti collision
+        	while(col < gp.maxWorldCol && row < gp.maxWorldRow) {
+        	    
+        	    // 1. Ambil ID tile dari map
+        	    int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
+
+        	    // 2. Akses database tile menggunakan array 2D: [currentMap][tileNum]
+        	    // Kita cek apakah tileNum berada dalam range array (300) dan tidak null
+        	    if(tileNum < gp.tileM.tile[gp.currentMap].length && gp.tileM.tile[gp.currentMap][tileNum] != null) {
+        	        if(gp.tileM.tile[gp.currentMap][tileNum].collision == true) {
+        	            node[col][row].solid = true;
+        	        }
+        	    }
+
+        	    col++;
+        	    if(col == gp.maxWorldCol) {
+        	        col = 0;
+        	        row++;
+        	    }
+        	}
+
+            // CHECK INTERACTIVE TILES
+            // Tips: Loop iTile cukup sekali, jangan di dalam loop col/row jika bisa
             col++;
             if(col == gp.maxWorldCol) {
                 col = 0;
                 row++;
             }
         }
+        
+        // Khusus iTile, kita tandai setelah loop map selesai
+        for(int i = 0; i < gp.iTile[gp.currentMap].length; i++) {
+            if(gp.iTile[gp.currentMap][i] != null && gp.iTile[gp.currentMap][i].destructible == true) {
+                int itCol = gp.iTile[gp.currentMap][i].worldX / gp.tileSize;
+                int itRow = gp.iTile[gp.currentMap][i].worldY / gp.tileSize;
+                node[itCol][itRow].solid = true;
+            }
+        }
     }
-    
+
+    public void openNode(Node node) {
+        if(node.open == false && node.checked == false && node.solid == false) {
+            node.open = true;
+            node.parent = currentNode;
+            
+            // PERBAIKAN: Hitung cost HANYA saat node dibuka
+            getCost(node); 
+            
+            openList.add(node);
+        }
+    }
     public void getCost(Node node) {
         // G Cost
         int xDistance = Math.abs(node.col - startNode.col);
@@ -174,15 +206,6 @@ public class PathFinder {
         }
         return goalReached;
     }
-    
-    public void openNode(Node node) {
-        if(node.open == false && node.checked == false && node.solid == false) {
-            node.open = true;
-            node.parent = currentNode;
-            openList.add(node);
-        }
-    }
-    
     public void trackThePath() {
         Node current = goalNode;
 
