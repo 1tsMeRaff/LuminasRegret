@@ -100,9 +100,6 @@ public class TileManager {
 			setup(65, "portal", false);
 			
 			//map ke 2
-
-
-
 			setup(100, "hitam", true);
 			setup(101, "tile001", false);
 			setup(102, "tile002", false);
