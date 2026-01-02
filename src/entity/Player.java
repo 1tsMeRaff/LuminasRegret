@@ -52,8 +52,6 @@ public class Player extends Entity {
     
     public void setDefaultValues() {
         
- //       worldX = gp.tileSize * 23;
- //      worldY = gp.tileSize * 21;
         worldX = gp.tileSize * 23;
         worldY = gp.tileSize * 21;
         speed = 4;
@@ -78,8 +76,6 @@ public class Player extends Entity {
     }
     public void setDefaultPositions() {
     	
-//    	worldX = gp.tileSize * 23;
-//       worldY = gp.tileSize * 21;
         worldX = gp.tileSize * 23;
         worldY = gp.tileSize * 21;
         direction = "down";
@@ -454,9 +450,10 @@ public class Player extends Entity {
     	}
     }
     public void damageInteractiveTile(int i) { //FIXED
-        if (i != 999 && gp.iTile[gp.currentMap][i].destructible == true && gp.iTile[gp.currentMap][i].isCorrectItem(this) == true) {  //FIXED
+        if (i != 999 && gp.iTile[gp.currentMap][i].destructible == true 
+        	&& gp.iTile[gp.currentMap][i].isCorrectItem(this) == true) {
             
-            Entity destroyedTile = gp.iTile[gp.currentMap][i]; //FIXED
+            Entity destroyedTile = gp.iTile[gp.currentMap][i];
             
             gp.iTile[i] = null;
             
