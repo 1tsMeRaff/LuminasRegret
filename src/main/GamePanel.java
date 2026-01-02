@@ -48,7 +48,7 @@ public class GamePanel extends JPanel implements Runnable {
     int FPS = 60;
     
     // System
-    TileManager tileM = new TileManager(this);
+    public TileManager tileM = new TileManager(this);
     public KeyHandler keyH = new KeyHandler(this);
     Sound music = new Sound();
     Sound se = new Sound();
@@ -78,7 +78,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int characterState = 4; 
     public final int optionsState = 5;
     public final int gameOverState = 6;
-    
+    public final int transitionState = 7;
     public final int tradeState = 8;
     
     public GamePanel() {
@@ -183,9 +183,6 @@ public class GamePanel extends JPanel implements Runnable {
     		player.update();
     		
     		//NPC 
-    		
-    	
-    		
     		for(int i = 0; i < npc[1].length; i++) {
     			if(npc[currentMap][i] != null) {
     				npc[currentMap][i].update();

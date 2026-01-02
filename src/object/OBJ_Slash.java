@@ -23,14 +23,14 @@ public class OBJ_Slash extends Projectile {
 	    }
 
 	    public void getImage() {
-	        up1 = setup("/projectile/rangeatt000", gp.tileSize, gp.tileSize);
-	        up2 = setup("/projectile/rangeatt000", gp.tileSize, gp.tileSize);
-	        down1 = setup("/projectile/rangeatt000", gp.tileSize, gp.tileSize);
-	        down2 = setup("/projectile/rangeatt000", gp.tileSize, gp.tileSize);
-	        left1 = setup("/projectile/rangeatt000", gp.tileSize, gp.tileSize);
-	        left2 = setup("/projectile/rangeatt000", gp.tileSize, gp.tileSize);
-	        right1 = setup("/projectile/rangeatt000", gp.tileSize, gp.tileSize);
-	        right2 = setup("/projectile/rangeatt000", gp.tileSize, gp.tileSize);
+	        up1 = setup("/projectile/rangeatt000", gp.tileSize / 4, gp.tileSize / 4);
+	        up2 = setup("/projectile/rangeatt000", gp.tileSize / 4, gp.tileSize / 4);
+	        down1 = setup("/projectile/rangeatt000", gp.tileSize / 4, gp.tileSize / 4);
+	        down2 = setup("/projectile/rangeatt000", gp.tileSize / 4, gp.tileSize / 4);
+	        left1 = setup("/projectile/rangeatt000", gp.tileSize / 4, gp.tileSize / 4);
+	        left2 = setup("/projectile/rangeatt000", gp.tileSize / 4, gp.tileSize / 4);
+	        right1 = setup("/projectile/rangeatt000", gp.tileSize / 4, gp.tileSize / 4);
+	        right2 = setup("/projectile/rangeatt000", gp.tileSize / 4, gp.tileSize / 4);
 	    }
 	    
 	    public boolean haveResource(Entity user) {

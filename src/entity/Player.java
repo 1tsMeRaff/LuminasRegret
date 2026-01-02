@@ -52,8 +52,6 @@ public class Player extends Entity {
     
     public void setDefaultValues() {
         
- //       worldX = gp.tileSize * 23;
- //      worldY = gp.tileSize * 21;
         worldX = gp.tileSize * 23;
         worldY = gp.tileSize * 21;
         speed = 4;
@@ -69,7 +67,7 @@ public class Player extends Entity {
         dexterity = 1;
         exp = 0;
         nextLevelExp = 5;
-        coin = 0;
+        coin = 500;
         currentWeapon = new OBJ_Sword_Standard(gp);
         currentShield = new OBJ_Shield_Wood(gp);
         projectile = new OBJ_Slash(gp);
@@ -78,8 +76,6 @@ public class Player extends Entity {
     }
     public void setDefaultPositions() {
     	
-//    	worldX = gp.tileSize * 23;
-//       worldY = gp.tileSize * 21;
         worldX = gp.tileSize * 23;
         worldY = gp.tileSize * 21;
         direction = "down";
@@ -198,7 +194,7 @@ public class Player extends Entity {
             // Reset collision status
             collisionOn = false;
             // Check Tile Collision
- //           gp.cChecker.checkTile(this);
+            gp.cChecker.checkTile(this);
             
             // Check Object Collision
             int objIndex = gp.cChecker.checkObject(this, true);
@@ -454,9 +450,10 @@ public class Player extends Entity {
     	}
     }
     public void damageInteractiveTile(int i) { //FIXED
-        if (i != 999 && gp.iTile[gp.currentMap][i].destructible == true && gp.iTile[gp.currentMap][i].isCorrectItem(this) == true) {  //FIXED
+        if (i != 999 && gp.iTile[gp.currentMap][i].destructible == true 
+        	&& gp.iTile[gp.currentMap][i].isCorrectItem(this) == true) {
             
-            Entity destroyedTile = gp.iTile[gp.currentMap][i]; //FIXED
+            Entity destroyedTile = gp.iTile[gp.currentMap][i];
             
             gp.iTile[i] = null;
             
@@ -486,7 +483,7 @@ public class Player extends Entity {
     }
     
     public void selectItem() {
-    	int itemIndex = gp.ui.getItemIndexOnSlot();
+    	int itemIndex = gp.ui.getItemIndexOnSlot(gp.ui.playerSlotCol, gp.ui.playerSlotRow);
     	
     	if(itemIndex < inventory.size()) {
     		

@@ -80,9 +80,9 @@ public class AssetSetter {
 		// Map 1
 		mapNum = 1;
 		i = 0;
-//		gp.npc[mapNum][i] = new NPC_Guide(gp);
-//		gp.npc[mapNum][i].worldX = gp.tileSize*28;
-//		gp.npc[mapNum][i].worldY = gp.tileSize*28;
+		gp.npc[mapNum][i] = new NPC_Merchant(gp);
+		gp.npc[mapNum][i].worldX = gp.tileSize*23;
+		gp.npc[mapNum][i].worldY = gp.tileSize*18;
 		i++;
 	}
 	public void setMonster() {
