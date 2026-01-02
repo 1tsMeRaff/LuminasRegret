@@ -16,6 +16,7 @@ public class OBJ_Axe extends Entity {
 		attackArea.width = 36;
 	    attackArea.height = 36;
 	    description = "[" + name + "]\n Hanya kapak biasa.";
+	    knockBackPower = 10;
 	}
 
 }
