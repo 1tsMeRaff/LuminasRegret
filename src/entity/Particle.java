@@ -19,6 +19,7 @@ public class Particle extends Entity {
 		this.generator = generator;
 		this.color = color;
 		this.size = size;
+		this.speed = speed;
 		this.maxLife = maxLife;
 		this.xd = xd;
 		this.yd = yd;
