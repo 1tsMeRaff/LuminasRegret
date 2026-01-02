@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
+import ai.Node;
 import main.GamePanel;
 import main.UtilityTool;
 
@@ -302,8 +303,6 @@ public class Entity {
 			        hpBarOn = false;
 			    }
 			}
-
-			
 			
 			if(invincible == true) {
 				hpBarOn = true;
@@ -358,84 +357,68 @@ public class Entity {
 	}
 	
 	public void searchPath(int goalCol, int goalRow) {
-		
-        int startCol = (worldX + solidArea.x) / gp.tileSize;
-        int startRow = (worldY + solidArea.y) / gp.tileSize;
-        gp.pFinder.setNodes(startCol,startRow,goalCol,goalRow,this);
-        if(gp.pFinder.search() == true) {
-            //Next WorldX and WorldY
-            int nextX = gp.pFinder.pathList.get(0).col * gp.tileSize;
-            int nextY = gp.pFinder.pathList.get(0).row * gp.tileSize;
-
-            //Entity's solidArea position
-            int enLeftX = worldX + solidArea.x;
-            int enRightX = worldX + solidArea.x + solidArea.width;
-            int enTopY = worldY + solidArea.y;
-            int enBottomY = worldY + solidArea.y + solidArea.height;
-
-            // TOP PATH
-            if(enTopY > nextY && enLeftX >= nextX && enRightX < nextX + gp.tileSize) {
-                direction = "up";
-            }
-            // BOTTOM PATH
-            else if(enTopY < nextY && enLeftX >= nextX && enRightX < nextX + gp.tileSize) {
-                direction = "down";
-            }
-            // RIGHT - LEFT PATH
-            else if(enTopY >= nextY && enBottomY < nextY + gp.tileSize) {
-                //either left or right
-                // LEFT PATH
-                if(enLeftX > nextX) {
-                    direction = "left";
-                }
-                // RIGHT PATH
-                if(enLeftX < nextX) {
-                    direction = "right";
-                }
-            }
-            //OTHER EXCEPTIONS
-            else if(enTopY > nextY && enLeftX > nextX) {
-                // up or left
-                direction = "up";
-                checkCollision();
-                if(collisionOn == true)
-                {
-                    direction = "left";
-                }
-            }
-            else if(enTopY > nextY && enLeftX < nextX) {
-                // up or right
-                direction = "up";
-                checkCollision();
-                if(collisionOn == true)
-                {
-                    direction = "right";
-                }
-            }
-            else if(enTopY < nextY && enLeftX > nextX) {
-                // down or left
-                direction = "down";
-                checkCollision();
-                if(collisionOn == true) {
-                    direction = "left";
-                }
-            }
-            else if(enTopY < nextY && enLeftX < nextX) {
-                // down or right
-                direction = "down";
-                checkCollision();
-                if(collisionOn == true) {
-                    direction = "right";
-                }
-            }
-            // for following player, disable this. It should be enabled when npc walking to specified location
-//            int nextCol = gp.pFinder.pathList.get(0).col;
-//            int nextRow = gp.pFinder.pathList.get(0).row;
-//            if(nextCol == goalCol && nextRow == goalRow) {
-//                onPath = false;
-//            }
-        }
-    }
+	    
+	    // Cek posisi saat ini
+	    int currentCol = (worldX + solidArea.x) / gp.tileSize;
+	    int currentRow = (worldY + solidArea.y) / gp.tileSize;
+	    
+	    // Jika path kosong, hitung path baru
+	    if(gp.pFinder.pathList.isEmpty()) {
+	        gp.pFinder.setNodes(currentCol, currentRow, goalCol, goalRow, this);
+	        
+	        if(!gp.pFinder.search()) {
+	            onPath = false;
+	            return;
+	        }
+	        
+	        // Hapus node pertama jika NPC sudah di posisinya
+	        if(!gp.pFinder.pathList.isEmpty()) {
+	            Node firstNode = gp.pFinder.pathList.get(0);
+	            if(firstNode.col == currentCol && firstNode.row == currentRow) {
+	                gp.pFinder.pathList.remove(0);
+	            }
+	        }
+	    }
+	    
+	    // Jika path masih ada
+	    if(!gp.pFinder.pathList.isEmpty()) {
+	        Node nextNode = gp.pFinder.pathList.get(0);
+	        
+	        // Simple direction berdasarkan grid
+	        if(nextNode.row < currentRow) {
+	            direction = "up";
+	        } 
+	        else if(nextNode.row > currentRow) {
+	            direction = "down";
+	        }
+	        else if(nextNode.col < currentCol) {
+	            direction = "left";
+	        }
+	        else if(nextNode.col > currentCol) {
+	            direction = "right";
+	        }
+	        
+	        // Cek jika sudah mendekati node
+	        int nextCenterX = nextNode.col * gp.tileSize + gp.tileSize/2;
+	        int nextCenterY = nextNode.row * gp.tileSize + gp.tileSize/2;
+	        int currentCenterX = worldX + solidArea.x + solidArea.width/2;
+	        int currentCenterY = worldY + solidArea.y + solidArea.height/2;
+	        
+	        // Jika sudah dekat, hapus node
+	        if(Math.abs(currentCenterX - nextCenterX) <= speed * 2 && 
+	           Math.abs(currentCenterY - nextCenterY) <= speed * 2) {
+	            gp.pFinder.pathList.remove(0);
+	            
+	            // Cek jika sudah mencapai tujuan
+	            if(nextNode.col == goalCol && nextNode.row == goalRow) {
+	                onPath = false;
+	                gp.pFinder.pathList.clear();
+	            }
+	        }
+	    } else {
+	        onPath = false;
+	    }
+	}
 //    public int getDetected(Entity user, Entity target[][], String targetName)
 //    {
 //        int index = 999;
