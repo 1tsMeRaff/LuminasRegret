@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
@@ -68,6 +69,8 @@ public class Entity {
 	public Projectile projectile;
 	
 	// Item Attributes
+    public ArrayList<Entity> inventory = new ArrayList<>();
+    public final int maxInventorySize = 20;
 	public int value;
 	public int attackValue;
 	public int defenseValue;
@@ -121,9 +124,11 @@ public class Entity {
 	public void use(Entity entity) {
 		
 	}
+	
 	public void checkDrop() {
 		
 	}
+	
 	public void dropItems(Entity droppedItem) {
 		
 		for(int i = 0; i < gp.obj[1].length; i++) {
@@ -135,6 +140,7 @@ public class Entity {
 			}
 		}
 	}
+	
 	public Color getParticleColor() {
     	Color color = null;
     	return color;
@@ -154,6 +160,7 @@ public class Entity {
     	int maxLife = 0;
     	return maxLife;
     }
+    
     public void generateParticle(Entity generator, Entity target) {
     	
     	Color color = generator.getParticleColor();
@@ -161,10 +168,10 @@ public class Entity {
     	int speed = generator.getParticleSpeed();
     	int maxLife = generator.getParticleMaxLife();
     	
-    	Particle p1 = new Particle(gp, generator, color, size, speed, maxLife, -2, -1);
-    	Particle p2 = new Particle(gp, generator, color, size, speed, maxLife, 2, -1);
-    	Particle p3 = new Particle(gp, generator, color, size, speed, maxLife, -2, 1);
-    	Particle p4 = new Particle(gp, generator, color, size, speed, maxLife, 2, 1);
+    	Particle p1 = new Particle(gp, target, color, size, speed, maxLife, -2, -1);
+    	Particle p2 = new Particle(gp, target, color, size, speed, maxLife, 2, -1);
+    	Particle p3 = new Particle(gp, target, color, size, speed, maxLife, -2, 1);
+    	Particle p4 = new Particle(gp, target, color, size, speed, maxLife, 2, 1);
     	gp.particleList.add(p1);
     	gp.particleList.add(p2);
     	gp.particleList.add(p3);
