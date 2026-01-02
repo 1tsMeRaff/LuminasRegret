@@ -37,6 +37,7 @@ public class Entity {
 	public boolean alive = true;
 	public boolean dying = false;
 	boolean hpBarOn = false;
+	public boolean onPath = false;
 	
 	
 	//Counter
@@ -72,6 +73,7 @@ public class Entity {
 	public int defenseValue;
 	public String description = "";
 	public int useCost;
+	public int price;
 	
 	// Tipe Equipment
 	public int type; // 0 = player, 1 = npc, 2 = monster
@@ -83,6 +85,7 @@ public class Entity {
 	public final int type_shield = 5;
 	public final int type_consumable = 6;
 	public final int type_pickupOnly = 7;
+	public Entity currentLight;
 	
 	public Entity(GamePanel gp) {
 		this.gp = gp;
@@ -123,11 +126,11 @@ public class Entity {
 	}
 	public void dropItems(Entity droppedItem) {
 		
-		for(int i = 0; i < gp.obj.length; i++) {
-			if(gp.obj[i] == null) {
-				gp.obj[i] = droppedItem;
-				gp.obj[i].worldX = worldX; //the dead monsters worldX
-				gp.obj[i].worldY = worldY;
+		for(int i = 0; i < gp.obj[1].length; i++) {
+			if(gp.obj[gp.currentMap][i] == null) {
+				gp.obj[gp.currentMap][i] = droppedItem;
+				gp.obj[gp.currentMap][i].worldX = worldX; //the dead monsters worldX
+				gp.obj[gp.currentMap][i].worldY = worldY;
 				break;
 			}
 		}
