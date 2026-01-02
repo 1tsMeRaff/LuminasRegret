@@ -2,7 +2,6 @@ package entity;
 
 import java.util.Random;
 
-import ai.Node;
 import main.GamePanel;
 
 public class NPC_Guide extends Entity {
@@ -11,7 +10,7 @@ public class NPC_Guide extends Entity {
 		super(gp);
 		
 		direction = "down";
-		speed = 1;
+		speed = 2;
 		
 		getImage();
 		setDialogue();
@@ -36,70 +35,18 @@ public class NPC_Guide extends Entity {
 		dialogues[3] = "Hello World 4";
 		dialogues[4] = "Hello World 5";
 	}
-	public void searchPath(int goalCol, int goalRow) {
-	    
-	    // Cek posisi saat ini
-	    int currentCol = (worldX + solidArea.x) / gp.tileSize;
-	    int currentRow = (worldY + solidArea.y) / gp.tileSize;
-	    
-	    // Jika path kosong, hitung path baru
-	    if(gp.pFinder.pathList.isEmpty()) {
-	        gp.pFinder.setNodes(currentCol, currentRow, goalCol, goalRow, this);
-	        
-	        if(!gp.pFinder.search()) {
-	            onPath = false;
-	            return;
-	        }
-	        
-	        // Hapus node pertama jika NPC sudah di posisinya
-	        if(!gp.pFinder.pathList.isEmpty()) {
-	            Node firstNode = gp.pFinder.pathList.get(0);
-	            if(firstNode.col == currentCol && firstNode.row == currentRow) {
-	                gp.pFinder.pathList.remove(0);
-	            }
-	        }
-	    }
-	    
-	    // Jika path masih ada
-	    if(!gp.pFinder.pathList.isEmpty()) {
-	        Node nextNode = gp.pFinder.pathList.get(0);
-	        
-	        // Simple direction berdasarkan grid
-	        if(nextNode.row < currentRow) {
-	            direction = "up";
-	        } 
-	        else if(nextNode.row > currentRow) {
-	            direction = "down";
-	        }
-	        else if(nextNode.col < currentCol) {
-	            direction = "left";
-	        }
-	        else if(nextNode.col > currentCol) {
-	            direction = "right";
-	        }
-	        
-	        // Cek jika sudah mendekati node
-	        int nextCenterX = nextNode.col * gp.tileSize + gp.tileSize/2;
-	        int nextCenterY = nextNode.row * gp.tileSize + gp.tileSize/2;
-	        int currentCenterX = worldX + solidArea.x + solidArea.width/2;
-	        int currentCenterY = worldY + solidArea.y + solidArea.height/2;
-	        
-	        // Jika sudah dekat, hapus node
-	        if(Math.abs(currentCenterX - nextCenterX) <= speed * 2 && 
-	           Math.abs(currentCenterY - nextCenterY) <= speed * 2) {
-	            gp.pFinder.pathList.remove(0);
-	            
-	            // Cek jika sudah mencapai tujuan
-	            if(nextNode.col == goalCol && nextNode.row == goalRow) {
-	                onPath = false;
-	                gp.pFinder.pathList.clear();
-	            }
-	        }
-	    } else {
-	        onPath = false;
-	    }
-	    
-			actionLockCounter++;
+	public void setAction() {
+		
+		if(onPath == true) {
+			
+			int goalCol = 28;
+			int goalRow = 29;
+			
+			searchPath(goalCol, goalRow);
+		}
+		else {
+			
+			actionLockCounter ++;
 			if(actionLockCounter == 120) {
 				Random random = new Random();
 				int i = random.nextInt(100)+1;
@@ -120,7 +67,7 @@ public class NPC_Guide extends Entity {
 				actionLockCounter = 0;
 			}
 		}
-	
+	}
 	public void speak() {
 		
 		super.speak();

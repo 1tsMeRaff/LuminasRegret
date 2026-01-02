@@ -358,65 +358,91 @@ public class Entity {
 	
 	public void searchPath(int goalCol, int goalRow) {
 	    
-	    // Cek posisi saat ini
-	    int currentCol = (worldX + solidArea.x) / gp.tileSize;
-	    int currentRow = (worldY + solidArea.y) / gp.tileSize;
+	    int startCol = (worldX + solidArea.x) / gp.tileSize;
+	    int startRow = (worldY + solidArea.y) / gp.tileSize;
 	    
-	    // Jika path kosong, hitung path baru
-	    if(gp.pFinder.pathList.isEmpty()) {
-	        gp.pFinder.setNodes(currentCol, currentRow, goalCol, goalRow, this);
+	    // Cek apakah sudah sampai tujuan
+	    if(startCol == goalCol && startRow == goalRow) {
+	        // Sudah sampai, tidak perlu bergerak
+	        direction = ""; // atau arah idle
+	        return;
+	    }
+	    
+	    gp.pFinder.setNodes(startCol, startRow, goalCol, goalRow, this);
+	    
+	    if(gp.pFinder.search() == true && gp.pFinder.pathList.size() > 1) {
+	        // AMBIL TITIK BERIKUTNYA (bukan yang pertama!)
+	        // Biasanya: index 0 = start, index 1 = next step
+	        int nextCol = gp.pFinder.pathList.get(1).col;
+	        int nextRow = gp.pFinder.pathList.get(1).row;
+	        int nextX = nextCol * gp.tileSize;
+	        int nextY = nextRow * gp.tileSize;
+
+	        // Entity's solidArea position
+	        int enLeftX = worldX + solidArea.x;
+	        int enRightX = worldX + solidArea.x + solidArea.width;
+	        int enTopY = worldY + solidArea.y;
+	        int enBottomY = worldY + solidArea.y + solidArea.height;
+
+	        // Gunakan <= untuk boundary yang tepat
+	        boolean verticallyAligned = (enLeftX >= nextX && enRightX <= nextX + gp.tileSize);
+	        boolean horizontallyAligned = (enTopY >= nextY && enBottomY <= nextY + gp.tileSize);
 	        
-	        if(!gp.pFinder.search()) {
-	            onPath = false;
-	            return;
+	        // Vertikal movement
+	        if(verticallyAligned) {
+	            if(enTopY > nextY) {
+	                direction = "up";
+	            } 
+	            else if(enTopY < nextY) {
+	                direction = "down";
+	            }
 	        }
-	        
-	        // Hapus node pertama jika NPC sudah di posisinya
-	        if(!gp.pFinder.pathList.isEmpty()) {
-	            Node firstNode = gp.pFinder.pathList.get(0);
-	            if(firstNode.col == currentCol && firstNode.row == currentRow) {
-	                gp.pFinder.pathList.remove(0);
+	        // Horizontal movement
+	        else if(horizontallyAligned) {
+	            if(enLeftX > nextX) {
+	                direction = "left";
+	            } 
+	            else if(enLeftX < nextX) {
+	                direction = "right";
+	            }
+	            else {
+	                // enLeftX == nextX, sudah segaris
+	                // Pilih arah berdasarkan kebutuhan
+	            }
+	        }
+	        // Diagonal movement
+	        else {
+	            // Prioritaskan vertikal dulu
+	            if(enTopY > nextY) {
+	                direction = "up";
+	            } 
+	            else if(enTopY < nextY) {
+	                direction = "down";
+	            }
+	            
+	            // Cek collision
+	            checkCollision();
+	            if(collisionOn) {
+	                // Coba horizontal
+	                if(enLeftX > nextX) {
+	                    direction = "left";
+	                } 
+	                else if(enLeftX < nextX) {
+	                    direction = "right";
+	                }
+	                
+	                // Cek collision lagi
+	                checkCollision();
+	                if(collisionOn) {
+	                    // Tidak bisa ke arah manapun
+	                    direction = ""; // idle
+	                }
 	            }
 	        }
 	    }
-	    
-	    // Jika path masih ada
-	    if(!gp.pFinder.pathList.isEmpty()) {
-	        Node nextNode = gp.pFinder.pathList.get(0);
-	        
-	        // Simple direction berdasarkan grid
-	        if(nextNode.row < currentRow) {
-	            direction = "up";
-	        } 
-	        else if(nextNode.row > currentRow) {
-	            direction = "down";
-	        }
-	        else if(nextNode.col < currentCol) {
-	            direction = "left";
-	        }
-	        else if(nextNode.col > currentCol) {
-	            direction = "right";
-	        }
-	        
-	        // Cek jika sudah mendekati node
-	        int nextCenterX = nextNode.col * gp.tileSize + gp.tileSize/2;
-	        int nextCenterY = nextNode.row * gp.tileSize + gp.tileSize/2;
-	        int currentCenterX = worldX + solidArea.x + solidArea.width/2;
-	        int currentCenterY = worldY + solidArea.y + solidArea.height/2;
-	        
-	        // Jika sudah dekat, hapus node
-	        if(Math.abs(currentCenterX - nextCenterX) <= speed * 2 && 
-	           Math.abs(currentCenterY - nextCenterY) <= speed * 2) {
-	            gp.pFinder.pathList.remove(0);
-	            
-	            // Cek jika sudah mencapai tujuan
-	            if(nextNode.col == goalCol && nextNode.row == goalRow) {
-	                onPath = false;
-	                gp.pFinder.pathList.clear();
-	            }
-	        }
-	    } else {
-	        onPath = false;
+	    else {
+	        // Path tidak ditemukan atau sudah sampai
+	        direction = "down"; // idle
 	    }
 	}
 //    public int getDetected(Entity user, Entity target[][], String targetName)

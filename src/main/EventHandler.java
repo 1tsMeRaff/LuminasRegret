@@ -41,8 +41,6 @@ public class EventHandler {
 				}
 			}
 		}
-		
-		
 	}
 	
 	public void checkEvent() {
