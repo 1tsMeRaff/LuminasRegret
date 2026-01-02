@@ -79,7 +79,7 @@ public class Player extends Entity {
     public void setDefaultPositions() {
     	
         worldX = gp.tileSize * 23;
-        worldY = gp.tileSize * 21;
+        worldY = gp.tileSize * 23;
         direction = "down";
     }
     public void restoreLifeAndMana() {
