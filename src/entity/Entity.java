@@ -404,11 +404,11 @@ public class Entity {
 	    // Cek apakah sudah sampai tujuan
 	    if(startCol == goalCol && startRow == goalRow) {
 	        // Sudah sampai, tidak perlu bergerak
-	        direction = ""; // atau arah idle
+	        direction = ""; 
 	        return;
 	    }
 	    
-	    gp.pFinder.setNodes(startCol, startRow, goalCol, goalRow, this);
+	    gp.pFinder.setNodes(startCol, startRow, goalCol, goalRow);
 	    
 	    if(gp.pFinder.search() == true && gp.pFinder.pathList.size() > 1) {
 	        // AMBIL TITIK BERIKUTNYA (bukan yang pertama!)
@@ -462,7 +462,7 @@ public class Entity {
 	            
 	            // Cek collision
 	            checkCollision();
-	            if(collisionOn) {
+	            if(collisionOn == true) {
 	                // Coba horizontal
 	                if(enLeftX > nextX) {
 	                    direction = "left";

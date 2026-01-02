@@ -59,7 +59,7 @@ public class PathFinder {
         step = 0;
     }
     
-    public void setNodes(int startCol, int startRow, int goalCol, int goalRow, Entity entity) {
+    public void setNodes(int startCol, int startRow, int goalCol, int goalRow) {
         
         resetNodes();
         

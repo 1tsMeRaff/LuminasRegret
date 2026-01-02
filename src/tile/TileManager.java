@@ -41,7 +41,7 @@ public class TileManager {
     }
     
     private void setupWorld0() {
-        setup(0, 0, "air", true); // dipakai
+        setup(0, 0, "air", false); // dipakai
         setup(0, 2, "sungai11", true); // dipakai
         setup(0, 3, "sungai01", true); // dipakai
         setup(0, 4, "jembatan1", false); // dipakai
