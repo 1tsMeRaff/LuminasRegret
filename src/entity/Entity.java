@@ -22,7 +22,7 @@ public class Entity {
 						 attackDown2, attackDown3, attackLeft1, attackLeft2, 
 						 attackLeft3, attackRight1, attackRight2, attackRight3;
 	public BufferedImage image, image2, image3;
-	public Rectangle solidArea = new Rectangle(0, 0, 48, 48);
+	public Rectangle solidArea = new Rectangle(8, 28, 16, 20);
 	public Rectangle attackArea = new Rectangle(0, 0, 0, 0);
 	public int solidAreaDefaultX, solidAreaDefaultY;
 	public boolean collisionOn = false;
@@ -95,10 +95,69 @@ public class Entity {
 	public final int type_pickupOnly = 7;
 	public Entity currentLight;
 	
-	public Entity(GamePanel gp) {
-		this.gp = gp;
-	}
+	// Path Finder
+	public int goalCol;
+	public int goalRow;
+	public boolean hasGoal;
+    
+//    // INTERACTION AREA (untuk interaksi player-NPC)
+//    public Rectangle interactionArea;
+//    public int interactionAreaDefaultX, interactionAreaDefaultY;
+//    
+//    // INTERACTION RANGE (jarak untuk trigger interaksi)
+//    public int interactionRange = gp.tileSize * 2; // 2 tiles
+//    
+//    // INTERACTION COOLDOWN
+//    public int interactionCooldown = 0;
+//    public final int INTERACTION_COOLDOWN_MAX = 30; // frames
+//    
+    // Constructor
+    public Entity(GamePanel gp) {
+        this.gp = gp;
+        
+//        // Default solid area
+//        solidArea = new Rectangle(0, 0, 48, 48);
+//        solidAreaDefaultX = solidArea.x;
+//        solidAreaDefaultY = solidArea.y;
+//        
+//        // Interaction area (lebih besar dari solid area)
+//        interactionArea = new Rectangle(0, 0, 96, 96); // 2x lebih besar
+//        interactionAreaDefaultX = interactionArea.x;
+//        interactionAreaDefaultY = interactionArea.y;
+    }
 	
+ // Update interaction area position
+//    public void updateInteractionArea() {
+//        interactionArea.x = worldX + interactionAreaDefaultX - interactionArea.width/2;
+//        interactionArea.y = worldY + interactionAreaDefaultY - interactionArea.height/2;
+//    }
+//    
+//    // Check if player can interact with this entity
+//    public boolean canInteractWith(Entity player) {
+//        updateInteractionArea();
+//        player.updateInteractionArea();
+//        
+//        return interactionArea.intersects(player.interactionArea);
+//    }
+    
+    // Check distance between entities
+    public int getDistanceTo(Entity other) {
+        int centerX1 = worldX + solidArea.x + solidArea.width/2;
+        int centerY1 = worldY + solidArea.y + solidArea.height/2;
+        int centerX2 = other.worldX + other.solidArea.x + other.solidArea.width/2;
+        int centerY2 = other.worldY + other.solidArea.y + other.solidArea.height/2;
+        
+        return (int)Math.sqrt(
+            Math.pow(centerX1 - centerX2, 2) + 
+            Math.pow(centerY1 - centerY2, 2)
+        );
+    }
+    
+    // Check if entity is within interaction range
+//    public boolean isInInteractionRange(Entity player) {
+//        return getDistanceTo(player) <= interactionRange;
+//    }
+
 	public void setAction() {}
 	public void damageReaction() {}
 	public void speak() {
@@ -200,6 +259,8 @@ public class Entity {
 
     }
 	public void update() {
+		
+		collisionOn = false;
 		
 		if(knockBack == true) {
 			
@@ -396,94 +457,88 @@ public class Entity {
 	    return image;
 	}
 	
-	public void searchPath(int goalCol, int goalRow) {
+	// Di class NPC_Guide, tambahkan method ini:
+	public void startPathFinding(int goalCol, int goalRow) {
+	    System.out.println("🚀 startPathFinding() called");
+	    System.out.println("  Old onPath: " + this.onPath);
+	    System.out.println("  Old goal: " + this.goalCol + ", " + this.goalRow);
 	    
-	    int startCol = (worldX + solidArea.x) / gp.tileSize;
-	    int startRow = (worldY + solidArea.y) / gp.tileSize;
+	    this.onPath = true;
+	    this.goalCol = goalCol;
+	    this.goalRow = goalRow;
 	    
-	    // Cek apakah sudah sampai tujuan
-	    if(startCol == goalCol && startRow == goalRow) {
-	        // Sudah sampai, tidak perlu bergerak
-	        direction = ""; 
-	        return;
-	    }
+	    System.out.println("  New onPath: " + this.onPath);
+	    System.out.println("  New goal: " + this.goalCol + ", " + this.goalRow);
 	    
-	    gp.pFinder.setNodes(startCol, startRow, goalCol, goalRow);
-	    
-	    if(gp.pFinder.search() == true && gp.pFinder.pathList.size() > 1) {
-	        // Biasanya: index 0 = start, index 1 = next step
-	        int nextCol = gp.pFinder.pathList.get(1).col;
-	        int nextRow = gp.pFinder.pathList.get(1).row;
-	        int nextX = nextCol * gp.tileSize;
-	        int nextY = nextRow * gp.tileSize;
-
-	        // Entity's solidArea position
-	        int enLeftX = worldX + solidArea.x;
-	        int enRightX = worldX + solidArea.x + solidArea.width;
-	        int enTopY = worldY + solidArea.y;
-	        int enBottomY = worldY + solidArea.y + solidArea.height;
-
-	        // Gunakan <= untuk boundary yang tepat
-	        boolean verticallyAligned = (enLeftX >= nextX && enRightX <= nextX + gp.tileSize);
-	        boolean horizontallyAligned = (enTopY >= nextY && enBottomY <= nextY + gp.tileSize);
-	        
-	        // Vertikal movement
-	        if(verticallyAligned) {
-	            if(enTopY > nextY) {
-	                direction = "up";
-	            } 
-	            else if(enTopY < nextY) {
-	                direction = "down";
-	            }
-	        }
-	        // Horizontal movement
-	        else if(horizontallyAligned) {
-	            if(enLeftX > nextX) {
-	                direction = "left";
-	            } 
-	            else if(enLeftX < nextX) {
-	                direction = "right";
-	            }
-	            else {
-	                // enLeftX == nextX, sudah segaris
-	                // Pilih arah berdasarkan kebutuhan
-	            }
-	        }
-	        // Diagonal movement
-	        else {
-	            // Prioritaskan vertikal dulu
-	            if(enTopY > nextY) {
-	                direction = "up";
-	            } 
-	            else if(enTopY < nextY) {
-	                direction = "down";
-	            }
-	            
-	            // Cek collision
-	            checkCollision();
-	            if(collisionOn == true) {
-	                // Coba horizontal
-	                if(enLeftX > nextX) {
-	                    direction = "left";
-	                } 
-	                else if(enLeftX < nextX) {
-	                    direction = "right";
-	                }
-	                
-	                // Cek collision lagi
-	                checkCollision();
-	                if(collisionOn) {
-	                    // Tidak bisa ke arah manapun
-	                    direction = "down"; // idle
-	                }
-	            }
-	        }
-	    }
-	    else {
-	        // Path tidak ditemukan atau sudah sampai
-	        direction = "down"; // idle
+	    // Clear path lama
+	    if (gp.pFinder != null) {
+	        gp.pFinder.pathList.clear();
+	        System.out.println("  Cleared old path");
 	    }
 	}
+
+	public void stopPathFinding() {
+	    System.out.println("🛑 stopPathFinding() called");
+	    this.onPath = false;
+	    this.goalCol = -1;
+	    this.goalRow = -1;
+	    
+	    if (gp.pFinder != null) {
+	        gp.pFinder.pathList.clear();
+	    }
+	}
+	
+    public void followPath() {
+        System.out.println("--- followPath() called ---");
+        
+        if (gp.pFinder.pathList.isEmpty()) {
+            System.out.println("PathList is empty, waiting...");
+            direction = "down";
+            return;
+        }
+        
+        Node nextNode = gp.pFinder.pathList.get(0);
+        System.out.println("Next node: " + nextNode.col + ", " + nextNode.row);
+        
+        int targetX = nextNode.col * gp.tileSize + gp.tileSize / 2;
+        int targetY = nextNode.row * gp.tileSize + gp.tileSize / 2;
+        
+        int centerX = worldX + solidArea.x + solidArea.width / 2;
+        int centerY = worldY + solidArea.y + solidArea.height / 2;
+        
+        int dx = targetX - centerX;
+        int dy = targetY - centerY;
+        
+        System.out.println("Target: " + targetX + ", " + targetY);
+        System.out.println("Center: " + centerX + ", " + centerY);
+        System.out.println("Diff: " + dx + ", " + dy);
+        
+        int threshold = gp.tileSize / 4;
+        
+        if(Math.abs(dx) < threshold && Math.abs(dy) < threshold) {
+            System.out.println("Reached node, removing from path");
+            gp.pFinder.pathList.remove(0);
+            
+            if(gp.pFinder.pathList.isEmpty()) {
+                System.out.println("Path finished!");
+                return;
+            }
+            
+            // Update to next node
+            nextNode = gp.pFinder.pathList.get(0);
+            System.out.println("Moving to next node: " + nextNode.col + ", " + nextNode.row);
+        }
+        
+        // Tentukan arah
+        if(Math.abs(dx) > Math.abs(dy)) {
+            direction = (dx > 0) ? "right" : "left";
+        } else {
+            direction = (dy > 0) ? "down" : "up";
+        }
+        
+        System.out.println("Selected direction: " + direction);
+    }
+
 //    public int getDetected(Entity user, Entity target[][], String targetName)
 //    {
 //        int index = 999;

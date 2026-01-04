@@ -1,217 +1,284 @@
 package ai;
 
-import entity.Entity;
 import main.GamePanel;
 import java.util.ArrayList;
-import tile.Tile;
 
 public class PathFinder {
 
     GamePanel gp;
-    Node[][] node;
+    Node[][] nodes;
+
     ArrayList<Node> openList = new ArrayList<>();
     public ArrayList<Node> pathList = new ArrayList<>();
+
     Node startNode, goalNode, currentNode;
-    boolean goalReached = false;
-    int step = 0;
+
+    // TAMBAHKAN VARIABLE UNTUK MENGATUR INFLATE
+    private int inflateRadius = 0; // UBAH INI: 0 = no inflate, 1 = minimal inflate
 
     public PathFinder(GamePanel gp) {
         this.gp = gp;
-        instantiateNodes();
+        initNodes();
     }
-    
-    public void instantiateNodes() {
-        node = new Node[gp.maxWorldCol][gp.maxWorldRow];
 
-        int col = 0;
-        int row = 0;
-
-        while(col < gp.maxWorldCol && row < gp.maxWorldRow) {
-            node[col][row] = new Node(col,row);
-
-            col++;
-            if(col == gp.maxWorldCol) {
-                col = 0;
-                row++;
+    // --------------------------------------------------
+    // INIT NODE GRID
+    // --------------------------------------------------
+    private void initNodes() {
+        nodes = new Node[gp.maxWorldCol][gp.maxWorldRow];
+        for (int col = 0; col < gp.maxWorldCol; col++) {
+            for (int row = 0; row < gp.maxWorldRow; row++) {
+                nodes[col][row] = new Node(col, row);
             }
         }
     }
 
-    //reset previous pathfinding result
-    public void resetNodes() {
-        int col = 0;
-        int row = 0;
-        while(col < gp.maxWorldCol && row < gp.maxWorldRow) {
-            //reset open, checked and solid state
-            node[col][row].open = false;
-            node[col][row].checked = false;
-            node[col][row].solid = false;
-
-            col++;
-            if(col == gp.maxWorldCol) {
-                col = 0;
-                row++;
-            }
-        }
-        //reset other settings
+    // --------------------------------------------------
+    // RESET STATE
+    // --------------------------------------------------
+    private void reset() {
         openList.clear();
         pathList.clear();
-        goalReached = false;
-        step = 0;
+
+        for (int col = 0; col < gp.maxWorldCol; col++) {
+            for (int row = 0; row < gp.maxWorldRow; row++) {
+                Node n = nodes[col][row];
+                n.open = false;
+                n.checked = false;
+                n.parent = null;
+                n.solid = false;
+            }
+        }
     }
-    
-    public void setNodes(int startCol, int startRow, int goalCol, int goalRow) {
-        resetNodes();
 
-        startNode = node[startCol][startRow];
-        currentNode = startNode;
-        goalNode = node[goalCol][goalRow];
-        openList.add(currentNode);
-
-        // OPTIMASI: Jangan loop seluruh map di sini. 
-        // Tandai solid node hanya saat diperlukan atau buat method terpisah 
-        // untuk update solid status jika ada perubahan tile (seperti pintu terbuka).
+    // --------------------------------------------------
+    // SET SOLID NODE - VERSI MINIMAL INFLATE
+    // --------------------------------------------------
+    private void setSolidNodes() {
+        System.out.println("=== SETTING SOLID NODES ===");
+        System.out.println("Inflate radius: " + inflateRadius);
         
-        int col = 0;
-        int row = 0;
-        while(col < gp.maxWorldCol && row < gp.maxWorldRow) {
-            
-            // SET SOLID TILE
-        	// PERBAIKAN (Benar):
-//        	int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
+        int solidCount = 0;
 
-        	// Cek apakah tile tersebut ada dan apakah memiliki properti collision
-        	while(col < gp.maxWorldCol && row < gp.maxWorldRow) {
-        	    
-        	    // 1. Ambil ID tile dari map
-        	    int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
+        for (int col = 0; col < gp.maxWorldCol; col++) {
+            for (int row = 0; row < gp.maxWorldRow; row++) {
 
-        	    // 2. Akses database tile menggunakan array 2D: [currentMap][tileNum]
-        	    // Kita cek apakah tileNum berada dalam range array (300) dan tidak null
-        	    if(tileNum < gp.tileM.tile[gp.currentMap].length && gp.tileM.tile[gp.currentMap][tileNum] != null) {
-        	        if(gp.tileM.tile[gp.currentMap][tileNum].collision == true) {
-        	            node[col][row].solid = true;
-        	        }
-        	    }
+                int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
-        	    col++;
-        	    if(col == gp.maxWorldCol) {
-        	        col = 0;
-        	        row++;
-        	    }
-        	}
+                if (gp.tileM.tile[gp.currentMap][tileNum].collision) {
+                    // HANYA tile utama yang solid
+                    nodes[col][row].solid = true;
+                    solidCount++;
 
-            // CHECK INTERACTIVE TILES
-            // Tips: Loop iTile cukup sekali, jangan di dalam loop col/row jika bisa
-            col++;
-            if(col == gp.maxWorldCol) {
-                col = 0;
-                row++;
-            }
-        }
-        
-        // Khusus iTile, kita tandai setelah loop map selesai
-        for(int i = 0; i < gp.iTile[gp.currentMap].length; i++) {
-            if(gp.iTile[gp.currentMap][i] != null && gp.iTile[gp.currentMap][i].destructible == true) {
-                int itCol = gp.iTile[gp.currentMap][i].worldX / gp.tileSize;
-                int itRow = gp.iTile[gp.currentMap][i].worldY / gp.tileSize;
-                node[itCol][itRow].solid = true;
-            }
-        }
-    }
-
-    public void openNode(Node node) {
-        if(node.open == false && node.checked == false && node.solid == false) {
-            node.open = true;
-            node.parent = currentNode;
-            
-            // PERBAIKAN: Hitung cost HANYA saat node dibuka
-            getCost(node); 
-            
-            openList.add(node);
-        }
-    }
-    public void getCost(Node node) {
-        // G Cost
-        int xDistance = Math.abs(node.col - startNode.col);
-        int yDistance = Math.abs(node.row - startNode.row);
-        node.gCost = xDistance + yDistance;
-
-        // H Cost
-        xDistance = Math.abs(node.col - goalNode.col);
-        yDistance = Math.abs(node.row - goalNode.row);
-        node.hCost = xDistance + yDistance;
-
-        // F Cost
-        node.fCost = node.gCost + node.hCost;
-    }
-    
-    public boolean search() {
-        while(goalReached == false && step < 500) {
-            int col = currentNode.col;
-            int row = currentNode.row;
-
-            //check the current node
-            currentNode.checked = true;
-            openList.remove(currentNode);
-
-            //open the UP node
-            if(row-1 >= 0) {
-                openNode(node[col][row-1]);
-            }
-            //open the LEFT node
-            if(col - 1 >= 0) {
-                openNode(node[col-1][row]);
-            }
-            //open the DOWN node
-            if(row + 1 < gp.maxWorldRow) {
-                openNode(node[col][row+1]);
-            }
-            //open the RIGHT node
-            if(col + 1 < gp.maxWorldCol) {
-                openNode(node[col+1][row]);
-            }
-
-            //Find the best node
-            int bestNodeIndex = 0;
-            int bestNodefCost = 999;
-
-            for(int i = 0; i < openList.size(); i++) {
-                //Check if this node's F cost is better
-                if(openList.get(i).fCost < bestNodefCost) {
-                    bestNodeIndex = i;
-                    bestNodefCost = openList.get(i).fCost;
-                }
-                //If F cost is equal, check the G cost
-                else if(openList.get(i).fCost == bestNodefCost) {
-                    if(openList.get(i).gCost < openList.get(bestNodeIndex).gCost) {
-                        bestNodeIndex = i;
+                    // INFLATE OPTIONAL - sesuaikan dengan kebutuhan
+                    if (inflateRadius > 0) {
+                        // Inflate hanya ke kanan dan bawah (untuk menghindari NPC terjebak)
+                        if (col + 1 < gp.maxWorldCol) {
+                            nodes[col + 1][row].solid = true;
+                        }
+                        if (row + 1 < gp.maxWorldRow) {
+                            nodes[col][row + 1].solid = true;
+                        }
                     }
                 }
             }
-
-            //If there is no node in the openList, end the loop
-            if(openList.size() == 0) {
-                break;
-            }
-
-            //After the loop, openList(bestNodeIndex] is the next step (= currentNode)
-            currentNode = openList.get(bestNodeIndex);
-
-            if(currentNode == goalNode) {
-                goalReached = true;
-                trackThePath();
-            }
-            step++;
         }
-        return goalReached;
-    }
-    public void trackThePath() {
-        Node current = goalNode;
 
-        while(current != startNode) {
-            pathList.add(0,current); //last added node is in the [0]
+        System.out.println("Total solid tiles: " + solidCount);
+    }
+
+    // --------------------------------------------------
+    // MAIN SEARCH - DIPERBAIKI
+    // --------------------------------------------------
+    public boolean search(int startCol, int startRow, int goalCol, int goalRow) {
+        System.out.println("\n🔍 PATHFINDER: (" + startCol + "," + startRow + ") -> (" + goalCol + "," + goalRow + ")");
+
+        reset();
+        setSolidNodes();
+
+        // Validasi koordinat
+        if (!isValidCoordinate(startCol, startRow) || !isValidCoordinate(goalCol, goalRow)) {
+            System.out.println("❌ Invalid coordinates");
+            return false;
+        }
+
+        startNode = nodes[startCol][startRow];
+        goalNode = nodes[goalCol][goalRow];
+
+        // Cek jika goal solid
+        if (goalNode.solid) {
+            System.out.println("⚠️ Goal tile is solid! Finding alternative...");
+            
+            // Cari tile non-solid terdekat
+            Node alternative = findNearestNonSolid(goalCol, goalRow, 3);
+            if (alternative != null) {
+                System.out.println("✅ Alternative found: (" + alternative.col + "," + alternative.row + ")");
+                goalCol = alternative.col;
+                goalRow = alternative.row;
+                goalNode = nodes[goalCol][goalRow];
+            } else {
+                System.out.println("❌ No alternative found");
+                return false;
+            }
+        }
+
+        // Jika start dan goal sama
+        if (startCol == goalCol && startRow == goalRow) {
+            System.out.println("✅ Already at goal");
+            return true;
+        }
+
+        // Setup A* algorithm
+        startNode.gCost = 0;
+        startNode.hCost = manhattanDistance(startNode, goalNode);
+        startNode.calculateFCost();
+
+        openList.add(startNode);
+        startNode.open = true;
+
+        int maxIterations = gp.maxWorldCol * gp.maxWorldRow;
+        int iterations = 0;
+
+        while (!openList.isEmpty() && iterations < maxIterations) {
+            iterations++;
+
+            currentNode = getBestNode();
+            if (currentNode == null) break;
+
+            currentNode.checked = true;
+            openList.remove(currentNode);
+
+            // Cek jika mencapai goal
+            if (currentNode == goalNode) {
+                buildPath();
+                System.out.println("✅ PATH FOUND! Length: " + pathList.size());
+                return true;
+            }
+
+            // Explore neighbors
+            exploreNeighbor(currentNode.col, currentNode.row - 1); // up
+            exploreNeighbor(currentNode.col - 1, currentNode.row); // left
+            exploreNeighbor(currentNode.col, currentNode.row + 1); // down
+            exploreNeighbor(currentNode.col + 1, currentNode.row); // right
+        }
+
+        System.out.println("❌ NO PATH FOUND after " + iterations + " iterations");
+        return false;
+    }
+
+    // --------------------------------------------------
+    // HELPER METHODS
+    // --------------------------------------------------
+    private boolean isValidCoordinate(int col, int row) {
+        return col >= 0 && col < gp.maxWorldCol && row >= 0 && row < gp.maxWorldRow;
+    }
+
+    private Node findNearestNonSolid(int centerCol, int centerRow, int maxRadius) {
+        for (int radius = 1; radius <= maxRadius; radius++) {
+            for (int c = centerCol - radius; c <= centerCol + radius; c++) {
+                for (int r = centerRow - radius; r <= centerRow + radius; r++) {
+                    if (isValidCoordinate(c, r) && !nodes[c][r].solid) {
+                        return nodes[c][r];
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private void exploreNeighbor(int col, int row) {
+        if (!isValidCoordinate(col, row)) return;
+
+        Node neighbor = nodes[col][row];
+        if (neighbor.checked || neighbor.solid) return;
+
+        int tentativeG = currentNode.gCost + 1;
+
+        if (!neighbor.open || tentativeG < neighbor.gCost) {
+            neighbor.parent = currentNode;
+            neighbor.gCost = tentativeG;
+            neighbor.hCost = manhattanDistance(neighbor, goalNode);
+            neighbor.calculateFCost();
+
+            if (!neighbor.open) {
+                neighbor.open = true;
+                openList.add(neighbor);
+            }
+        }
+    }
+
+    private Node getBestNode() {
+        if (openList.isEmpty()) return null;
+
+        Node best = openList.get(0);
+        for (Node n : openList) {
+            if (n.fCost < best.fCost || 
+               (n.fCost == best.fCost && n.hCost < best.hCost)) {
+                best = n;
+            }
+        }
+        return best;
+    }
+
+    private int manhattanDistance(Node a, Node b) {
+        return Math.abs(a.col - b.col) + Math.abs(a.row - b.row);
+    }
+
+    private void buildPath() {
+        Node current = goalNode;
+        pathList.clear();
+
+        while (current != null && current != startNode) {
+            pathList.add(0, current);
             current = current.parent;
+        }
+    }
+
+    // --------------------------------------------------
+    // PUBLIC METHODS
+    // --------------------------------------------------
+    public void setInflateRadius(int radius) {
+        this.inflateRadius = Math.max(0, Math.min(radius, 2)); // Max 2 untuk safety
+        System.out.println("Inflate radius set to: " + inflateRadius);
+    }
+
+    public void debugTile(int col, int row) {
+        if (!isValidCoordinate(col, row)) {
+            System.out.println("Invalid tile: (" + col + "," + row + ")");
+            return;
+        }
+        
+        Node n = nodes[col][row];
+        int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
+        boolean collision = gp.tileM.tile[gp.currentMap][tileNum].collision;
+        
+        System.out.println("Tile (" + col + "," + row + "):");
+        System.out.println("  Tile number: " + tileNum);
+        System.out.println("  Has collision: " + collision);
+        System.out.println("  Node solid: " + n.solid);
+        System.out.println("  Is walkable: " + !n.solid);
+    }
+
+    public void printArea(int centerCol, int centerRow, int size) {
+        System.out.println("\nMap area around (" + centerCol + "," + centerRow + "):");
+        
+        for (int r = centerRow - size; r <= centerRow + size; r++) {
+            StringBuilder line = new StringBuilder();
+            for (int c = centerCol - size; c <= centerCol + size; c++) {
+                if (isValidCoordinate(c, r)) {
+                    Node n = nodes[c][r];
+                    if (c == centerCol && r == centerRow) {
+                        line.append(" S "); // Center
+                    } else if (n.solid) {
+                        line.append(" X "); // Solid
+                    } else {
+                        line.append(" . "); // Walkable
+                    }
+                } else {
+                    line.append(" # "); // Out of bounds
+                }
+            }
+            System.out.println(line.toString());
         }
     }
 }

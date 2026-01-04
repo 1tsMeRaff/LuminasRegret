@@ -34,11 +34,11 @@ public class Player extends Entity {
         // Solid Area
         solidArea = new Rectangle();
         solidArea.x = 8;
-        solidArea.y = 10;
+        solidArea.y = 28;
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
-        solidArea.width = 32;
-        solidArea.height = 32;
+        solidArea.width = 16;
+        solidArea.height = 20;
         
         // Attack Area
 //        attackArea.width = 36;

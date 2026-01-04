@@ -171,7 +171,7 @@ public class KeyHandler implements KeyListener {
 			gp.gameState = gp.playState;
 		}
 		
-		if(code == KeyEvent.VK_ENTER) {
+		if(code == KeyEvent.VK_E) {
 			gp.player.selectItem();
 		}
 		playerInventory(code);

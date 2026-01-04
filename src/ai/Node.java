@@ -1,21 +1,24 @@
 package ai;
 
 public class Node {
+    public int col, row;
 
-    Node parent;
-    public int col;
-    public int row;
-    int gCost;
-    int hCost;
-    int fCost;
-    boolean solid;
-    boolean open;
-    boolean checked;
+    public int gCost; // cost dari start
+    public int hCost; // heuristic ke goal
+    public int fCost;
 
-    public Node(int col, int row)
-    {
+    public boolean solid;
+    public boolean open;
+    public boolean checked;
+
+    public Node parent;
+
+    public Node(int col, int row) {
         this.col = col;
         this.row = row;
     }
 
+    public void calculateFCost() {
+        fCost = gCost + hCost;
+    }
 }
