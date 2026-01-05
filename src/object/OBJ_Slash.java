@@ -53,37 +53,27 @@ public class OBJ_Slash extends Projectile {
     @Override
     public void draw(Graphics2D g2) {
         if (alive) {
-            BufferedImage img = getCurrentImage();
+            BufferedImage img = image;
             if (img != null) {
                 int screenX = worldX - gp.player.worldX + gp.player.screenX;
                 int screenY = worldY - gp.player.worldY + gp.player.screenY;
                 
-                // Pastikan dalam layar
+                // Cek apakah dalam layar
                 if(worldX + gp.tileSize > gp.player.worldX - gp.player.screenX && 
                    worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
                    worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
                    worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
                     
                     g2.drawImage(img, screenX, screenY, null);
-                    
-                    // DEBUG: Gambar bounding box merah
-                    // g2.setColor(java.awt.Color.RED);
-                    // g2.drawRect(screenX, screenY, img.getWidth(), img.getHeight());
                 }
             }
         }
-    }
-    
-    private java.awt.image.BufferedImage getCurrentImage() {
-        if (image != null) return image; // Gunakan image single jika ada
-        
-        // Atau gunakan image berdasarkan direction
-        switch(direction) {
-            case "up": return (spriteNum == 1) ? up1 : up2;
-            case "down": return (spriteNum == 1) ? down1 : down2;
-            case "left": return (spriteNum == 1) ? left1 : left2;
-            case "right": return (spriteNum == 1) ? right1 : right2;
-            default: return down1;
+        else {
+            // Hapus dari array jika ada indeks yang valid
+            if (projectileIndex >= 0 && projectileIndex < gp.projectile[gp.currentMap].length) {
+                gp.projectile[gp.currentMap][projectileIndex] = null;
+                projectileIndex = -1;  // Reset
+            }
         }
     }
     

@@ -12,7 +12,7 @@ public class OBJ_GreenProjectile extends Projectile {
         this.gp = gp;
         
         name = "GreenProjectile";
-        speed = 3;
+        speed = 1;
         maxLife = 80; // Maksimum jarak tempuh
         life = maxLife;
         attack = 2;
@@ -38,7 +38,6 @@ public class OBJ_GreenProjectile extends Projectile {
         image = setup("/projectile/balls005", gp.tileSize / 2, gp.tileSize / 2);
     }
     
-    // Optional: Override draw method untuk projectile lebih kecil
     @Override
     public void draw(java.awt.Graphics2D g2) {
         if (image != null && alive) {

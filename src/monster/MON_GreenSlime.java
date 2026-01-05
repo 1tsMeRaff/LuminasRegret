@@ -3,7 +3,6 @@ package monster;
 import java.util.Random;
 
 import entity.Entity;
-import entity.Projectile;
 import main.GamePanel;
 import object.OBJ_Coin_Bronze;
 import object.OBJ_GreenProjectile;
@@ -41,14 +40,16 @@ public class MON_GreenSlime extends Entity {
 	}
 	public void getImage() {
 		
-		up1 = setup("/monster/slimeup1", gp.tileSize, gp.tileSize);
-		up2 = setup("/monster/slimeup2", gp.tileSize, gp.tileSize);
-		down1 = setup("/monster/slimeidle", gp.tileSize, gp.tileSize);
-		down2 = setup("/monster/slimemove", gp.tileSize, gp.tileSize);
-		left1 = setup("/monster/slimeleft1", gp.tileSize, gp.tileSize);
-		left2 = setup("/monster/slimeleft2", gp.tileSize, gp.tileSize);
-		right1 = setup("/monster/slimeright1", gp.tileSize, gp.tileSize);
-		right2 = setup("/monster/slimeright2", gp.tileSize, gp.tileSize);
+		int size = 64;
+		
+		up1 = setup("/monster/slimeup1", size, size);
+		up2 = setup("/monster/slimeup2", size, size);
+		down1 = setup("/monster/slimeidle", size, size);
+		down2 = setup("/monster/slimemove", size, size);
+		left1 = setup("/monster/slimeleft1", size, size);
+		left2 = setup("/monster/slimeleft2", size, size);
+		right1 = setup("/monster/slimeright1", size, size);
+		right2 = setup("/monster/slimeright2", size, size);
 	}
 	public void setAction() {
 		
@@ -76,16 +77,16 @@ public class MON_GreenSlime extends Entity {
 		int i = new Random().nextInt(100)+1;
 		if(i > 99 && projectile.alive == false && rangeAvailableCounter == 30) {
 			projectile.set(worldX, worldY, direction, true, this);
-//			gp.projectileList.add(projectile);
+			gp.projectileList.add(projectile);
 			rangeAvailableCounter = 0;
 		}
 		// Check Vacancy
-//				for(int ii = 0; ii < gp.projectile[1].length; ii++) {
-//					if(gp.projectile[gp.currentMap][ii] == null) {
-//						gp.projectile[gp.currentMap][ii] = projectile;
-//						break;
-//					}
-//				}
+				for(int ii = 0; ii < gp.projectile[1].length; ii++) {
+					if(gp.projectile[gp.currentMap][ii] == null) {
+						gp.projectile[gp.currentMap][ii] = projectile;
+						break;
+					}
+				}
 	}
 	public void damageReaction() {
 		

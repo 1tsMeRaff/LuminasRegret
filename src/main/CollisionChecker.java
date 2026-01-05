@@ -13,299 +13,252 @@ public class CollisionChecker {
     }
     
     public void checkTile(Entity entity) {
-
-        int leftWorldX   = entity.worldX + entity.solidArea.x;
-        int rightWorldX  = leftWorldX + entity.solidArea.width;
-        int topWorldY    = entity.worldY + entity.solidArea.y;
-        int bottomWorldY = topWorldY + entity.solidArea.height;
-
-        int leftCol   = leftWorldX / gp.tileSize;
-        int rightCol  = rightWorldX / gp.tileSize;
-        int topRow    = topWorldY / gp.tileSize;
-        int bottomRow = bottomWorldY / gp.tileSize;
-
-        int maxCol = gp.tileM.mapTileNum[gp.currentMap].length;
-        int maxRow = gp.tileM.mapTileNum[gp.currentMap][0].length;
-
+        // Hitung batas solid area di world coordinates
+        int entityLeft = entity.worldX + entity.solidArea.x;
+        int entityRight = entityLeft + entity.solidArea.width;
+        int entityTop = entity.worldY + entity.solidArea.y;
+        int entityBottom = entityTop + entity.solidArea.height;
+        
+        // Convert ke tile coordinates
+        int leftCol = entityLeft / gp.tileSize;
+        int rightCol = entityRight / gp.tileSize;
+        int topRow = entityTop / gp.tileSize;
+        int bottomRow = entityBottom / gp.tileSize;
+        
         int tileNum1, tileNum2;
-
+        
         switch (entity.direction) {
-
-        case "up":
-            int nextTopRow = (topWorldY - entity.speed) / gp.tileSize;
-
-            if (nextTopRow < 0) {
-                entity.collisionOn = true;
-                return;
-            }
-
-            tileNum1 = gp.tileM.mapTileNum[gp.currentMap][leftCol][nextTopRow];
-            tileNum2 = gp.tileM.mapTileNum[gp.currentMap][rightCol][nextTopRow];
-
-            if (isCollisionTile(tileNum1) || isCollisionTile(tileNum2)) {
-                entity.collisionOn = true;
-            }
-            break;
-
-        case "down":
-            int nextBottomRow = (bottomWorldY + entity.speed) / gp.tileSize;
-
-            if (nextBottomRow >= maxRow) {
-                entity.collisionOn = true;
-                return;
-            }
-
-            tileNum1 = gp.tileM.mapTileNum[gp.currentMap][leftCol][nextBottomRow];
-            tileNum2 = gp.tileM.mapTileNum[gp.currentMap][rightCol][nextBottomRow];
-
-            if (isCollisionTile(tileNum1) || isCollisionTile(tileNum2)) {
-                entity.collisionOn = true;
-            }
-            break;
-
-        case "left":
-            int nextLeftCol = (leftWorldX - entity.speed) / gp.tileSize;
-
-            if (nextLeftCol < 0) {
-                entity.collisionOn = true;
-                return;
-            }
-
-            tileNum1 = gp.tileM.mapTileNum[gp.currentMap][nextLeftCol][topRow];
-            tileNum2 = gp.tileM.mapTileNum[gp.currentMap][nextLeftCol][bottomRow];
-
-            if (isCollisionTile(tileNum1) || isCollisionTile(tileNum2)) {
-                entity.collisionOn = true;
-            }
-            break;
-
-        case "right":
-            int nextRightCol = (rightWorldX + entity.speed) / gp.tileSize;
-
-            if (nextRightCol >= maxCol) {
-                entity.collisionOn = true;
-                return;
-            }
-
-            tileNum1 = gp.tileM.mapTileNum[gp.currentMap][nextRightCol][topRow];
-            tileNum2 = gp.tileM.mapTileNum[gp.currentMap][nextRightCol][bottomRow];
-
-            if (isCollisionTile(tileNum1) || isCollisionTile(tileNum2)) {
-                entity.collisionOn = true;
-            }
-            break;
+            case "up":
+                // Cek tile di atas entity
+                int nextTopRow = (entityTop - entity.speed) / gp.tileSize;
+                
+                if (nextTopRow < 0) {
+                    entity.collisionOn = true;
+                    return;
+                }
+                
+                // Cek dua titik di kiri dan kanan atas entity
+                tileNum1 = gp.tileM.mapTileNum[gp.currentMap][leftCol][nextTopRow];
+                tileNum2 = gp.tileM.mapTileNum[gp.currentMap][rightCol][nextTopRow];
+                
+                if (isCollisionTile(tileNum1) || isCollisionTile(tileNum2)) {
+                    entity.collisionOn = true;
+                }
+                break;
+                
+            case "down":
+                // Cek tile di bawah entity
+                int nextBottomRow = (entityBottom + entity.speed) / gp.tileSize;
+                
+                if (nextBottomRow >= gp.maxWorldRow) {
+                    entity.collisionOn = true;
+                    return;
+                }
+                
+                // Cek dua titik di kiri dan kanan bawah entity
+                tileNum1 = gp.tileM.mapTileNum[gp.currentMap][leftCol][nextBottomRow];
+                tileNum2 = gp.tileM.mapTileNum[gp.currentMap][rightCol][nextBottomRow];
+                
+                if (isCollisionTile(tileNum1) || isCollisionTile(tileNum2)) {
+                    entity.collisionOn = true;
+                }
+                break;
+                
+            case "left":
+                // Cek tile di kiri entity
+                int nextLeftCol = (entityLeft - entity.speed) / gp.tileSize;
+                
+                if (nextLeftCol < 0) {
+                    entity.collisionOn = true;
+                    return;
+                }
+                
+                // Cek dua titik di atas dan bawah kiri entity
+                tileNum1 = gp.tileM.mapTileNum[gp.currentMap][nextLeftCol][topRow];
+                tileNum2 = gp.tileM.mapTileNum[gp.currentMap][nextLeftCol][bottomRow];
+                
+                if (isCollisionTile(tileNum1) || isCollisionTile(tileNum2)) {
+                    entity.collisionOn = true;
+                }
+                break;
+                
+            case "right":
+                // Cek tile di kanan entity
+                int nextRightCol = (entityRight + entity.speed) / gp.tileSize;
+                
+                if (nextRightCol >= gp.maxWorldCol) {
+                    entity.collisionOn = true;
+                    return;
+                }
+                
+                // Cek dua titik di atas dan bawah kanan entity
+                tileNum1 = gp.tileM.mapTileNum[gp.currentMap][nextRightCol][topRow];
+                tileNum2 = gp.tileM.mapTileNum[gp.currentMap][nextRightCol][bottomRow];
+                
+                if (isCollisionTile(tileNum1) || isCollisionTile(tileNum2)) {
+                    entity.collisionOn = true;
+                }
+                break;
         }
     }
-
+    
     private boolean isCollisionTile(int tileNum) {
-
         if (tileNum < 0 || tileNum >= gp.tileM.tile[gp.currentMap].length) {
-            return true; // invalid tile dianggap tembok
+            return true;
         }
-
-        return gp.tileM.tile[gp.currentMap][tileNum] != null &&
+        return gp.tileM.tile[gp.currentMap][tileNum] != null && 
                gp.tileM.tile[gp.currentMap][tileNum].collision;
     }
-
     
+    // Check collision with objects
     public int checkObject(Entity entity, boolean player) {
         int index = 999;
         
-        for(int i = 0; i < gp.obj[1].length; i++) {
-            if(gp.obj[gp.currentMap][i] != null) {
+        if (gp.obj == null || gp.currentMap < 0 || gp.currentMap >= gp.obj.length) {
+            return index;
+        }
+        
+        // Simpan posisi asli solid area
+        Rectangle originalEntitySolidArea = new Rectangle(entity.solidArea);
+        entity.solidArea.x = entity.worldX + entity.solidArea.x;
+        entity.solidArea.y = entity.worldY + entity.solidArea.y;
+        
+        // Posisi solid area setelah bergerak
+        Rectangle futureSolidArea = new Rectangle(entity.solidArea);
+        
+        switch (entity.direction) {
+            case "up": futureSolidArea.y -= entity.speed; break;
+            case "down": futureSolidArea.y += entity.speed; break;
+            case "left": futureSolidArea.x -= entity.speed; break;
+            case "right": futureSolidArea.x += entity.speed; break;
+        }
+        
+        for (int i = 0; i < gp.obj[gp.currentMap].length; i++) {
+            if (gp.obj[gp.currentMap][i] != null) {
+                // Simpan posisi asli object
+                Rectangle originalObjSolidArea = new Rectangle(gp.obj[gp.currentMap][i].solidArea);
                 
-                // Simpan posisi asli
-                int originalEntityX = entity.solidArea.x;
-                int originalEntityY = entity.solidArea.y;
-                int originalObjX = gp.obj[gp.currentMap][i].solidArea.x;
-                int originalObjY = gp.obj[gp.currentMap][i].solidArea.y;
+                // Hitung posisi object di world
+                Rectangle objWorldSolidArea = new Rectangle(
+                    gp.obj[gp.currentMap][i].worldX + gp.obj[gp.currentMap][i].solidArea.x,
+                    gp.obj[gp.currentMap][i].worldY + gp.obj[gp.currentMap][i].solidArea.y,
+                    gp.obj[gp.currentMap][i].solidArea.width,
+                    gp.obj[gp.currentMap][i].solidArea.height
+                );
                 
-                // Set posisi untuk collision check
-                entity.solidArea.x = entity.worldX + entity.solidArea.x;
-                entity.solidArea.y = entity.worldY + entity.solidArea.y;
-                gp.obj[gp.currentMap][i].solidArea.x = gp.obj[gp.currentMap][i].worldX + gp.obj[gp.currentMap][i].solidArea.x;
-                gp.obj[gp.currentMap][i].solidArea.y = gp.obj[gp.currentMap][i].worldY + gp.obj[gp.currentMap][i].solidArea.y;
-                
-                // Adjust based on movement direction
-                switch(entity.direction) {
-                case "up":
-                    entity.solidArea.y -= entity.speed;                    
-                    break;
-                case "down":
-                    entity.solidArea.y += entity.speed;
-                    break;
-                case "left":
-                    entity.solidArea.x -= entity.speed;
-                    break;
-                case "right":
-                    entity.solidArea.x += entity.speed;
-                    break;
-                }
-                
-                // Untuk semua objek, gunakan intersect biasa untuk pickup
-                if(entity.solidArea.intersects(gp.obj[gp.currentMap][i].solidArea)) {
-                    if(gp.obj[gp.currentMap][i].collision == true) {
+                // Cek collision antara future solid area dan object
+                if (futureSolidArea.intersects(objWorldSolidArea)) {
+                    if (gp.obj[gp.currentMap][i].collision) {
                         entity.collisionOn = true;
                     }
-                    if(player == true) {
+                    if (player) {
                         index = i;
                     }
                 }
                 
-                // Reset posisi
-                entity.solidArea.x = originalEntityX;
-                entity.solidArea.y = originalEntityY;
-                gp.obj[gp.currentMap][i].solidArea.x = originalObjX;
-                gp.obj[gp.currentMap][i].solidArea.y = originalObjY;
+                // Reset posisi object
+                gp.obj[gp.currentMap][i].solidArea.setBounds(originalObjSolidArea);
             }
         }
+        
+        // Reset posisi entity
+        entity.solidArea.setBounds(originalEntitySolidArea);
         return index;
     }
     
-    // NPC Or Monster
+    // Check collision with other entities (NPC/Monster)
     public int checkEntity(Entity entity, Entity[][] target) {
-        
         int index = 999;
         
-        // Hitung titik tengah entity
-        int entityCenterX = entity.worldX + entity.solidArea.x + (entity.solidArea.width / 2);
-        int entityCenterY = entity.worldY + entity.solidArea.y + (entity.solidArea.height / 2);
+        if (target == null || gp.currentMap < 0 || gp.currentMap >= target.length) {
+            return index;
+        }
         
-        for(int i = 0; i < target[1].length; i++) {
-            if(target[gp.currentMap][i] != null && target[gp.currentMap][i] != entity) {
-                // Hitung titik tengah target
-                int targetCenterX = target[gp.currentMap][i].worldX + target[gp.currentMap][i].solidArea.x + 
-                                   (target[gp.currentMap][i].solidArea.width / 2);
-                int targetCenterY = target[gp.currentMap][i].worldY + target[gp.currentMap][i].solidArea.y + 
-                                   (target[gp.currentMap][i].solidArea.height / 2);
+        // Simpan posisi asli solid area entity
+        Rectangle originalEntitySolidArea = new Rectangle(entity.solidArea);
+        entity.solidArea.x = entity.worldX + entity.solidArea.x;
+        entity.solidArea.y = entity.worldY + entity.solidArea.y;
+        
+        // Posisi solid area setelah bergerak
+        Rectangle futureSolidArea = new Rectangle(entity.solidArea);
+        
+        switch (entity.direction) {
+            case "up": futureSolidArea.y -= entity.speed; break;
+            case "down": futureSolidArea.y += entity.speed; break;
+            case "left": futureSolidArea.x -= entity.speed; break;
+            case "right": futureSolidArea.x += entity.speed; break;
+        }
+        
+        for (int i = 0; i < target[gp.currentMap].length; i++) {
+            if (target[gp.currentMap][i] != null && target[gp.currentMap][i] != entity) {
+                // Simpan posisi asli target
+                Rectangle originalTargetSolidArea = new Rectangle(target[gp.currentMap][i].solidArea);
                 
-                // Hitung jarak antara titik tengah
-                int distanceX = Math.abs(entityCenterX - targetCenterX);
-                int distanceY = Math.abs(entityCenterY - targetCenterY);
+                // Hitung posisi target di world
+                Rectangle targetWorldSolidArea = new Rectangle(
+                    target[gp.currentMap][i].worldX + target[gp.currentMap][i].solidArea.x,
+                    target[gp.currentMap][i].worldY + target[gp.currentMap][i].solidArea.y,
+                    target[gp.currentMap][i].solidArea.width,
+                    target[gp.currentMap][i].solidArea.height
+                );
                 
-                // Tentukan threshold untuk collision
-                int thresholdX = (entity.solidArea.width + target[gp.currentMap][i].solidArea.width) / 4;
-                int thresholdY = (entity.solidArea.height + target[gp.currentMap][i].solidArea.height) / 4;
-                
-                // Cek jika titik tengah cukup dekat berdasarkan arah gerakan
-                boolean isColliding = false;
-                
-                switch(entity.direction) {
-                case "up":
-                    isColliding = distanceX < thresholdX && 
-                                 entityCenterY - entity.speed <= targetCenterY + thresholdY &&
-                                 entityCenterY - entity.speed >= targetCenterY - thresholdY;
-                    break;
-                case "down":
-                    isColliding = distanceX < thresholdX && 
-                                 entityCenterY + entity.speed <= targetCenterY + thresholdY &&
-                                 entityCenterY + entity.speed >= targetCenterY - thresholdY;
-                    break;
-                case "left":
-                    isColliding = distanceY < thresholdY && 
-                                 entityCenterX - entity.speed <= targetCenterX + thresholdX &&
-                                 entityCenterX - entity.speed >= targetCenterX - thresholdX;
-                    break;
-                case "right":
-                    isColliding = distanceY < thresholdY && 
-                                 entityCenterX + entity.speed <= targetCenterX + thresholdX &&
-                                 entityCenterX + entity.speed >= targetCenterX - thresholdX;
-                    break;
-                }
-                
-                if(isColliding) {
+                // Cek collision antara future solid area dan target
+                if (futureSolidArea.intersects(targetWorldSolidArea)) {
                     entity.collisionOn = true;
                     index = i;
                 }
+                
+                // Reset posisi target
+                target[gp.currentMap][i].solidArea.setBounds(originalTargetSolidArea);
             }
         }
+        
+        // Reset posisi entity
+        entity.solidArea.setBounds(originalEntitySolidArea);
         return index;
     }
     
+    // Check collision with player (untuk NPC/Monster)
     public boolean checkPlayer(Entity entity) {
+        if (gp.player == null) return false;
         
-        // Hitung titik tengah entity
-        int entityCenterX = entity.worldX + entity.solidArea.x + (entity.solidArea.width / 2);
-        int entityCenterY = entity.worldY + entity.solidArea.y + (entity.solidArea.height / 2);
+        // Simpan posisi asli solid area entity
+        Rectangle originalEntitySolidArea = new Rectangle(entity.solidArea);
+        entity.solidArea.x = entity.worldX + entity.solidArea.x;
+        entity.solidArea.y = entity.worldY + entity.solidArea.y;
         
-        // Hitung titik tengah player
-        int playerCenterX = gp.player.worldX + gp.player.solidArea.x + (gp.player.solidArea.width / 2);
-        int playerCenterY = gp.player.worldY + gp.player.solidArea.y + (gp.player.solidArea.height / 2);
+        // Posisi solid area setelah bergerak
+        Rectangle futureSolidArea = new Rectangle(entity.solidArea);
         
-        // Hitung jarak antara titik tengah
-        int distanceX = Math.abs(entityCenterX - playerCenterX);
-        int distanceY = Math.abs(entityCenterY - playerCenterY);
-        
-        // Tentukan threshold untuk collision
-        int thresholdX = (entity.solidArea.width + gp.player.solidArea.width) / 4;
-        int thresholdY = (entity.solidArea.height + gp.player.solidArea.height) / 4;
-        
-        // Cek jika titik tengah cukup dekat berdasarkan arah gerakan
-        boolean isColliding = false;
-        
-        switch(entity.direction) {
-        case "up":
-            isColliding = distanceX < thresholdX && 
-                         entityCenterY - entity.speed <= playerCenterY + thresholdY &&
-                         entityCenterY - entity.speed >= playerCenterY - thresholdY;
-            break;
-        case "down":
-            isColliding = distanceX < thresholdX && 
-                         entityCenterY + entity.speed <= playerCenterY + thresholdY &&
-                         entityCenterY + entity.speed >= playerCenterY - thresholdY;
-            break;
-        case "left":
-            isColliding = distanceY < thresholdY && 
-                         entityCenterX - entity.speed <= playerCenterX + thresholdX &&
-                         entityCenterX - entity.speed >= playerCenterX - thresholdX;
-            break;
-        case "right":
-            isColliding = distanceY < thresholdY && 
-                         entityCenterX + entity.speed <= playerCenterX + thresholdX &&
-                         entityCenterX + entity.speed >= playerCenterX - thresholdX;
-            break;
+        switch (entity.direction) {
+            case "up": futureSolidArea.y -= entity.speed; break;
+            case "down": futureSolidArea.y += entity.speed; break;
+            case "left": futureSolidArea.x -= entity.speed; break;
+            case "right": futureSolidArea.x += entity.speed; break;
         }
         
-        if(isColliding) {
+        // Hitung posisi player di world
+        Rectangle playerWorldSolidArea = new Rectangle(
+            gp.player.worldX + gp.player.solidArea.x,
+            gp.player.worldY + gp.player.solidArea.y,
+            gp.player.solidArea.width,
+            gp.player.solidArea.height
+        );
+        
+        // Cek collision antara future solid area dan player
+        if (futureSolidArea.intersects(playerWorldSolidArea)) {
             entity.collisionOn = true;
+            // Reset posisi entity
+            entity.solidArea.setBounds(originalEntitySolidArea);
             return true;
         }
         
+        // Reset posisi entity
+        entity.solidArea.setBounds(originalEntitySolidArea);
         return false;
     }
     
-    // Method untuk mengecek tile di koordinat tertentu
-    public boolean isTileCollision(int col, int row) {
-        if (col < 0 || col >= gp.maxWorldCol || row < 0 || row >= gp.maxWorldRow) {
-            return true; // Di luar map = collision
-        }
-        
-        int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
-        if (gp.tileM.tile[gp.currentMap][tileNum] != null) {
-            return gp.tileM.tile[gp.currentMap][tileNum].collision;
-        }
-        return false;
-    }
-    
-    // Method untuk mengecek apakah titik tertentu berada di tile yang collision
-    public boolean isPointInCollisionTile(int worldX, int worldY) {
-        int col = worldX / gp.tileSize;
-        int row = worldY / gp.tileSize;
-        
-        return isTileCollision(col, row);
-    }
-    
-    // Method untuk mendapatkan tile di posisi tertentu
-    public int getTileAtPosition(int worldX, int worldY) {
-        int col = worldX / gp.tileSize;
-        int row = worldY / gp.tileSize;
-        
-        if (col >= 0 && col < gp.maxWorldCol && row >= 0 && row < gp.maxWorldRow) {
-            return gp.tileM.mapTileNum[gp.currentMap][col][row];
-        }
-        return 0;
-    }
-    
+    // Check collision with interactive tiles
     public int checkInteractiveTile(Entity entity) {
         int index = 999;
         
@@ -316,70 +269,103 @@ public class CollisionChecker {
             return index;
         }
         
-        InteractiveTile[] tiles = gp.iTile[gp.currentMap];
+        // Simpan posisi asli solid area entity
+        Rectangle originalEntitySolidArea = new Rectangle(entity.solidArea);
+        entity.solidArea.x = entity.worldX + entity.solidArea.x;
+        entity.solidArea.y = entity.worldY + entity.solidArea.y;
         
-        // Hitung titik tengah entity
-        int entityCenterX = entity.worldX + entity.solidArea.x + (entity.solidArea.width / 2);
-        int entityCenterY = entity.worldY + entity.solidArea.y + (entity.solidArea.height / 2);
+        // Gunakan attack area untuk interaksi
+        Rectangle attackArea = new Rectangle(entity.attackArea);
         
-        // Hitung titik attack berdasarkan arah
-        int attackX = entityCenterX;
-        int attackY = entityCenterY;
-        
-        switch(entity.direction) {
+        // Atur posisi attack area berdasarkan arah dan ukuran attack area
+        switch (entity.direction) {
             case "up":
-                attackY -= entity.attackArea.height;
+                attackArea.x = entity.solidArea.x + (entity.solidArea.width / 2) - (attackArea.width / 2);
+                attackArea.y = entity.solidArea.y - attackArea.height;
                 break;
             case "down":
-                attackY += entity.attackArea.height;
+                attackArea.x = entity.solidArea.x + (entity.solidArea.width / 2) - (attackArea.width / 2);
+                attackArea.y = entity.solidArea.y + entity.solidArea.height;
                 break;
             case "left":
-                attackX -= entity.attackArea.width;
+                attackArea.x = entity.solidArea.x - attackArea.width;
+                attackArea.y = entity.solidArea.y + (entity.solidArea.height / 2) - (attackArea.height / 2);
                 break;
             case "right":
-                attackX += entity.attackArea.width;
+                attackArea.x = entity.solidArea.x + entity.solidArea.width;
+                attackArea.y = entity.solidArea.y + (entity.solidArea.height / 2) - (attackArea.height / 2);
                 break;
         }
         
-        for (int i = 0; i < tiles.length; i++) {
-            if (tiles[i] != null && tiles[i].destructible) {
-                // Hitung titik tengah interactive tile
-                int tileCenterX = tiles[i].worldX + tiles[i].solidArea.x + (tiles[i].solidArea.width / 2);
-                int tileCenterY = tiles[i].worldY + tiles[i].solidArea.y + (tiles[i].solidArea.height / 2);
+        for (int i = 0; i < gp.iTile[gp.currentMap].length; i++) {
+            InteractiveTile tile = gp.iTile[gp.currentMap][i];
+            if (tile != null && tile.destructible) {
+                // Hitung posisi tile di world
+                Rectangle tileWorldSolidArea = new Rectangle(
+                    tile.worldX + tile.solidArea.x,
+                    tile.worldY + tile.solidArea.y,
+                    tile.solidArea.width,
+                    tile.solidArea.height
+                );
                 
-                // Hitung jarak antara titik attack dan titik tengah tile
-                int distanceX = Math.abs(attackX - tileCenterX);
-                int distanceY = Math.abs(attackY - tileCenterY);
-                
-                // Tentukan threshold (gunakan ukuran attack area sebagai referensi)
-                int threshold = Math.min(entity.attackArea.width, entity.attackArea.height) / 2;
-                
-                // Cek jika titik attack cukup dekat dengan titik tengah tile
-                if (distanceX < threshold && distanceY < threshold) {
+                // Cek collision dengan attack area
+                if (attackArea.intersects(tileWorldSolidArea)) {
                     index = i;
-                    break; // Stop after first collision
+                    break;
                 }
             }
         }
         
+        // Reset posisi entity
+        entity.solidArea.setBounds(originalEntitySolidArea);
         return index;
     }
     
-    // Cek apakah entity berada tepat di tengah tile secara horizontal
-    public boolean isAtHorizontalTileCenter(Entity entity) {
-        int entityCenterX = entity.worldX + entity.solidArea.x + (entity.solidArea.width / 2);
-        int tileLeft = (entityCenterX / gp.tileSize) * gp.tileSize;
-        int tileCenterX = tileLeft + (gp.tileSize / 2);
+    // Utility methods
+    public boolean isTileCollision(int col, int row) {
+        if (col < 0 || col >= gp.maxWorldCol || row < 0 || row >= gp.maxWorldRow) {
+            return true;
+        }
         
-        return Math.abs(entityCenterX - tileCenterX) <= 2; // Toleransi 2 pixel
+        int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
+        return isCollisionTile(tileNum);
     }
     
-    // Cek apakah entity berada tepat di tengah tile secara vertikal
+    public boolean isPointInCollisionTile(int worldX, int worldY) {
+        int col = worldX / gp.tileSize;
+        int row = worldY / gp.tileSize;
+        return isTileCollision(col, row);
+    }
+    
+    public int getTileAtPosition(int worldX, int worldY) {
+        int col = worldX / gp.tileSize;
+        int row = worldY / gp.tileSize;
+        
+        if (col >= 0 && col < gp.maxWorldCol && row >= 0 && row < gp.maxWorldRow) {
+            return gp.tileM.mapTileNum[gp.currentMap][col][row];
+        }
+        return -1;
+    }
+    
+    public boolean isAtHorizontalTileCenter(Entity entity) {
+        int entityCenterX = entity.worldX + entity.solidArea.x + (entity.solidArea.width / 2);
+        int tileCenterX = ((entityCenterX / gp.tileSize) * gp.tileSize) + (gp.tileSize / 2);
+        return Math.abs(entityCenterX - tileCenterX) <= 2;
+    }
+    
     public boolean isAtVerticalTileCenter(Entity entity) {
         int entityCenterY = entity.worldY + entity.solidArea.y + (entity.solidArea.height / 2);
-        int tileTop = (entityCenterY / gp.tileSize) * gp.tileSize;
-        int tileCenterY = tileTop + (gp.tileSize / 2);
-        
+        int tileCenterY = ((entityCenterY / gp.tileSize) * gp.tileSize) + (gp.tileSize / 2);
         return Math.abs(entityCenterY - tileCenterY) <= 2;
+    }
+    
+    // Metode untuk mendapatkan collision area di world coordinates
+    public Rectangle getWorldCollisionArea(Entity entity) {
+        return new Rectangle(
+            entity.worldX + entity.solidArea.x,
+            entity.worldY + entity.solidArea.y,
+            entity.solidArea.width,
+            entity.solidArea.height
+        );
     }
 }

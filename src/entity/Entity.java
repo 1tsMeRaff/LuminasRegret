@@ -71,6 +71,7 @@ public class Entity {
 	public Entity currentWeapon;
 	public Entity currentShield;
 	public Projectile projectile;
+	public int projectileIndex = -1;
 	
 	// Item Attributes
     public ArrayList<Entity> inventory = new ArrayList<>();
@@ -99,46 +100,11 @@ public class Entity {
 	public int goalCol;
 	public int goalRow;
 	public boolean hasGoal;
-    
-//    // INTERACTION AREA (untuk interaksi player-NPC)
-//    public Rectangle interactionArea;
-//    public int interactionAreaDefaultX, interactionAreaDefaultY;
-//    
-//    // INTERACTION RANGE (jarak untuk trigger interaksi)
-//    public int interactionRange = gp.tileSize * 2; // 2 tiles
-//    
-//    // INTERACTION COOLDOWN
-//    public int interactionCooldown = 0;
-//    public final int INTERACTION_COOLDOWN_MAX = 30; // frames
-//    
+	
     // Constructor
     public Entity(GamePanel gp) {
         this.gp = gp;
-        
-//        // Default solid area
-//        solidArea = new Rectangle(0, 0, 48, 48);
-//        solidAreaDefaultX = solidArea.x;
-//        solidAreaDefaultY = solidArea.y;
-//        
-//        // Interaction area (lebih besar dari solid area)
-//        interactionArea = new Rectangle(0, 0, 96, 96); // 2x lebih besar
-//        interactionAreaDefaultX = interactionArea.x;
-//        interactionAreaDefaultY = interactionArea.y;
     }
-	
- // Update interaction area position
-//    public void updateInteractionArea() {
-//        interactionArea.x = worldX + interactionAreaDefaultX - interactionArea.width/2;
-//        interactionArea.y = worldY + interactionAreaDefaultY - interactionArea.height/2;
-//    }
-//    
-//    // Check if player can interact with this entity
-//    public boolean canInteractWith(Entity player) {
-//        updateInteractionArea();
-//        player.updateInteractionArea();
-//        
-//        return interactionArea.intersects(player.interactionArea);
-//    }
     
     // Check distance between entities
     public int getDistanceTo(Entity other) {
@@ -152,11 +118,6 @@ public class Entity {
             Math.pow(centerY1 - centerY2, 2)
         );
     }
-    
-    // Check if entity is within interaction range
-//    public boolean isInInteractionRange(Entity player) {
-//        return getDistanceTo(player) <= interactionRange;
-//    }
 
 	public void setAction() {}
 	public void damageReaction() {}
@@ -538,39 +499,141 @@ public class Entity {
         
         System.out.println("Selected direction: " + direction);
     }
-
-//    public int getDetected(Entity user, Entity target[][], String targetName)
-//    {
-//        int index = 999;
-//
-//        //Check the surrounding object
-//        int nextWorldX = user.getLeftX();
-//        int nextWorldY = user.getTopY();
-//
-//        switch (user.direction)
-//        {
-//            case "up" : nextWorldY = user.getTopY() - gp.player.speed; break;
-//            case "down": nextWorldY = user.getBottomY() + gp.player.speed; break;
-//            case "left": nextWorldX = user.getLeftX() - gp.player.speed; break;
-//            case "right": nextWorldX = user.getRightX() + gp.player.speed; break;
-//        }
-//        int col = nextWorldX/gp.tileSize;
-//        int row = nextWorldY/gp.tileSize;
-//
-//        for(int i = 0; i < target[1].length; i++)
-//        {
-//            if(target[gp.currentMap][i] != null)
-//            {
-//                if (target[gp.currentMap][i].getCol() == col                                //checking if player 1 tile away from target (key etc.) (must be same direction)
-//                        && target[gp.currentMap][i].getRow() == row
-//                            && target[gp.currentMap][i].name.equals(targetName))
-//                {
-//                    index = i;
-//                    break;
-//                }
-//            }
-//
-//        }
-//        return  index;
-//    }
+    
+    // --------------------------------------------------
+    // PATH FOLLOWING YANG LEBIH BAIK
+    // --------------------------------------------------
+    public void followImprovedPath() {
+        
+        Node nextNode = gp.pFinder.pathList.get(0);
+        int nextCol = nextNode.col;
+        int nextRow = nextNode.row;
+        
+        // Hitung posisi tengah tile target
+        int targetCenterX = getTileCenterX(nextCol);
+        int targetCenterY = getTileCenterY(nextRow);
+        
+        // Hitung posisi tengah NPC
+        int npcCenterX = worldX + solidArea.x + solidArea.width/2;
+        int npcCenterY = worldY + solidArea.y + solidArea.height/2;
+        
+        // Hitung jarak ke target
+        int dx = targetCenterX - npcCenterX;
+        int dy = targetCenterY - npcCenterY;
+        
+        // Threshold: jika sangat dekat, anggap sudah mencapai node
+        int threshold = gp.tileSize / 8; // 1/8 tile (6 pixel jika tileSize=48)
+        
+        if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) {
+            gp.pFinder.pathList.remove(0);
+            
+            // Posisikan NPC tepat di tengah tile
+            alignToTile(nextCol, nextRow);
+            
+            return;
+        }
+        determineDirection(dx, dy);
+    }
+    
+    public void alignToTile(int tileX, int tileY) {
+        int targetX = getTileCenterX(tileX) - solidArea.width/2 - solidArea.x;
+        int targetY = getTileCenterY(tileY) - solidArea.height/2 - solidArea.y;
+        
+        worldX = targetX;
+        worldY = targetY;
+    }
+    
+    public void determineDirection(int dx, int dy) {
+    	
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 0) {
+                direction = "right";
+                System.out.println("→ Moving RIGHT to reach center");
+            } else {
+                direction = "left";
+                System.out.println("← Moving LEFT to reach center");
+            }
+        } else {
+            if (dy > 0) {
+                direction = "down";
+                System.out.println("↓ Moving DOWN to reach center");
+            } else {
+                direction = "up";
+                System.out.println("↑ Moving UP to reach center");
+            }
+        }
+    }
+    
+    public void moveToTileCenter(int tileX, int tileY) {
+        // Bergerak ke tengah tile saat sudah di tile yang benar
+        int targetCenterX = getTileCenterX(tileX);
+        int targetCenterY = getTileCenterY(tileY);
+        
+        int npcCenterX = worldX + solidArea.x + solidArea.width/2;
+        int npcCenterY = worldY + solidArea.y + solidArea.height/2;
+        
+        int dx = targetCenterX - npcCenterX;
+        int dy = targetCenterY - npcCenterY;
+        
+        if (Math.abs(dx) > Math.abs(dy)) {
+            direction = (dx > 0) ? "right" : "left";
+        } else {
+            direction = (dy > 0) ? "down" : "up";
+        }
+        
+        System.out.println("Centering to tile (" + tileX + ", " + tileY + ")");
+    }
+    
+    // --------------------------------------------------
+    // PERBAIKI PERHITUNGAN POSISI TILE
+    // --------------------------------------------------
+    public int getCurrentTileX() {
+        // Hitung tile berdasarkan worldX (bukan dengan solidArea offset)
+        return (worldX + solidArea.x + solidArea.width/2) / gp.tileSize;
+    }
+    
+    public int getCurrentTileY() {
+        return (worldY + solidArea.y + solidArea.height/2) / gp.tileSize;
+    }
+    
+    public int getTileCenterX(int tileX) {
+        // Hitung posisi pixel tengah tile X
+        return tileX * gp.tileSize + gp.tileSize/2;
+    }
+    
+    public int getTileCenterY(int tileY) {
+        // Hitung posisi pixel tengah tile Y
+        return tileY * gp.tileSize + gp.tileSize/2;
+    }
+    
+    public boolean isAtTileCenter() {
+        // Cek apakah NPC sudah di tengah tile
+        int centerX = worldX + solidArea.x + solidArea.width/2;
+        int centerY = worldY + solidArea.y + solidArea.height/2;
+        
+        int tileX = centerX / gp.tileSize;
+        int tileY = centerY / gp.tileSize;
+        
+        int tileCenterX = getTileCenterX(tileX);
+        int tileCenterY = getTileCenterY(tileY);
+        
+        int dx = Math.abs(tileCenterX - centerX);
+        int dy = Math.abs(tileCenterY - centerY);
+        
+        return dx < 2 && dy < 2; // Toleransi 2 pixel
+    }
+    
+    public void alignToTileCenter() {
+        // Paksa NPC ke tengah tile
+        int currentCol = getCurrentTileX();
+        int currentRow = getCurrentTileY();
+        
+        int targetX = getTileCenterX(currentCol) - solidArea.width/2 - solidArea.x;
+        int targetY = getTileCenterY(currentRow) - solidArea.height/2 - solidArea.y;
+        
+        worldX = targetX;
+        worldY = targetY;
+        
+        System.out.println("Aligned NPC to tile center: (" + currentCol + ", " + currentRow + ")");
+    }
 }

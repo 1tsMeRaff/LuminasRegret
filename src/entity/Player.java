@@ -4,7 +4,6 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 
 import main.GamePanel;
 import main.KeyHandler;
@@ -22,6 +21,13 @@ public class Player extends Entity {
     int standCounter = 0;
     public boolean attackCanceled = false;
     
+    // Dash
+    public boolean dashing = false;
+    public int dashCounter = 0;
+    public int dashCoolDown = 0;
+    final int dashDuration = 8;     // 0.25 detik
+    final int dashCoolDownMax = 40;  // Cooldown dash
+    
     public Player(GamePanel gp, KeyHandler keyH) {
         
         super(gp);
@@ -33,16 +39,12 @@ public class Player extends Entity {
         
         // Solid Area
         solidArea = new Rectangle();
-        solidArea.x = 8;
-        solidArea.y = 28;
+        solidArea.x = 15;
+        solidArea.y = 30;
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
-        solidArea.width = 16;
+        solidArea.width = 18;
         solidArea.height = 20;
-        
-        // Attack Area
-//        attackArea.width = 36;
-//        attackArea.height = 36;
         
         
         setDefaultValues();
@@ -159,161 +161,185 @@ public class Player extends Entity {
     
     public void update() {
         
-        // Simpan posisi sebelumnya untuk collision checking
-        int tempWorldX = worldX;
-        int tempWorldY = worldY;
-        
-        // Gunakan float/double untuk perhitungan akurat
-        float moveX = 0;
-        float moveY = 0;
-        
-        if(attacking == true) {
-        	attacking();
+        // 1. LOGIKA DASHING (PRIORITAS TERTINGGI)
+        if(dashing == true) {
+            invincible = true; 
+            
+            // --- SETTING KECEPATAN DASH ---
+            // Dash speed sekarang kita buat relatif terhadap default speed
+            int dashSpeed = defaultSpeed + 6; 
+            
+            // Simpan speed asli
+            speed = dashSpeed; 
+            
+            // Dash Movement (Tanpa Collision Monster)
+            collisionOn = false;
+            gp.cChecker.checkTile(this);
+            gp.cChecker.checkObject(this, true);
+            gp.cChecker.checkEntity(this, gp.iTile);
+            
+            if(collisionOn == false) {
+                 switch(direction) {
+                    case "up":    worldY -= speed; break;
+                    case "down":  worldY += speed; break;
+                    case "left":  worldX -= speed; break;
+                    case "right": worldX += speed; break;
+                }
+            }
+            
+            // Kembalikan speed asli
+            speed = defaultSpeed; 
+
+            // Counter durasi dash
+            dashCounter++;
+            if(dashCounter > dashDuration) {
+                dashing = false;
+                dashCounter = 0;
+                dashCoolDown = dashCoolDownMax;
+                invincible = false;
+            }
+            return; // PENTING: Stop update disini saat dash
+        }
+
+        // Cooldown Dash berkurang setiap frame
+        if(dashCoolDown > 0) {
+            dashCoolDown--;
         }
         
-        else if(keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true ||
-        		keyH.rightPressed == true || keyH.actionPressed == true) {
-        	
-        	// Cek input dan hitung vektor
-            if (keyH.upPressed == true) {
-                direction = "up";
-                moveY -= speed;
-            }
-            if (keyH.downPressed == true) {
-                direction = "down";
-                moveY += speed;
-            }
-            if (keyH.leftPressed == true) {
-                direction = "left";
-                moveX -= speed;
-            }
-            if (keyH.rightPressed == true) {
-                direction = "right";
-                moveX += speed;
-            }
+        if(gp.keyH.rangeKeyPressed == true && rangeAvailableCounter == 30 && projectile.haveResource(this) == true) {
+    	    
+    	    projectile.set(worldX, worldY, direction, true, this);
+    	    
+    	    projectile.substractResource(this);
+    	    
+    	    // Get Vacancy
+    	    for(int i = 0; i < gp.projectile[gp.currentMap].length; i++) {
+    	    	if(gp.projectile[gp.currentMap][i] == null) {
+    	    		gp.projectile[gp.currentMap][i] = projectile;
+    	    		projectile.projectileIndex = i;
+    	    		break;
+    	    	}
+    	    }
+    	    
+    	    rangeAvailableCounter = 0;
+    	}
+
+        // 2. LOGIKA ATTACK
+        if(attacking == true) {
+            attacking();
+        }
+        
+        // 3. MOVEMENT NORMAL & INPUT
+        else if(keyH.upPressed == true || keyH.downPressed == true || 
+                keyH.leftPressed == true || keyH.rightPressed == true || 
+                keyH.actionPressed == true || keyH.dashKeyPressed == true) {
             
-            // Reset collision status
+            // --- AKTIVASI DASH (Q) ---
+            if(keyH.dashKeyPressed == true && dashCoolDown == 0 && attackCanceled == false) {
+                 dashing = true;
+                 gp.playSE(7); // Sound dash
+                 return;
+            }
+
+            // --- TENTUKAN ARAH ---
+            if (keyH.upPressed == true) { direction = "up"; }
+            if (keyH.downPressed == true) { direction = "down"; }
+            if (keyH.leftPressed == true) { direction = "left"; }
+            if (keyH.rightPressed == true) { direction = "right"; }
+            
+            // Cek apakah player menekan tombol vertikal DAN horizontal bersamaan
+            boolean isMovingDiagonal = (keyH.upPressed || keyH.downPressed) && 
+                                       (keyH.leftPressed || keyH.rightPressed);
+            
+            if(isMovingDiagonal) {
+                // Kurangi speed sekitar 30% saat diagonal agar total vektornya sama
+                speed = (int)Math.round(defaultSpeed * 0.707); 
+                // Contoh: Jika speed 4, diagonal jadi 3.
+            } else {
+                speed = defaultSpeed;
+            }
+
+            // --- CEK COLLISION ---
             collisionOn = false;
-            // Check Tile Collision
             gp.cChecker.checkTile(this);
             
-            // Check Object Collision
             int objIndex = gp.cChecker.checkObject(this, true);
             pickUpObject(objIndex);
             
-            // Check NPC Collision
             int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
             interactNPC(npcIndex);
             
-            // Check Monster Collision
             int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
             contactMonster(monsterIndex);
             
-            // CHECK INTERACTIVE TILE COLLISION
-            int iTileIndex = gp.cChecker.checkEntity(this, gp.iTile);
-            
-            // Check Event
+            gp.cChecker.checkEntity(this, gp.iTile);
             gp.eHandler.checkEvent();
             
-            // Normalize diagonal movement (jika bergerak diagonal)
-            if (moveX != 0 && moveY != 0) {
-                float length = (float)Math.sqrt(moveX * moveX + moveY * moveY);
-                float normalizedSpeed = speed; // Target speed
+            // --- GERAKKAN PLAYER ---
+            // Kita tidak pakai moveX/moveY float lagi karena sudah dihandle speed integer di atas
+            if (collisionOn == false && keyH.actionPressed == false) {
                 
-                // Skala vektor untuk mendapatkan kecepatan yang tepat
-                moveX = (moveX / length) * normalizedSpeed;
-                moveY = (moveY / length) * normalizedSpeed;
+                // Gerakan Diagonal Manual (agar collision checker tetap akurat per axis)
+                if(isMovingDiagonal) {
+                    // Update posisi berdasarkan tombol yang ditekan, bukan cuma "direction" terakhir
+                    if(keyH.upPressed)    worldY -= speed;
+                    if(keyH.downPressed)  worldY += speed;
+                    if(keyH.leftPressed)  worldX -= speed;
+                    if(keyH.rightPressed) worldX += speed;
+                } else {
+                    // Gerakan Lurus (Up/Down/Left/Right)
+                    switch(direction) {
+                        case "up":    worldY -= speed; break;
+                        case "down":  worldY += speed; break;
+                        case "left":  worldX -= speed; break;
+                        case "right": worldX += speed; break;
+                    }
+                }
             }
             
-            // Terapkan pergerakan (dengan rounding untuk posisi integer)
-            worldX += Math.round(moveX);
-            worldY += Math.round(moveY);
-            
-            // Jika ada collision, kembalikan ke posisi sebelumnya
-            if (collisionOn == true && keyH.actionPressed == false) {
-            	
-            	switch(direction) {
-            	case "up":
-            		worldY -= speed;
-            		break;
-            	case "down":
-            		worldY += speed;
-            		break;
-            	case "left":
-            		worldX -= speed;
-            		break;
-            	case "right":
-            		worldX += speed;
-            		break;
-            	}
-                worldX = tempWorldX;
-                worldY = tempWorldY;
+            if(life <= 0) {
+
+            	gp.stopMusic();
+        		gp.playSE(10);
+            	gp.gameState = gp.gameOverState;
             }
             
+            // Kembalikan speed ke normal untuk perhitungan frame berikutnya
+            speed = defaultSpeed;
+            
+            // Attack Input
             if(keyH.actionPressed == true && attackCanceled == false) {
-            	gp.playSE(7);
-            	attacking = true;
-            	spriteCounter = 0;
+                gp.playSE(7);
+                attacking = true;
+                spriteCounter = 0;
             }
             
             attackCanceled = false;
             
-            // Sprite Animation Logic
-                spriteCounter++;
-                if (spriteCounter > 12) {
-                	if(spriteNum == 1) {
-                		spriteNum = 2;
-                	}
-                	else if(spriteNum == 2) {
-                		spriteNum = 1;
-                	}
-                    spriteCounter = 0;
-                }
+            // Sprite Animation
+            spriteCounter++;
+            if (spriteCounter > 12) {
+                if(spriteNum == 1) spriteNum = 2;
+                else if(spriteNum == 2) spriteNum = 1;
+                spriteCounter = 0;
+            }
         }
         
-        if(gp.keyH.rangeKeyPressed == true && projectile.alive == false 
-        	    && rangeAvailableCounter == 30 && projectile.haveResource(this) == true) {
-        	    
-        	    // PERBAIKAN: Pastikan ini memanggil set() yang sudah diperbaiki
-        	    projectile.set(worldX, worldY, direction, true, this);
-        	    
-        	    projectile.substractResource(this);
-        	    
-        	    // Get Vacancy
-        	    for(int i = 0; i < gp.projectile[gp.currentMap].length; i++) {
-        	    	if(gp.projectile[gp.currentMap][i] == null) {
-        	    		gp.projectile[gp.currentMap][i] = projectile;
-        	    		break;
-        	    	}
-        	    }
-        	    
-        	    rangeAvailableCounter = 0;
-        	}
-        
-        
-        // Invincible Counter
+        // ... Sisa kode (Invincible counter, Life regen, dll) biarkan sama ...
         if(invincible == true) {
-        	invincibleCounter++;
-        	if(invincibleCounter > 60) {
-        		invincible = false;
-        		invincibleCounter = 0;
-        	}
+            invincibleCounter++;
+            if(invincibleCounter > 40) {
+                 if(dashing == false) { 
+                     invincible = false;
+                     invincibleCounter = 0;
+                 }
+            }
         }
-	        if(rangeAvailableCounter < 30) {
-	        	rangeAvailableCounter++;
-	        }
-	        if (life > maxLife) {
-			    life = maxLife;
-			}
-	        if (mana > maxMana) {
-			    mana = maxMana;
-			}
-	        if (life <= 0) {
-	        	gp.gameState = gp.gameOverState;
-	        	gp.stopMusic();
-	        	gp.playSE(10);
-	        }
+        if(rangeAvailableCounter < 30) {
+            rangeAvailableCounter++;
+        }
     }
+    
     public void attacking() {
         spriteCounter++;
 
@@ -323,38 +349,37 @@ public class Player extends Entity {
         if(spriteCounter > 5 && spriteCounter <= 25) {
             spriteNum = 2;
             
-            // Current Player Position
+            // Simpan posisi & solidArea asli
             int currentWorldX = worldX;
             int currentWorldY = worldY;
             int solidAreaWidth = solidArea.width;
             int solidAreaHeight = solidArea.height;
             
-            // Adjust Player Position For attackArea
+            int adjustX = (gp.tileSize - attackArea.width) / 2;
+            int adjustY = (gp.tileSize - attackArea.height) / 2;
+            
             switch(direction) {
-                case "up": worldY -= attackArea.height; break;
-                case "down": worldY += attackArea.height; break;
-                case "left": worldX -= attackArea.width; break;
-                case "right": worldX += attackArea.width; break;
+                case "up":    worldY -= attackArea.height; break;
+                case "down":  worldY += attackArea.height; break;
+                case "left":  worldX -= attackArea.width;  break;
+                case "right": worldX += attackArea.width;  break;
             }
             
-            // AttackArea becomes SolidArea
+            // Set solidArea menjadi ukuran senjata
             solidArea.width = attackArea.width;
             solidArea.height = attackArea.height;
             
-            // Check Monster collision
+            // Check Collision dengan senjata
             int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
             damageMonster(monsterIndex, attack, currentWeapon.knockBackPower);
             
-            // Check Interactive Tile collision (PERBAIKAN DI SINI)
             int iTileIndex = gp.cChecker.checkInteractiveTile(this);
-            if (iTileIndex != 999) {
-                damageInteractiveTile(iTileIndex);
-            }
+            damageInteractiveTile(iTileIndex);
             
             int projectileIndex = gp.cChecker.checkEntity(this, gp.projectile);
             damageProjectile(projectileIndex);
             
-            // Restore values
+            // Restore values (PENTING: Kembalikan posisi player)
             worldX = currentWorldX;
             worldY = currentWorldY;
             solidArea.width = solidAreaWidth;
@@ -588,14 +613,17 @@ public class Player extends Entity {
                 break;
         }
         
-        if(invincible == true) {
-        	g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+        if(dashing == true) {
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)); 
+            // Player jadi setengah transparan saat dash
         }
-        
-        // Gambar player di tengah screen
+        else if(invincible == true) {
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+        }
+
         g2.drawImage(image, screenX, screenY, null);
-        
+
+        // Reset composite
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-        
     }
 }

@@ -6,7 +6,8 @@ import java.awt.event.KeyListener;
 public class KeyHandler implements KeyListener {
 
 	GamePanel gp;
-	public boolean upPressed, downPressed, leftPressed, rightPressed, actionPressed, enterPressed, rangeKeyPressed;
+	public boolean upPressed, downPressed, leftPressed, rightPressed, 
+				   actionPressed, enterPressed, rangeKeyPressed, dashKeyPressed;
 	
 	//Debug
 	boolean showDebugText= false;
@@ -116,6 +117,9 @@ public class KeyHandler implements KeyListener {
 		if(code == KeyEvent.VK_E) {
 		    actionPressed = true;
 		}
+		if(code == KeyEvent.VK_Q) {
+            dashKeyPressed = true;
+        }
 		if(code == KeyEvent.VK_P) {
 			gp.gameState = gp.pauseState;
 		}
@@ -403,6 +407,9 @@ public class KeyHandler implements KeyListener {
 		if(code == KeyEvent.VK_E) {
 		    actionPressed = false;
 		}
+		if(code == KeyEvent.VK_Q) {
+            dashKeyPressed = false;
+        }
 		if(code == KeyEvent.VK_ENTER) {
 			enterPressed = false;
 		}
