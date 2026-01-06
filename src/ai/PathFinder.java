@@ -7,23 +7,17 @@ public class PathFinder {
 
     GamePanel gp;
     Node[][] nodes;
-
     ArrayList<Node> openList = new ArrayList<>();
     public ArrayList<Node> pathList = new ArrayList<>();
-
     Node startNode, goalNode, currentNode;
-
-    // TAMBAHKAN VARIABLE UNTUK MENGATUR INFLATE
-    private int inflateRadius = 0; // UBAH INI: 0 = no inflate, 1 = minimal inflate
+    
+    private int inflateRadius = 0;
 
     public PathFinder(GamePanel gp) {
         this.gp = gp;
         initNodes();
     }
 
-    // --------------------------------------------------
-    // INIT NODE GRID
-    // --------------------------------------------------
     private void initNodes() {
         nodes = new Node[gp.maxWorldCol][gp.maxWorldRow];
         for (int col = 0; col < gp.maxWorldCol; col++) {
@@ -33,139 +27,94 @@ public class PathFinder {
         }
     }
 
-    // --------------------------------------------------
-    // RESET STATE
-    // --------------------------------------------------
-    private void reset() {
-        openList.clear();
-        pathList.clear();
-
+    // PENTING: Jalankan ini hanya saat ganti Map atau awal game, bukan setiap frame!
+    public void setNodes() {
         for (int col = 0; col < gp.maxWorldCol; col++) {
             for (int row = 0; row < gp.maxWorldRow; row++) {
-                Node n = nodes[col][row];
-                n.open = false;
-                n.checked = false;
-                n.parent = null;
-                n.solid = false;
-            }
-        }
-    }
+                
+                // Reset state node
+                nodes[col][row].open = false;
+                nodes[col][row].checked = false;
+                nodes[col][row].solid = false;
+                nodes[col][row].parent = null;
 
-    // --------------------------------------------------
-    // SET SOLID NODE - VERSI MINIMAL INFLATE
-    // --------------------------------------------------
-    private void setSolidNodes() {
-        System.out.println("=== SETTING SOLID NODES ===");
-        System.out.println("Inflate radius: " + inflateRadius);
-        
-        int solidCount = 0;
-
-        for (int col = 0; col < gp.maxWorldCol; col++) {
-            for (int row = 0; row < gp.maxWorldRow; row++) {
-
+                // Tentukan solid berdasarkan tile map
                 int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
-
-                if (gp.tileM.tile[gp.currentMap][tileNum].collision) {
-                    // HANYA tile utama yang solid
+                if (gp.tileM.tile[gp.currentMap][tileNum].collision == true) {
                     nodes[col][row].solid = true;
-                    solidCount++;
-
-                    // INFLATE OPTIONAL - sesuaikan dengan kebutuhan
+                    
+                    // Inflate Logic (Membuat area di sekitar tembok jadi solid agar monster tidak nyangkut)
                     if (inflateRadius > 0) {
-                        // Inflate hanya ke kanan dan bawah (untuk menghindari NPC terjebak)
-                        if (col + 1 < gp.maxWorldCol) {
-                            nodes[col + 1][row].solid = true;
-                        }
-                        if (row + 1 < gp.maxWorldRow) {
-                            nodes[col][row + 1].solid = true;
-                        }
+                        inflateSolid(col, row);
                     }
                 }
             }
         }
-
-        System.out.println("Total solid tiles: " + solidCount);
+    }
+    
+    private void inflateSolid(int col, int row) {
+        for(int i = 1; i <= inflateRadius; i++) {
+            if(col+i < gp.maxWorldCol) nodes[col+i][row].solid = true;
+            if(row+i < gp.maxWorldRow) nodes[col][row+i].solid = true;
+            if(col-i >= 0) nodes[col-i][row].solid = true;
+            if(row-i >= 0) nodes[col][row-i].solid = true;
+        }
     }
 
-    // --------------------------------------------------
-    // MAIN SEARCH - DIPERBAIKI
-    // --------------------------------------------------
-    public boolean search(int startCol, int startRow, int goalCol, int goalRow) {
-        System.out.println("\n🔍 PATHFINDER: (" + startCol + "," + startRow + ") -> (" + goalCol + "," + goalRow + ")");
-
-        reset();
-        setSolidNodes();
-
-        // Validasi koordinat
-        if (!isValidCoordinate(startCol, startRow) || !isValidCoordinate(goalCol, goalRow)) {
-            System.out.println("❌ Invalid coordinates");
-            return false;
+    private void resetNodes() {
+        // Hanya reset status pencarian, bukan status 'solid'
+        for (int col = 0; col < gp.maxWorldCol; col++) {
+            for (int row = 0; row < gp.maxWorldRow; row++) {
+                nodes[col][row].open = false;
+                nodes[col][row].checked = false;
+                nodes[col][row].parent = null;
+            }
         }
+        openList.clear();
+        pathList.clear();
+    }
+
+    public boolean search(int startCol, int startRow, int goalCol, int goalRow) {
+        resetNodes();
+
+        if (!isValidCoordinate(startCol, startRow) || !isValidCoordinate(goalCol, goalRow)) return false;
 
         startNode = nodes[startCol][startRow];
         goalNode = nodes[goalCol][goalRow];
 
-        // Cek jika goal solid
+        // Jika Goal solid (misal player berdiri tepat di depan tembok), cari tile terdekat yang kosong
         if (goalNode.solid) {
-            System.out.println("⚠️ Goal tile is solid! Finding alternative...");
-            
-            // Cari tile non-solid terdekat
-            Node alternative = findNearestNonSolid(goalCol, goalRow, 3);
-            if (alternative != null) {
-                System.out.println("✅ Alternative found: (" + alternative.col + "," + alternative.row + ")");
-                goalCol = alternative.col;
-                goalRow = alternative.row;
-                goalNode = nodes[goalCol][goalRow];
-            } else {
-                System.out.println("❌ No alternative found");
-                return false;
-            }
+            Node alt = findNearestNonSolid(goalCol, goalRow, 2);
+            if (alt != null) goalNode = alt;
+            else return false;
         }
-
-        // Jika start dan goal sama
-        if (startCol == goalCol && startRow == goalRow) {
-            System.out.println("✅ Already at goal");
-            return true;
-        }
-
-        // Setup A* algorithm
-        startNode.gCost = 0;
-        startNode.hCost = manhattanDistance(startNode, goalNode);
-        startNode.calculateFCost();
 
         openList.add(startNode);
-        startNode.open = true;
 
-        int maxIterations = gp.maxWorldCol * gp.maxWorldRow;
         int iterations = 0;
+        int maxIterations = 1000; // Batasi agar tidak infinite loop
 
         while (!openList.isEmpty() && iterations < maxIterations) {
             iterations++;
 
             currentNode = getBestNode();
-            if (currentNode == null) break;
-
             currentNode.checked = true;
             openList.remove(currentNode);
 
-            // Cek jika mencapai goal
             if (currentNode == goalNode) {
                 buildPath();
-                System.out.println("✅ PATH FOUND! Length: " + pathList.size());
                 return true;
             }
 
-            // Explore neighbors
+            // Neighbors
             exploreNeighbor(currentNode.col, currentNode.row - 1); // up
-            exploreNeighbor(currentNode.col - 1, currentNode.row); // left
             exploreNeighbor(currentNode.col, currentNode.row + 1); // down
+            exploreNeighbor(currentNode.col - 1, currentNode.row); // left
             exploreNeighbor(currentNode.col + 1, currentNode.row); // right
         }
-
-        System.out.println("❌ NO PATH FOUND after " + iterations + " iterations");
         return false;
     }
-
+    
     // --------------------------------------------------
     // HELPER METHODS
     // --------------------------------------------------
@@ -281,4 +230,6 @@ public class PathFinder {
             System.out.println(line.toString());
         }
     }
+    
+    
 }

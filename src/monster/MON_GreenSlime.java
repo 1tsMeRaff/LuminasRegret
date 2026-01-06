@@ -24,7 +24,7 @@ public class MON_GreenSlime extends Entity {
 		speed = defaultSpeed;
 		maxLife = 4;
 		life = maxLife;
-		attack = 5;
+		attack = 2;
 		defense = 0;
 		exp = 2;
 		projectile = new OBJ_GreenProjectile(gp);
@@ -52,46 +52,72 @@ public class MON_GreenSlime extends Entity {
 		right2 = setup("/monster/slimeright2", size, size);
 	}
 	public void setAction() {
-		
-		if(actionLockCounter == 120) {
-			Random random = new Random();
-			int i = random.nextInt(100)+1;
-			
-			if(i <= 25) {
-				direction = "up";
-			}
-			if(i > 25 && i <= 50) {
-				direction = "down";
-			}
-			if(i > 50 && i <= 75) {
-				direction = "left";
-			}
-			if(i > 75 && i <= 100) {
-				direction = "right";
-			}
-			
-			actionLockCounter = 0;
-			
-		}
+	    
+	    if (onPath) {
+	        // 1. UPDATE GOAL SECARA REALTIME
+	        int currentCol = (worldX + solidArea.x) / gp.tileSize;
+	        int currentRow = (worldY + solidArea.y) / gp.tileSize;
+	        int goalCol = (gp.player.worldX + gp.player.solidArea.x) / gp.tileSize;
+	        int goalRow = (gp.player.worldY + gp.player.solidArea.y) / gp.tileSize;
 
-		int i = new Random().nextInt(100)+1;
-		if(i > 99 && projectile.alive == false && rangeAvailableCounter == 30) {
-			projectile.set(worldX, worldY, direction, true, this);
-			gp.projectileList.add(projectile);
-			rangeAvailableCounter = 0;
-		}
-		// Check Vacancy
-				for(int ii = 0; ii < gp.projectile[1].length; ii++) {
-					if(gp.projectile[gp.currentMap][ii] == null) {
-						gp.projectile[gp.currentMap][ii] = projectile;
-						break;
-					}
-				}
+	        // 2. LOGIKA MENEMBAK (Hanya saat probabilitas tepat)
+	        int i = new Random().nextInt(100) + 1;
+	        if (i > 99 && !projectile.alive && rangeAvailableCounter == 30) {
+	            projectile.set(worldX, worldY, direction, true, this);
+	            
+	            // Check Vacancy - PINDAHKAN KE DALAM IF MENEMBAK
+	            for (int ii = 0; ii < gp.projectile[gp.currentMap].length; ii++) {
+	                if (gp.projectile[gp.currentMap][ii] == null) {
+	                    gp.projectile[gp.currentMap][ii] = projectile;
+	                    break;
+	                }
+	            }
+	            rangeAvailableCounter = 0;
+	        }
+
+	        // 3. RE-PATHFINDING (Cari jalan setiap kali player bergerak)
+	        searchPath(goalCol, goalRow);
+
+	    } else {
+	        // Jarak deteksi (Opsional: Aggro otomatis jika player mendekat)
+//	        checkStartChasing(gp.player, 5, 100); 
+	        
+	        // Random movement jika tidak sedang mengejar
+	        randomMovement();
+	    }
 	}
+	
+	public void searchPath(int goalCol, int goalRow) {
+		
+	    int currentCol = (worldX + solidArea.x) / gp.tileSize;
+	    int currentRow = (worldY + solidArea.y) / gp.tileSize;
+
+	    boolean found = gp.pFinder.search(currentCol, currentRow, goalCol, goalRow);
+	    
+	    if (found) {
+	    	if (gp.pFinder.pathList.size() > 0) {
+
+		        // Ambil arah dari node pertama di path
+		        int nextX = gp.pFinder.pathList.get(0).col * gp.tileSize;
+		        int nextY = gp.pFinder.pathList.get(0).row * gp.tileSize;
+
+		        // Tentukan arah berdasarkan posisi node berikutnya
+		        if (nextY < worldY) direction = "up";
+		        else if (nextY > worldY) direction = "down";
+		        else if (nextX < worldX) direction = "left";
+		        else if (nextX > worldX) direction = "right";
+	    	}
+	    	else {
+	    		onPath = false;
+	    	}
+	    }
+	}
+	
 	public void damageReaction() {
 		
 		actionLockCounter = 0;
-		direction = gp.player.direction;
+//		direction = gp.player.direction;
+		onPath = true;
 	}
 	public void checkDrop() {
 		

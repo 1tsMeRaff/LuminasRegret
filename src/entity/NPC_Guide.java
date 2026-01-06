@@ -20,11 +20,6 @@ public class NPC_Guide extends Entity {
         
         getImage();
         setDialogue();
-        
-        // Inisialisasi variabel pathfinding
-        goalCol = -1;
-        goalRow = -1;
-        onPath = false;
     }
     
     public void getImage() {
@@ -88,7 +83,7 @@ public class NPC_Guide extends Entity {
             }
         } else {
             // Random movement
-//            randomMovement();
+            randomMovement();
         }
     }
     
@@ -115,20 +110,5 @@ public class NPC_Guide extends Entity {
         
         onPath = true;
         gp.pFinder.pathList.clear();
-    }
-
-    public void randomMovement() {
-        actionLockCounter++;
-        if (actionLockCounter >= 120) {
-            Random random = new Random();
-            int i = random.nextInt(100);
-            
-            if (i < 25) direction = "up";
-            else if (i < 50) direction = "down";
-            else if (i < 75) direction = "left";
-            else direction = "right";
-            
-            actionLockCounter = 0;
-        }
     }
 }

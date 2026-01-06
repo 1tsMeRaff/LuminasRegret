@@ -7,6 +7,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -418,23 +419,15 @@ public class Entity {
 	    return image;
 	}
 	
-	// Di class NPC_Guide, tambahkan method ini:
 	public void startPathFinding(int goalCol, int goalRow) {
-	    System.out.println("🚀 startPathFinding() called");
-	    System.out.println("  Old onPath: " + this.onPath);
-	    System.out.println("  Old goal: " + this.goalCol + ", " + this.goalRow);
 	    
 	    this.onPath = true;
 	    this.goalCol = goalCol;
 	    this.goalRow = goalRow;
 	    
-	    System.out.println("  New onPath: " + this.onPath);
-	    System.out.println("  New goal: " + this.goalCol + ", " + this.goalRow);
-	    
 	    // Clear path lama
 	    if (gp.pFinder != null) {
 	        gp.pFinder.pathList.clear();
-	        System.out.println("  Cleared old path");
 	    }
 	}
 
@@ -500,9 +493,7 @@ public class Entity {
         System.out.println("Selected direction: " + direction);
     }
     
-    // --------------------------------------------------
-    // PATH FOLLOWING YANG LEBIH BAIK
-    // --------------------------------------------------
+    // PATH FOLLOWING
     public void followImprovedPath() {
         
         Node nextNode = gp.pFinder.pathList.get(0);
@@ -564,6 +555,21 @@ public class Entity {
         }
     }
     
+    public void randomMovement() {
+        actionLockCounter++;
+        if (actionLockCounter >= 120) {
+            Random random = new Random();
+            int i = random.nextInt(100);
+            
+            if (i < 25) direction = "up";
+            else if (i < 50) direction = "down";
+            else if (i < 75) direction = "left";
+            else direction = "right";
+            
+            actionLockCounter = 0;
+        }
+    }
+    
     public void moveToTileCenter(int tileX, int tileY) {
         // Bergerak ke tengah tile saat sudah di tile yang benar
         int targetCenterX = getTileCenterX(tileX);
@@ -584,9 +590,7 @@ public class Entity {
         System.out.println("Centering to tile (" + tileX + ", " + tileY + ")");
     }
     
-    // --------------------------------------------------
-    // PERBAIKI PERHITUNGAN POSISI TILE
-    // --------------------------------------------------
+    // PERHITUNGAN POSISI TILE
     public int getCurrentTileX() {
         // Hitung tile berdasarkan worldX (bukan dengan solidArea offset)
         return (worldX + solidArea.x + solidArea.width/2) / gp.tileSize;
