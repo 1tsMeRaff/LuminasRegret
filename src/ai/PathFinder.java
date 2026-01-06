@@ -1,7 +1,7 @@
 package ai;
 
-import main.GamePanel;
 import java.util.ArrayList;
+import main.GamePanel;
 
 public class PathFinder {
 
@@ -11,7 +11,8 @@ public class PathFinder {
     public ArrayList<Node> pathList = new ArrayList<>();
     Node startNode, goalNode, currentNode;
     
-    private int inflateRadius = 0;
+    // Default 0. Ubah ke 1 jika NPC sering nyangkut di pojokan tembok
+    private int inflateRadius = 0; 
 
     public PathFinder(GamePanel gp) {
         this.gp = gp;
@@ -27,32 +28,67 @@ public class PathFinder {
         }
     }
 
-    // PENTING: Jalankan ini hanya saat ganti Map atau awal game, bukan setiap frame!
-    public void setNodes() {
+    // Panggil ini setiap kali NPC mau mencari jalan baru
+    // Agar status pintu terbuka/tertutup atau tembok hancur selalu update
+    public void setNodes(int startCol, int startRow, int goalCol, int goalRow) {
+        
+        resetNodes();
+
         for (int col = 0; col < gp.maxWorldCol; col++) {
             for (int row = 0; row < gp.maxWorldRow; row++) {
                 
-                // Reset state node
-                nodes[col][row].open = false;
-                nodes[col][row].checked = false;
-                nodes[col][row].solid = false;
-                nodes[col][row].parent = null;
+                // 1. Reset Node State
+                Node node = nodes[col][row];
+                node.open = false;
+                node.checked = false;
+                node.solid = false;
+                node.parent = null;
 
-                // Tentukan solid berdasarkan tile map
+                // 2. CEK TILE COLLISION (Tembok, Air, Jurang)
                 int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
-                if (gp.tileM.tile[gp.currentMap][tileNum].collision == true) {
-                    nodes[col][row].solid = true;
-                    
-                    // Inflate Logic (Membuat area di sekitar tembok jadi solid agar monster tidak nyangkut)
-                    if (inflateRadius > 0) {
-                        inflateSolid(col, row);
-                    }
+                // Sesuaikan baris ini dengan struktur TileManager kamu (apakah array 1D atau 2D)
+                if (gp.tileM.tile[gp.currentMap][tileNum].collision == true) { 
+                    node.solid = true;
+                }
+
+                // 3. CEK INTERACTIVE TILES (Pohon potong, Tembok hancur)
+                // Loop semua interactive tile di map ini
+                for (int i = 0; i < gp.iTile[1].length; i++) {
+                     if (gp.iTile[gp.currentMap][i] != null && gp.iTile[gp.currentMap][i].destructible) {
+                         // Cek apakah iTile ini ada di koordinat [col][row] dan punya collision
+                         int itCol = gp.iTile[gp.currentMap][i].worldX / gp.tileSize;
+                         int itRow = gp.iTile[gp.currentMap][i].worldY / gp.tileSize;
+                         
+                         if (col == itCol && row == itRow && gp.iTile[gp.currentMap][i].collision) {
+                             node.solid = true;
+                         }
+                     }
+                }
+
+                // 4. CEK OBJECTS (Pintu, Peti, NPC Lain)
+                // Ini penting agar monster tidak mencoba menembus pintu yang terkunci
+                for (int i = 0; i < gp.obj[1].length; i++) {
+                     if (gp.obj[gp.currentMap][i] != null && gp.obj[gp.currentMap][i].collision) {
+                         int objCol = gp.obj[gp.currentMap][i].worldX / gp.tileSize;
+                         int objRow = gp.obj[gp.currentMap][i].worldY / gp.tileSize;
+
+                         if (col == objCol && row == objRow) {
+                             node.solid = true;
+                         }
+                     }
+                }
+
+                // 5. Apply Inflate Radius (Padding tembok)
+                // Hanya lakukan ini jika node sudah confirm solid dari langkah 2, 3, atau 4
+                if (node.solid && inflateRadius > 0) {
+                    inflateSolid(col, row);
                 }
             }
         }
     }
     
     private void inflateSolid(int col, int row) {
+        // Tandai area sekitar tembok sebagai solid juga (safety buffer)
         for(int i = 1; i <= inflateRadius; i++) {
             if(col+i < gp.maxWorldCol) nodes[col+i][row].solid = true;
             if(row+i < gp.maxWorldRow) nodes[col][row+i].solid = true;
@@ -62,7 +98,7 @@ public class PathFinder {
     }
 
     private void resetNodes() {
-        // Hanya reset status pencarian, bukan status 'solid'
+        // Reset hanya variabel tracking pathfinding
         for (int col = 0; col < gp.maxWorldCol; col++) {
             for (int row = 0; row < gp.maxWorldRow; row++) {
                 nodes[col][row].open = false;
@@ -75,24 +111,29 @@ public class PathFinder {
     }
 
     public boolean search(int startCol, int startRow, int goalCol, int goalRow) {
-        resetNodes();
+        
+        // Setup Node Solid/Walkable TERBARU sebelum mencari jalan
+        setNodes(startCol, startRow, goalCol, goalRow);
 
         if (!isValidCoordinate(startCol, startRow) || !isValidCoordinate(goalCol, goalRow)) return false;
 
         startNode = nodes[startCol][startRow];
         goalNode = nodes[goalCol][goalRow];
 
-        // Jika Goal solid (misal player berdiri tepat di depan tembok), cari tile terdekat yang kosong
+        // Jika Goal solid (misal player masuk ke dalam pintu), cari tile tetangga terdekat yg kosong
         if (goalNode.solid) {
-            Node alt = findNearestNonSolid(goalCol, goalRow, 2);
-            if (alt != null) goalNode = alt;
-            else return false;
+            Node alt = findNearestNonSolid(goalCol, goalRow, 2); // Radius cari 2 tile
+            if (alt != null) {
+                goalNode = alt;
+            } else {
+                return false; // Tidak ada jalan ke sana
+            }
         }
 
         openList.add(startNode);
 
         int iterations = 0;
-        int maxIterations = 1000; // Batasi agar tidak infinite loop
+        int maxIterations = 500; // Safety break biar game gak freeze kalau path terlalu kompleks
 
         while (!openList.isEmpty() && iterations < maxIterations) {
             iterations++;
@@ -106,23 +147,24 @@ public class PathFinder {
                 return true;
             }
 
-            // Neighbors
-            exploreNeighbor(currentNode.col, currentNode.row - 1); // up
-            exploreNeighbor(currentNode.col, currentNode.row + 1); // down
-            exploreNeighbor(currentNode.col - 1, currentNode.row); // left
-            exploreNeighbor(currentNode.col + 1, currentNode.row); // right
+            // Cek 4 Arah (Atas, Bawah, Kiri, Kanan)
+            exploreNeighbor(currentNode.col, currentNode.row - 1); 
+            exploreNeighbor(currentNode.col, currentNode.row + 1); 
+            exploreNeighbor(currentNode.col - 1, currentNode.row); 
+            exploreNeighbor(currentNode.col + 1, currentNode.row); 
         }
+        
         return false;
     }
     
-    // --------------------------------------------------
-    // HELPER METHODS
-    // --------------------------------------------------
+    // --- HELPER METHODS SAMA SEPERTI YANG KAMU BUAT SEBELUMNYA ---
+    
     private boolean isValidCoordinate(int col, int row) {
         return col >= 0 && col < gp.maxWorldCol && row >= 0 && row < gp.maxWorldRow;
     }
 
     private Node findNearestNonSolid(int centerCol, int centerRow, int maxRadius) {
+        // Cari spiral tile kosong terdekat
         for (int radius = 1; radius <= maxRadius; radius++) {
             for (int c = centerCol - radius; c <= centerCol + radius; c++) {
                 for (int r = centerRow - radius; r <= centerRow + radius; r++) {
@@ -139,6 +181,8 @@ public class PathFinder {
         if (!isValidCoordinate(col, row)) return;
 
         Node neighbor = nodes[col][row];
+        
+        // INI KUNCINYA: Jangan masukkan neighbor yang SOLID ke dalam kalkulasi
         if (neighbor.checked || neighbor.solid) return;
 
         int tentativeG = currentNode.gCost + 1;
@@ -158,11 +202,9 @@ public class PathFinder {
 
     private Node getBestNode() {
         if (openList.isEmpty()) return null;
-
         Node best = openList.get(0);
         for (Node n : openList) {
-            if (n.fCost < best.fCost || 
-               (n.fCost == best.fCost && n.hCost < best.hCost)) {
+            if (n.fCost < best.fCost || (n.fCost == best.fCost && n.hCost < best.hCost)) {
                 best = n;
             }
         }
@@ -176,60 +218,9 @@ public class PathFinder {
     private void buildPath() {
         Node current = goalNode;
         pathList.clear();
-
         while (current != null && current != startNode) {
-            pathList.add(0, current);
+            pathList.add(0, current); // Tambah ke depan list agar urutannya dari start -> goal
             current = current.parent;
         }
     }
-
-    // --------------------------------------------------
-    // PUBLIC METHODS
-    // --------------------------------------------------
-    public void setInflateRadius(int radius) {
-        this.inflateRadius = Math.max(0, Math.min(radius, 2)); // Max 2 untuk safety
-        System.out.println("Inflate radius set to: " + inflateRadius);
-    }
-
-    public void debugTile(int col, int row) {
-        if (!isValidCoordinate(col, row)) {
-            System.out.println("Invalid tile: (" + col + "," + row + ")");
-            return;
-        }
-        
-        Node n = nodes[col][row];
-        int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
-        boolean collision = gp.tileM.tile[gp.currentMap][tileNum].collision;
-        
-        System.out.println("Tile (" + col + "," + row + "):");
-        System.out.println("  Tile number: " + tileNum);
-        System.out.println("  Has collision: " + collision);
-        System.out.println("  Node solid: " + n.solid);
-        System.out.println("  Is walkable: " + !n.solid);
-    }
-
-    public void printArea(int centerCol, int centerRow, int size) {
-        System.out.println("\nMap area around (" + centerCol + "," + centerRow + "):");
-        
-        for (int r = centerRow - size; r <= centerRow + size; r++) {
-            StringBuilder line = new StringBuilder();
-            for (int c = centerCol - size; c <= centerCol + size; c++) {
-                if (isValidCoordinate(c, r)) {
-                    Node n = nodes[c][r];
-                    if (c == centerCol && r == centerRow) {
-                        line.append(" S "); // Center
-                    } else if (n.solid) {
-                        line.append(" X "); // Solid
-                    } else {
-                        line.append(" . "); // Walkable
-                    }
-                } else {
-                    line.append(" # "); // Out of bounds
-                }
-            }
-            System.out.println(line.toString());
-        }
-    }
-    
-    
 }

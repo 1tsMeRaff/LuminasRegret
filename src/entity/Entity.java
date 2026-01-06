@@ -98,6 +98,7 @@ public class Entity {
 	public Entity currentLight;
 	
 	// Path Finder
+	public ArrayList<Node> myPath = new ArrayList<>();
 	public int goalCol;
 	public int goalRow;
 	public boolean hasGoal;
@@ -495,35 +496,47 @@ public class Entity {
     
     // PATH FOLLOWING
     public void followImprovedPath() {
-        
-        Node nextNode = gp.pFinder.pathList.get(0);
-        int nextCol = nextNode.col;
-        int nextRow = nextNode.row;
-        
-        // Hitung posisi tengah tile target
+    	
+    	if (myPath.isEmpty()) { 
+            // Jika path habis, stop
+    		onPath = false;
+            return; 
+            }
+
+         Node nextNode = myPath.get(0); // Ambil dari myPath
+         int nextCol = nextNode.col;
+         int nextRow = nextNode.row;
+
+        // 3. Hitung posisi target
         int targetCenterX = getTileCenterX(nextCol);
         int targetCenterY = getTileCenterY(nextRow);
-        
-        // Hitung posisi tengah NPC
         int npcCenterX = worldX + solidArea.x + solidArea.width/2;
         int npcCenterY = worldY + solidArea.y + solidArea.height/2;
-        
-        // Hitung jarak ke target
+
         int dx = targetCenterX - npcCenterX;
         int dy = targetCenterY - npcCenterY;
-        
-        // Threshold: jika sangat dekat, anggap sudah mencapai node
-        int threshold = gp.tileSize / 8; // 1/8 tile (6 pixel jika tileSize=48)
-        
+
+        // 4. Cek apakah sudah sampai di target (Node saat ini)
+        int threshold = gp.tileSize / 8;
         if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) {
-            gp.pFinder.pathList.remove(0);
-            
-            // Posisikan NPC tepat di tengah tile
-            alignToTile(nextCol, nextRow);
-            
+            myPath.remove(0); // Hapus dari myPath
+            // alignToTile(nextCol, nextRow);
             return;
         }
+
+        // 5. Tentukan arah
         determineDirection(dx, dy);
+
+        // 6. Cek Collision
+        collisionOn = false; // Reset dulu
+        checkCollision();
+        
+        switch (direction) {
+            case "up": worldY -= speed; break;
+            case "down": worldY += speed; break;
+            case "left": worldX -= speed; break;
+            case "right": worldX += speed; break;
+        }
     }
     
     public void alignToTile(int tileX, int tileY) {

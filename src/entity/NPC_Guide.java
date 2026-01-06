@@ -11,7 +11,7 @@ public class NPC_Guide extends Entity {
         super(gp);
         
         direction = "down";
-        speed = 1; // ⬅️ Tambah speed untuk testing
+        speed = 1;
         
         // Solid Area yang lebih kecil untuk presisi
         solidArea = new Rectangle(12, 20, 24, 28); // Lebih ke tengah
@@ -43,46 +43,53 @@ public class NPC_Guide extends Entity {
 		dialogues[4] = "Hello World 5";
 	}
     
-    @Override
+	@Override
     public void setAction() {
-    	
+        
         if (onPath) {
             int currentCol = getCurrentTileX();
             int currentRow = getCurrentTileY();
             
-            // Cek jika sudah sampai
+            // Cek jika sudah sampai tujuan
             if (currentCol == goalCol && currentRow == goalRow) {
-                // Pastikan di tengah tile sebelum berhenti
                 if (isAtTileCenter()) {
                     onPath = false;
                     direction = "down";
-                    gp.pFinder.pathList.clear();
+                    myPath.clear(); // Bersihkan path lokal
                 } else {
-                    // Bergerak ke tengah tile
                     moveToTileCenter(currentCol, currentRow);
                 }
                 return;
             }
             
-            // Cari path jika kosong
-            if (gp.pFinder.pathList.isEmpty()) {
-                System.out.println("🔍 Searching path...");
+            // LOGIKA PENTING: Cek myPath (milik sendiri), bukan gp.pFinder
+            if (myPath.isEmpty()) {
+                
+                System.out.println("🔍 NPC Searching path...");
+                
+                // Pinjam kalkulator global (gp.pFinder) sebentar
                 boolean found = gp.pFinder.search(currentCol, currentRow, goalCol, goalRow);
                 
-                if (found) {
-                    System.out.println("✅ Path found! Nodes: " + gp.pFinder.pathList.size());
-                    if (!gp.pFinder.pathList.isEmpty()) {
-                        followImprovedPath();
-                    }
+                if (found && !gp.pFinder.pathList.isEmpty()) {
+                    System.out.println("✅ Path found! Copying to local memory...");
+                    
+                    // COPY hasil pathfinder global ke path lokal NPC
+                    myPath.clear();
+                    myPath.addAll(gp.pFinder.pathList); 
+                    
+                    // Langsung jalan frame ini
+                    followImprovedPath();
                 } else {
-                    System.out.println("❌ Path not found!");
+                    System.out.println("❌ Path not found via Pathfinder!");
                     onPath = false;
+                    myPath.clear();
                 }
             } else {
+                // Jika myPath masih ada isinya, ikuti saja (jangan search ulang)
+                // Ini mencegah path NPC ditimpa oleh Monster
                 followImprovedPath();
             }
         } else {
-            // Random movement
             randomMovement();
         }
     }
@@ -109,6 +116,6 @@ public class NPC_Guide extends Entity {
         }
         
         onPath = true;
-        gp.pFinder.pathList.clear();
+        myPath.clear();
     }
 }
