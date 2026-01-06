@@ -21,6 +21,14 @@ public class InteractiveTile extends Entity {
     }
     public void update () {
     	
+    	if(invincible == true) {
+            invincibleCounter++;
+            if(invincibleCounter > 20) { // Jeda 20 frame sebelum bisa dipukul lagi
+                invincible = false;
+                invincibleCounter = 0;
+            }
+        }
+    	
     }
     public void draw(Graphics2D g2) {
     	

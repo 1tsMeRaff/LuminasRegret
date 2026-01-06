@@ -488,12 +488,14 @@ public class Player extends Entity {
     		}
     	}
     }
+    
     public void knockBack(Entity entity, int knockBackPower) {
     	
     	entity.direction = direction;
     	entity.speed += 10;
     	entity.knockBack = true;
     }
+    
     public void damageInteractiveTile(int i) { //FIXED
         if (i != 999 && gp.iTile[gp.currentMap][i].destructible == true 
         	&& gp.iTile[gp.currentMap][i].isCorrectItem(this) == true) {

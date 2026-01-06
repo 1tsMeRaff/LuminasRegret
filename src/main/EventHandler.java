@@ -23,10 +23,10 @@ public class EventHandler {
 		while(map < gp.maxMap && col  <gp.maxWorldCol && row < gp.maxWorldRow) {
 			
 			eventRect[map][col][row] = new EventRect();
-			eventRect[map][col][row].x = 23;
-			eventRect[map][col][row].y = 23;
-			eventRect[map][col][row].width = 2;
-			eventRect[map][col][row].height = 2;
+			eventRect[map][col][row].x = 8;
+			eventRect[map][col][row].y = 8;
+			eventRect[map][col][row].width = 32;
+			eventRect[map][col][row].height = 32;
 			eventRect[map][col][row].eventRectDefaultX = eventRect[map][col][row].x;
 			eventRect[map][col][row].eventRectDefaultY = eventRect[map][col][row].y;
 			
@@ -55,8 +55,8 @@ public class EventHandler {
 	    if(canTouchEvent == true) {
 	        if(hit(0,27,16,"right") == true) {damagePit(gp.dialogueState);}
 	        else if(hit(0,23,12,"up") == true) {healingPool(gp.dialogueState);}
-	        else if(hit(0,36,35,"any") == true){teleport(1,11,39);}
-	        else if(hit(1,11,39,"any") == true && gp.keyH.actionPressed == true){teleport(0,36,35);}
+	        else if((hit(0,36,35,"any") || hit(0,36,37,"any")) == true && gp.keyH.actionPressed == true){teleport(1,11,39);}
+	        else if((hit(1,11,39,"any") || hit(1,12,40,"any")) == true && gp.keyH.actionPressed == true){teleport(0,36,35);}
 //	        else if(hit(1,23,19,"up") == true) {speak(gp.npc[1][0]);}
 	    }
 	}

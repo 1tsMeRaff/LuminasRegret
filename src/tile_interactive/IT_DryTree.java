@@ -11,6 +11,9 @@ public class IT_DryTree extends InteractiveTile{
 		super(gp,col,row);
 		this.gp = gp;
 		
+		this.life = 3; // Misal: butuh 3 kali pukul untuk tumbang
+	    this.invincible = false;
+		
 		this.worldX = gp.tileSize * col;
 		this.worldY = gp.tileSize * row;
 		
