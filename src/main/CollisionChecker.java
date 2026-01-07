@@ -27,7 +27,13 @@ public class CollisionChecker {
         
         int tileNum1, tileNum2;
         
-        switch (entity.direction) {
+        String direction = entity.direction;
+        if(entity.knockBack) {
+        	direction = entity.knockBackDirection;
+        }
+        
+        
+        switch (direction) {
             case "up":
                 // Cek tile di atas entity
                 int nextTopRow = (entityTop - entity.speed) / gp.tileSize;
@@ -114,6 +120,11 @@ public class CollisionChecker {
     public int checkObject(Entity entity, boolean player) {
         int index = 999;
         
+        String direction = entity.direction;
+        if(entity.knockBack) {
+        	direction = entity.knockBackDirection;
+        }
+        
         if (gp.obj == null || gp.currentMap < 0 || gp.currentMap >= gp.obj.length) {
             return index;
         }
@@ -126,7 +137,7 @@ public class CollisionChecker {
         // Posisi solid area setelah bergerak
         Rectangle futureSolidArea = new Rectangle(entity.solidArea);
         
-        switch (entity.direction) {
+        switch (direction) {
             case "up": futureSolidArea.y -= entity.speed; break;
             case "down": futureSolidArea.y += entity.speed; break;
             case "left": futureSolidArea.x -= entity.speed; break;
@@ -169,6 +180,10 @@ public class CollisionChecker {
     // Check collision with other entities (NPC/Monster)
     public int checkEntity(Entity entity, Entity[][] target) {
         int index = 999;
+        String direction = entity.direction;
+        if(entity.knockBack) {
+        	direction = entity.knockBackDirection;
+        }
         
         if (target == null || gp.currentMap < 0 || gp.currentMap >= target.length) {
             return index;
@@ -182,7 +197,7 @@ public class CollisionChecker {
         // Posisi solid area setelah bergerak
         Rectangle futureSolidArea = new Rectangle(entity.solidArea);
         
-        switch (entity.direction) {
+        switch (direction) {
             case "up": futureSolidArea.y -= entity.speed; break;
             case "down": futureSolidArea.y += entity.speed; break;
             case "left": futureSolidArea.x -= entity.speed; break;

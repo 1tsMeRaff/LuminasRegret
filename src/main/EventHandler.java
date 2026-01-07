@@ -53,7 +53,7 @@ public class EventHandler {
 	    }
 
 	    if(canTouchEvent == true) {
-	        if(hit(0,27,16,"right") == true) {damagePit(gp.dialogueState);}
+	        if(hit(0,23,12,"up") == true) {healingPool(gp.dialogueState);}
 	        else if(hit(0,23,12,"up") == true) {healingPool(gp.dialogueState);}
 	        else if((hit(0,36,35,"any") || hit(0,36,37,"any")) == true && gp.keyH.actionPressed == true){teleport(1,11,39);}
 	        else if((hit(1,11,39,"any") || hit(1,12,40,"any")) == true && gp.keyH.actionPressed == true){teleport(0,36,35);}
