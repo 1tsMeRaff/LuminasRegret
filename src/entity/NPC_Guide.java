@@ -13,8 +13,7 @@ public class NPC_Guide extends Entity {
         direction = "down";
         speed = 1;
         
-        // Solid Area yang lebih kecil untuk presisi
-        solidArea = new Rectangle(12, 20, 24, 28); // Lebih ke tengah
+        solidArea = new Rectangle(12, 20, 24, 28);
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
         
@@ -23,15 +22,17 @@ public class NPC_Guide extends Entity {
     }
     
     public void getImage() {
+    	
+    	int size = 18;
 		
-		up1 = setup("/npc/up1", gp.tileSize, gp.tileSize);
-	    up2 = setup("/npc/up2", gp.tileSize, gp.tileSize);
-	    down1 = setup("/npc/down1", gp.tileSize, gp.tileSize); 
-	    down2 = setup("/npc/down2", gp.tileSize, gp.tileSize);
-	    left1 = setup("/npc/left1", gp.tileSize, gp.tileSize);
-	    left2 = setup("/npc/left2", gp.tileSize, gp.tileSize);
-		right1 = setup("/npc/right1", gp.tileSize, gp.tileSize);
-		right2 = setup("/npc/right2", gp.tileSize, gp.tileSize);
+		up1 = setup("/npc/up1", gp.tileSize - size, gp.tileSize - size);
+	    up2 = setup("/npc/up2", gp.tileSize - size, gp.tileSize - size);
+	    down1 = setup("/npc/down1", gp.tileSize - size, gp.tileSize - size); 
+	    down2 = setup("/npc/down2", gp.tileSize - size, gp.tileSize - size);
+	    left1 = setup("/npc/left1", gp.tileSize - size, gp.tileSize - size);
+	    left2 = setup("/npc/left2", gp.tileSize - size, gp.tileSize - size);
+		right1 = setup("/npc/right1", gp.tileSize - size, gp.tileSize - size);
+		right2 = setup("/npc/right2", gp.tileSize - size, gp.tileSize - size);
 	}
 	public void setDialogue() {
 		
@@ -62,12 +63,10 @@ public class NPC_Guide extends Entity {
                 return;
             }
             
-            // LOGIKA PENTING: Cek myPath (milik sendiri), bukan gp.pFinder
             if (myPath.isEmpty()) {
                 
                 System.out.println("🔍 NPC Searching path...");
                 
-                // Pinjam kalkulator global (gp.pFinder) sebentar
                 boolean found = gp.pFinder.search(currentCol, currentRow, goalCol, goalRow);
                 
                 if (found && !gp.pFinder.pathList.isEmpty()) {
@@ -85,8 +84,6 @@ public class NPC_Guide extends Entity {
                     myPath.clear();
                 }
             } else {
-                // Jika myPath masih ada isinya, ikuti saja (jangan search ulang)
-                // Ini mencegah path NPC ditimpa oleh Monster
                 followImprovedPath();
             }
         } else {

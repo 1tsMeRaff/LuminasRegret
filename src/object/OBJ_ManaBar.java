@@ -19,8 +19,5 @@ public class OBJ_ManaBar extends Entity {
     
     public void use(Entity entity) {
 		
-		gp.playSE(1);
-		gp.ui.addMessage("Mana +" + value);
-		entity.mana += value;
 	}
 }

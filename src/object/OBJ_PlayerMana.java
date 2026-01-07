@@ -21,7 +21,15 @@ public class OBJ_PlayerMana extends Entity {
 		
 		gp.playSE(1);
 		gp.ui.addMessage("Mana +" + value);
-		entity.mana += value;
+		if(entity.mana == entity.maxMana) {
+			entity.mana = entity.maxMana;
+		}
+		else if(entity.mana + 1 == entity.maxMana) {
+			entity.mana += 1;
+		}
+		else {
+			entity.mana += value;
+		}
 	}
 
 }
