@@ -14,7 +14,7 @@ import main.GamePanel;
 public class Lighting {
 	
 	GamePanel gp;
-	BufferedImage darknessFilter;
+	BufferedImage darknessFilter; // Lapisan Kegelapan
 	
 	public Lighting(GamePanel gp) {
 		
@@ -23,7 +23,7 @@ public class Lighting {
 	}
 	public void setLightSource() {
 		
-		// Create a buffered image
+		// Membuat buffered image (Berfungsi sebagai tempat "menggambar")
 		darknessFilter = new BufferedImage(gp.screenWidth, gp.screenHeight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2 = (Graphics2D)darknessFilter.getGraphics();
 		
@@ -32,11 +32,11 @@ public class Lighting {
 			g2.setColor(new Color (0, 0, 0, 0.98f));
 		}
 		else {
-			// Get the center x and y of the light circle
+			// Menentukan koordinat pusat x dan y pada lingkaran cahaya
 			int centerX = gp.player.screenX + (gp.tileSize)/2;	
 			int centerY = gp.player.screenY + (gp.tileSize)/2;
 			
-			// Create a gradation effect within the light circle
+			// Efek gradasi di dalam lingkaran cahaya
 			Color color[] = new Color[12];
 			float fraction[] = new float[12];
 			
@@ -66,10 +66,10 @@ public class Lighting {
 			fraction[10] = 0.95f;
 			fraction[11] = 1f;
 			
-			// Create a gradation paint settings for the light circle
+			// Efek Cahaya
 			RadialGradientPaint gPaint = new RadialGradientPaint(centerX, centerY, gp.player.currentLight.lightRadius, fraction, color);
 			
-			// Set the gradient data on g2
+			// Mengatur data gradasi pada g2
 			g2.setPaint(gPaint);
 		}
 		
@@ -77,6 +77,7 @@ public class Lighting {
 		
 		g2.dispose();
 	}
+	// Optimasi
 	public void update() {
 		
 		if(gp.player.lightUpdated == true) {
