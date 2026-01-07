@@ -29,6 +29,7 @@ public class MON_GoblinKing extends Entity {
 		defense = 2;
 		exp = 50;
 		knockBackPower = 5;
+		sleep = true;
 		
 		int area = gp.tileSize * 5;
 		solidArea.x = 48;
@@ -155,6 +156,12 @@ public class MON_GoblinKing extends Entity {
 		}
 	}
 
+	public void setDialogue() {
+		
+		dialogues[0] = "Tidak ada yang bisa mencuri hartaku!";
+		dialogues[1] = "Kamu akan mati disini!";
+		dialogues[2] = "SELAMAT DATANG DIKEMATIANMU!";
+	}
 	public void setAction() {
 		
 	    

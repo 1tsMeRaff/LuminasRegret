@@ -57,8 +57,8 @@ public class Player extends Entity {
     
     public void setDefaultValues() {
         
-        worldX = gp.tileSize * 23;
-        worldY = gp.tileSize * 23;
+        worldX = gp.tileSize * 13;
+        worldY = gp.tileSize * 39;
         defaultSpeed = 3;
         speed = defaultSpeed;
         direction = "down";
@@ -83,14 +83,14 @@ public class Player extends Entity {
     }
     public void setDefaultPositions() {
     	
-    	if(gp.currentMap == 0) {
-    		gp.currentMap = 0;
-            worldX = gp.tileSize * 23;
-            worldY = gp.tileSize * 23;
+    	if(gp.currentMap == 1) {
+    		gp.currentMap = 1;
+            worldX = gp.tileSize * 26;
+            worldY = gp.tileSize * 16;
             direction = "down";
     	}
     	else {
-    		gp.currentMap = 1;
+    		gp.currentMap = 0;
             worldX = gp.tileSize * 13;
             worldY = gp.tileSize * 39;
             direction = "down";
@@ -114,6 +114,8 @@ public class Player extends Entity {
     	inventory.clear();
     	inventory.add(currentWeapon);
     	inventory.add(currentShield);
+    	inventory.add(new OBJ_Lantern(gp));
+    	
 
     }
     public int getAttack() {
@@ -600,8 +602,10 @@ public class Player extends Entity {
         else if(invincible == true) {
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
         }
-
-        g2.drawImage(image, screenX, screenY, null);
+        if(drawing == true) {
+        	
+        	 g2.drawImage(image, screenX, screenY, null);
+        }
 
         // Reset composite
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));

@@ -38,7 +38,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int maxWorldCol = 50;
     public final int maxWorldRow = 50;
     public final int maxMap = 10;
-    public int currentMap = 0;
+    public int currentMap = 1;
     
     // Full Screen
     int screenWidth2 = screenWidth;
@@ -62,6 +62,7 @@ public class GamePanel extends JPanel implements Runnable {
     Config config = new Config(this);
     public PathFinder pFinder = new PathFinder(this);
     EnvirontmentManager eManager = new EnvirontmentManager(this);
+    public CutsceneManager csManager = new CutsceneManager(this);
     Thread gameThread;
     
     // Entity & Object
@@ -86,6 +87,10 @@ public class GamePanel extends JPanel implements Runnable {
     public final int gameOverState = 6;
     public final int transitionState = 7;
     public final int tradeState = 8;
+    public final int cutsceneState = 9;
+    
+    // Other
+    public boolean bossBattleOn = false;
     
     public GamePanel() {
         
@@ -115,6 +120,8 @@ public class GamePanel extends JPanel implements Runnable {
     
     public void resetGame(boolean restart) {
     	
+    	removeTempEntity();
+    	bossBattleOn = false;
     	player.setDefaultPositions();
     	player.restoreStatus();
     	aSetter.setNPC();
@@ -325,6 +332,9 @@ public class GamePanel extends JPanel implements Runnable {
         	// Environtment
         	eManager.draw(g2);
         	
+        	// Cutscene 
+        	csManager.draw(g2);
+        	
             // UI
             ui.draw(g2);
         }
@@ -372,5 +382,16 @@ public class GamePanel extends JPanel implements Runnable {
         se.setFile(i);
         se.checkVolume();
         se.play();
+    }
+    public void removeTempEntity() {
+
+        for(int mapNum = 0; mapNum < maxMap; mapNum++) {
+
+            for(int i = 0; i < obj[1].length; i++) {
+                if(obj[mapNum][i] != null && obj[mapNum][i].temp == true) {
+                    obj[mapNum][i] = null;
+                }
+            }
+        }
     }
 }
