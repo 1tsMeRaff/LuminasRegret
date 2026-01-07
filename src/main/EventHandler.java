@@ -57,6 +57,7 @@ public class EventHandler {
 	        else if(hit(0,23,12,"up") == true) {healingPool(gp.dialogueState);}
 	        else if((hit(0,36,35,"any") || hit(0,36,37,"any")) == true && gp.keyH.actionPressed == true){teleport(1,11,39);}
 	        else if((hit(1,11,39,"any") || hit(1,12,40,"any")) == true && gp.keyH.actionPressed == true){teleport(0,36,35);}
+	        else if(hit(3,25,27,"any") == true) {goblinKing();}
 //	        else if(hit(1,23,19,"up") == true) {speak(gp.npc[1][0]);}
 	    }
 	}
@@ -133,4 +134,11 @@ public class EventHandler {
             entity.speak();
         }
     }
+	public void goblinKing() {
+		
+		if(gp.bossBattleOn == false) {
+		    gp.gameState = gp.cutsceneState;
+		    gp.csManager.sceneNum = gp.csManager.goblinKing;
+		}
+	}
 }
