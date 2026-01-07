@@ -163,8 +163,8 @@ public class AssetSetter {
 		mapNum = 1;
 		i = 0;
 		gp.npc[mapNum][i] = new NPC_Merchant(gp);
-		gp.npc[mapNum][i].worldX = gp.tileSize*23;
-		gp.npc[mapNum][i].worldY = gp.tileSize*18;
+		gp.npc[mapNum][i].worldX = gp.tileSize*15;
+		gp.npc[mapNum][i].worldY = gp.tileSize*38;
 		i++;
 	}
 	public void setMonster() {
@@ -172,8 +172,8 @@ public class AssetSetter {
 		int mapNum = 0;
 		int i = 1;
 		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
-		gp.monster[mapNum][i].worldX = gp.tileSize * 11;
-		gp.monster[mapNum][i].worldY = gp.tileSize * 27;
+		gp.monster[mapNum][i].worldX = gp.tileSize * 10;
+		gp.monster[mapNum][i].worldY = gp.tileSize * 29;
 		i++;
 		
 		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
