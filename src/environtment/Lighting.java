@@ -86,6 +86,8 @@ public class Lighting {
 	}
 	public void draw (Graphics2D g2) {
 		
+		if(gp.currentMap == 1) 
+		
 		g2.drawImage(darknessFilter,0 ,0 , null);
 	}
 }
