@@ -31,15 +31,6 @@ public class AssetSetter {
 		
 		int mapNum = 0;
 		int i = 0;	
-//		gp.obj[i] = new OBJ_Portal(gp);
-//		gp.obj[i].worldX = gp.tileSize*21;
-//		gp.obj[i].worldY = gp.tileSize*22;
-//		i++;
-		
-		gp.obj[mapNum][i] = new OBJ_Coin_Bronze(gp);
-		gp.obj[mapNum][i].worldX = gp.tileSize*22;
-		gp.obj[mapNum][i].worldY = gp.tileSize*22;
-		i++;
 		
 		gp.obj[mapNum][i] = new OBJ_PlayerMana(gp);
 		gp.obj[mapNum][i].worldX = gp.tileSize*30;
@@ -57,8 +48,8 @@ public class AssetSetter {
 		i++;
 		
 		gp.obj[mapNum][i] = new OBJ_Lantern(gp);
-		gp.obj[mapNum][i].worldX = gp.tileSize*25;
-		gp.obj[mapNum][i].worldY = gp.tileSize*24;
+		gp.obj[mapNum][i].worldX = gp.tileSize*22;
+		gp.obj[mapNum][i].worldY = gp.tileSize*22;
 		i++;
 		
 		gp.obj[mapNum][i] = new OBJ_Shield_Iron(gp);
@@ -179,8 +170,8 @@ public class AssetSetter {
 		int mapNum = 0;
 		int i = 1;
 		gp.monster[mapNum][i] = new MON_Zombie(gp);
-		gp.monster[mapNum][i].worldX = gp.tileSize * 11;
-		gp.monster[mapNum][i].worldY = gp.tileSize * 27;
+		gp.monster[mapNum][i].worldX = gp.tileSize * 29;
+		gp.monster[mapNum][i].worldY = gp.tileSize * 28;
 		i++;
 //		
 //		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
