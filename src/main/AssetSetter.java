@@ -3,6 +3,7 @@ package main;
 import entity.NPC_Guide;
 import entity.NPC_Merchant;
 import monster.MON_GreenSlime;
+import monster.MON_Zombie;
 import object.OBJ_Axe;
 import object.OBJ_Bread;
 import object.OBJ_Coin_Bronze;
@@ -95,30 +96,30 @@ public class AssetSetter {
 		
 		int mapNum = 0;
 		int i = 1;
-		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
+		gp.monster[mapNum][i] = new MON_Zombie(gp);
 		gp.monster[mapNum][i].worldX = gp.tileSize * 11;
 		gp.monster[mapNum][i].worldY = gp.tileSize * 27;
 		i++;
-		
-		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
-		gp.monster[mapNum][i].worldX = gp.tileSize * 26;
-		gp.monster[mapNum][i].worldY = gp.tileSize * 24;
-		i++;
-		
-		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
-		gp.monster[mapNum][i].worldX = gp.tileSize * 22;
-		gp.monster[mapNum][i].worldY = gp.tileSize * 25;
-		i++;
-		
-		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
-		gp.monster[mapNum][i].worldX = gp.tileSize * 26;
-		gp.monster[mapNum][i].worldY = gp.tileSize * 30;
-		i++;
-		
-		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
-		gp.monster[mapNum][i].worldX = gp.tileSize * 31;
-		gp.monster[mapNum][i].worldY = gp.tileSize * 24;
-		i++;
+//		
+//		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
+//		gp.monster[mapNum][i].worldX = gp.tileSize * 26;
+//		gp.monster[mapNum][i].worldY = gp.tileSize * 24;
+//		i++;
+//		
+//		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
+//		gp.monster[mapNum][i].worldX = gp.tileSize * 22;
+//		gp.monster[mapNum][i].worldY = gp.tileSize * 25;
+//		i++;
+//		
+//		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
+//		gp.monster[mapNum][i].worldX = gp.tileSize * 26;
+//		gp.monster[mapNum][i].worldY = gp.tileSize * 30;
+//		i++;
+//		
+//		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
+//		gp.monster[mapNum][i].worldX = gp.tileSize * 31;
+//		gp.monster[mapNum][i].worldY = gp.tileSize * 24;
+//		i++;
 		
 //		mapNum = 1;
 //		gp.monster[mapNum][i] = new MON_GreenSlime(gp);
