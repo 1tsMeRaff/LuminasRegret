@@ -143,13 +143,13 @@ public class TileManager {
         setup(1, 70, "tile101", true);
         setup(1, 72, "tile104", true);
         setup(1, 76, "tile111", false);
-        setup(1, 89, "tile144", false);
+        setup(1, 89, "tile144", true);
         setup(1, 90, "tile145", false);
-        setup(1, 91, "tile146", false);
+        setup(1, 91, "tile146", true);
         setup(1, 92, "tile148", false);
-        setup(1, 103, "tile171", false);
+        setup(1, 103, "tile171", true);
         setup(1, 104, "tile172", false);
-        setup(1, 105, "tile173", false);
+        setup(1, 105, "tile173", true);
         setup(1, 117, "tile220", false);
         setup(1, 118, "tile221", false);
         setup(1, 119, "tile222", false);
