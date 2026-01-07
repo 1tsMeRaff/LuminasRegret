@@ -221,7 +221,7 @@ public class UI {
     			    double hpBarValue = oneScale*monster.life;
     			    
     			    int x = gp.screenWidth/2 - gp.tileSize * 4;
-    			    int y = gp.tileSize * 10;
+    			    int y = gp.screenHeight - (gp.tileSize * 2);
 
     			    g2.setColor(new Color(35,35,35));
     			    g2.fillRect(x-1, y-1, gp.tileSize * 8 + 2, 12);
@@ -341,11 +341,6 @@ public class UI {
         g2.setFont(g2.getFont().deriveFont(Font.PLAIN,28F));
         x += gp.tileSize;
         y += gp.tileSize;
-        
-        for(String line : currentDialogue.split("\n")) {
-            g2.drawString(line, x, y);
-            y += 35;
-        }
     }
     
     public void drawCharacterScreen() {

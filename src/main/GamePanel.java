@@ -38,7 +38,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int maxWorldCol = 50;
     public final int maxWorldRow = 50;
     public final int maxMap = 10;
-    public int currentMap = 0;
+    public int currentMap = 1;
     
     // Full Screen
     int screenWidth2 = screenWidth;
@@ -62,6 +62,7 @@ public class GamePanel extends JPanel implements Runnable {
     Config config = new Config(this);
     public PathFinder pFinder = new PathFinder(this);
     EnvirontmentManager eManager = new EnvirontmentManager(this);
+    public CutsceneManager csManager = new CutsceneManager(this);
     Thread gameThread;
     
     // Entity & Object
@@ -71,7 +72,6 @@ public class GamePanel extends JPanel implements Runnable {
     public Entity monster[][] = new Entity[maxMap][20];
     public InteractiveTile iTile[][] = new InteractiveTile[maxMap][500];
     public Entity projectile[][] = new Entity[maxMap][50];
-    public ArrayList<Entity> projectileList = new ArrayList<>();
     public ArrayList<Entity> particleList = new ArrayList<>();
     ArrayList<Entity> entityList = new ArrayList<>();
     
@@ -86,6 +86,10 @@ public class GamePanel extends JPanel implements Runnable {
     public final int gameOverState = 6;
     public final int transitionState = 7;
     public final int tradeState = 8;
+    public final int cutsceneState = 9;
+    
+    // Other
+    public boolean bossBattleOn = false;
     
     public GamePanel() {
         
@@ -115,6 +119,8 @@ public class GamePanel extends JPanel implements Runnable {
     
     public void resetGame(boolean restart) {
     	
+    	removeTempEntity();
+    	bossBattleOn = false;
     	player.setDefaultPositions();
     	player.restoreStatus();
     	aSetter.setNPC();
@@ -139,6 +145,7 @@ public class GamePanel extends JPanel implements Runnable {
     	screenWidth2 = Main.window.getWidth();
     	screenHeight2 = Main.window.getHeight();
     }
+    
     public void startGameThread() {
         
         gameThread = new Thread(this);
@@ -170,20 +177,15 @@ public class GamePanel extends JPanel implements Runnable {
                 delta--;
                 drawCount++;
             }
-
-            // FPS counter (opsional)
-//            if (timer >= 1000000000) {  // Jika sudah 1 detik
-//                System.out.println("FPS: " + drawCount);
-//                drawCount = 0;
-//                timer = 0;
-//            }
         }
     }
-    
     
     public void update() {
     	
     	if(gameState == playState) {
+    		// Check events
+    		eHandler.checkEvent();
+    		
     		//Player
     		player.update();
     		
@@ -201,8 +203,13 @@ public class GamePanel extends JPanel implements Runnable {
     					monster[currentMap][i].update();
     				}
     				if(monster[currentMap][i].alive == false) {
-    					monster[currentMap][i].checkDrop();
-    					monster[currentMap][i] = null;
+    					// Update dying animation
+    					if(monster[currentMap][i].dying == true) {
+    						monster[currentMap][i].update();
+    					} else {
+    						monster[currentMap][i].checkDrop();
+    						monster[currentMap][i] = null;
+    					}
     				}
     			}
     		}
@@ -218,6 +225,8 @@ public class GamePanel extends JPanel implements Runnable {
     				}
     			}
     		}
+    		
+    		// Particles
     		for(int i = 0; i < particleList.size(); i++) {
     			if(particleList.get(i) != null) {
     				if(particleList.get(i).alive == true) {
@@ -225,27 +234,50 @@ public class GamePanel extends JPanel implements Runnable {
     				}
     				if(particleList.get(i).alive == false) {
     					particleList.remove(i);
+    					i--; // Adjust index after removal
     				}
     			}
     		}
+    		
+    		// Interactive Tiles
     		for(int i = 0; i  < iTile[currentMap].length; i++) {
     			if(iTile[currentMap][i] != null) {
     				iTile[currentMap][i].update();
     			}
     		}
+    		
+    		// Environment
     		eManager.update();
     	}
-    	if(gameState == pauseState) {
-    		
+    	else if(gameState == pauseState) {
+    		// Pause logic if needed
     	}
-    	
-    	if(gameState == dialogueState) {
-            if(keyH.actionPressed == true) {
-                gameState = playState;
-                keyH.actionPressed = false; // Segera matikan agar tidak tembus ke frame selanjutnya
+    	else if(gameState == dialogueState) {
+            // Handle dialogue input untuk cutscene
+            if(csManager.isDialogueActive()) {
+                csManager.handleDialogueInput();
+            } else {
+                // Dialog normal dari NPC
+                if(keyH.actionPressed == true) {
+                    gameState = playState;
+                    keyH.actionPressed = false;
+                }
             }
         }
-        
+        else if(gameState == cutsceneState) {
+            // Update cutscene manager
+            csManager.update();
+            
+            // Also update player for animation if needed
+            player.update();
+            
+            // Update NPCs untuk cutscene
+            for(int i = 0; i < npc[currentMap].length; i++) {
+                if(npc[currentMap][i] != null) {
+                    npc[currentMap][i].update();
+                }
+            }
+        }
     }
     
     public void drawToTempScreen() {
@@ -297,39 +329,40 @@ public class GamePanel extends JPanel implements Runnable {
         			entityList.add(projectile[currentMap][i]);
         		}
         	}
+        	
         	for(int i = 0; i < particleList.size(); i ++) {
         		if(particleList.get(i) != null) {
         			entityList.add(particleList.get(i));
         		}
         	}
         	
-        	// Sort
+        	// Sort by Y position for correct drawing order
         	Collections.sort(entityList, new Comparator<Entity>() {
-
 				@Override
 				public int compare(Entity e1, Entity e2) {
-					
-					int result = Integer.compare(e1.worldY, e2.worldY);
-					return result;
+					return Integer.compare(e1.worldY, e2.worldY);
 				}
-        		
-			});
+        	});
             
             // Draw Entities
         	for(int i = 0; i < entityList.size(); i++) {
         		entityList.get(i).draw(g2);
         	}
+        	
         	// Empty Entity List
         	entityList.clear();
         	
-        	// Environtment
+        	// Environment
         	eManager.draw(g2);
+        	
+        	// Cutscene 
+        	if(gameState == cutsceneState) {
+        		csManager.draw(g2);
+        	}
         	
             // UI
             ui.draw(g2);
         }
-       
-        
         
         //Debug
         if(keyH.showDebugText == true) {
@@ -346,6 +379,8 @@ public class GamePanel extends JPanel implements Runnable {
             g2.drawString("WorldY" + player.worldY, x, y); y += lineHeight;
             g2.drawString("Col" + (player.worldX + player.solidArea.x)/tileSize, x, y); y += lineHeight;
             g2.drawString("Row" + (player.worldY + player.solidArea.y)/tileSize, x, y); y += lineHeight;
+            g2.drawString("Game State: " + gameState, x, y); y += lineHeight;
+            g2.drawString("Boss Battle: " + bossBattleOn, x, y); y += lineHeight;
             g2.drawString("Draw time = "+ passed, x, y);
         }
     }
@@ -362,6 +397,7 @@ public class GamePanel extends JPanel implements Runnable {
     	music.play();
     	music.loop();
     }
+    
     // Metode untuk menghentikan musik
     public void stopMusic() {
         music.stop();
@@ -372,5 +408,15 @@ public class GamePanel extends JPanel implements Runnable {
         se.setFile(i);
         se.checkVolume();
         se.play();
+    }
+    
+    public void removeTempEntity() {
+        for(int mapNum = 0; mapNum < maxMap; mapNum++) {
+            for(int i = 0; i < obj[mapNum].length; i++) {
+                if(obj[mapNum][i] != null && obj[mapNum][i].temp == true) {
+                    obj[mapNum][i] = null;
+                }
+            }
+        }
     }
 }

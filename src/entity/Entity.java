@@ -27,8 +27,10 @@ public class Entity {
 	public Rectangle attackArea = new Rectangle(0, 0, 0, 0);
 	public int solidAreaDefaultX, solidAreaDefaultY;
 	public boolean collisionOn = false;
-	String dialogues[] = new String[20];
+	protected String dialogues[] = new String[20];
 	public Entity attacker;
+	public boolean temp = false;
+	
 	
 	// State
 	public int worldX, worldY;
@@ -45,7 +47,8 @@ public class Entity {
 	public boolean knockBack = false;
 	public String knockBackDirection;
 	public boolean rage = false;
-	
+	public boolean sleep = false;
+	public boolean drawing = true;
 	
 	//Counter
 	public int spriteCounter = 0;
@@ -270,90 +273,93 @@ public class Entity {
 		
 		collisionOn = false;
 		
-		if(knockBack) {
+		if(sleep == false) {
 			
-			checkCollision();
-			
-			if(collisionOn == true) {
-				knockBackCounter = 0;
-				knockBack = false;
-				speed = defaultSpeed;
+			if(knockBack) {
+				
+				checkCollision();
+				
+				if(collisionOn == true) {
+					knockBackCounter = 0;
+					knockBack = false;
+					speed = defaultSpeed;
+				}
+				else if(collisionOn == false) {
+					switch(knockBackDirection) {
+					  case "up":
+				            worldY -= speed;
+				            break;
+				        case "down":
+				            worldY += speed;
+				            break;
+				        case "left":
+				            worldX -= speed;
+				            break;
+				        case "right":
+				            worldX += speed;
+				            break;
+					}
+				}
+				
+				knockBackCounter++;
+				if(knockBackCounter == 10) {
+					knockBackCounter = 0;
+					knockBack = false;
+					speed = defaultSpeed;
+				}
 			}
-			else if(collisionOn == false) {
-				switch(knockBackDirection) {
-				  case "up":
-			            worldY -= speed;
-			            break;
-			        case "down":
-			            worldY += speed;
-			            break;
-			        case "left":
-			            worldX -= speed;
-			            break;
-			        case "right":
-			            worldX += speed;
-			            break;
+			else if(attacking) {
+				attacking();
+			}
+			else {
+				
+				setAction();
+				checkCollision();
+						
+				// IF COLLISION IS FALSE, PLAYER CAN MOVE
+				if (collisionOn == false) {
+				    switch (direction) {
+				        case "up":
+				            worldY -= speed;
+				            break;
+				        case "down":
+				            worldY += speed;
+				            break;
+				        case "left":
+				            worldX -= speed;
+				            break;
+				        case "right":
+				            worldX += speed;
+				            break;
+				    }
+				}
+				
+				// Sprite animation logic
+				spriteCounter++;
+				if (spriteCounter > 12) {
+				    if (spriteNum == 1) {
+				        spriteNum = 2;
+				    } else if (spriteNum == 2) {
+				        spriteNum = 1;
+				    }
+				    spriteCounter = 0;
 				}
 			}
 			
-			knockBackCounter++;
-			if(knockBackCounter == 10) {
-				knockBackCounter = 0;
-				knockBack = false;
-				speed = defaultSpeed;
-			}
+			// Invincible Counter
+	        if(invincible == true) {
+	        	invincibleCounter++;
+	        	if(invincibleCounter > 40) {
+	        		invincible = false;
+	        		invincibleCounter = 0;
+	        	}
+	        }
+	        if(rangeAvailableCounter < 30) {
+	        	rangeAvailableCounter++;
+	        }
 		}
-		else if(attacking) {
-			attacking();
-		}
-		else {
-			
-			setAction();
-			checkCollision();
-					
-			// IF COLLISION IS FALSE, PLAYER CAN MOVE
-			if (collisionOn == false) {
-			    switch (direction) {
-			        case "up":
-			            worldY -= speed;
-			            break;
-			        case "down":
-			            worldY += speed;
-			            break;
-			        case "left":
-			            worldX -= speed;
-			            break;
-			        case "right":
-			            worldX += speed;
-			            break;
-			    }
-			}
-			
-			// Sprite animation logic
-			spriteCounter++;
-			if (spriteCounter > 12) {
-			    if (spriteNum == 1) {
-			        spriteNum = 2;
-			    } else if (spriteNum == 2) {
-			        spriteNum = 1;
-			    }
-			    spriteCounter = 0;
-			}
-		}
-		
-		// Invincible Counter
-        if(invincible == true) {
-        	invincibleCounter++;
-        	if(invincibleCounter > 40) {
-        		invincible = false;
-        		invincibleCounter = 0;
-        	}
-        }
-        if(rangeAvailableCounter < 30) {
-        	rangeAvailableCounter++;
-        }
 	}
-	
+		
 	public void attacking() {
         spriteCounter++;
 

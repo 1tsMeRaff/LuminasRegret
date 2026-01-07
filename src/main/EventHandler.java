@@ -43,23 +43,7 @@ public class EventHandler {
 		}
 	}
 	
-	public void checkEvent() {
-	    // Check if the player character is more than 1 tile away from the last event
-	    int xDistance = Math.abs(gp.player.worldX - previousEventX);
-	    int yDistance = Math.abs(gp.player.worldY - previousEventY);
-	    int distance = Math.max(xDistance, yDistance);
-	    if(distance > gp.tileSize) {
-	        canTouchEvent = true;
-	    }
 
-	    if(canTouchEvent == true) {
-	        if(hit(0,23,12,"up") == true) {healingPool(gp.dialogueState);}
-	        else if(hit(0,23,12,"up") == true) {healingPool(gp.dialogueState);}
-	        else if((hit(0,36,35,"any") || hit(0,36,37,"any")) == true && gp.keyH.actionPressed == true){teleport(1,11,39);}
-	        else if((hit(1,11,39,"any") || hit(1,12,40,"any")) == true && gp.keyH.actionPressed == true){teleport(0,36,35);}
-//	        else if(hit(1,23,19,"up") == true) {speak(gp.npc[1][0]);}
-	    }
-	}
 	public boolean hit(int map, int col, int row, String reqDirection) {
 		
 		boolean hit = false;
@@ -133,4 +117,39 @@ public class EventHandler {
             entity.speak();
         }
     }
+	// Di dalam method checkEvent():
+	public void checkEvent() {
+	    // Check if the player character is more than 1 tile away from the last event
+	    int xDistance = Math.abs(gp.player.worldX - previousEventX);
+	    int yDistance = Math.abs(gp.player.worldY - previousEventY);
+	    int distance = Math.max(xDistance, yDistance);
+	    if(distance > gp.tileSize) {
+	        canTouchEvent = true;
+	    }
+
+	    if(canTouchEvent == true) {
+	        if(hit(0,23,12,"up") == true) {
+	            healingPool(gp.dialogueState);
+	        }
+	        // ❌ HAPUS DUPLIKASI: else if(hit(0,23,12,"up") == true) {healingPool(gp.dialogueState);}
+	        else if((hit(0,36,35,"any") || hit(0,36,37,"any")) == true && gp.keyH.actionPressed == true) {
+	            teleport(1,11,39);
+	        }
+	        else if((hit(1,11,39,"any") || hit(1,12,40,"any")) == true && gp.keyH.actionPressed == true) {
+	            teleport(0,36,35);
+	        }
+	        else if(hit(1,26,20,"any") == true && gp.bossBattleOn == false) { // ✅ Tambah kondisi
+	            goblinKing();
+	        }
+	    }
+	}
+
+	// Perbaiki method goblinKing():
+	public void goblinKing() {
+	    if(gp.bossBattleOn == false && gp.csManager.sceneNum == gp.csManager.NA) {
+	        gp.gameState = gp.cutsceneState;
+	        gp.csManager.startScene(gp.csManager.goblinKing);
+	        gp.bossBattleOn = true; // Set langsung agar tidak terpicu lagi
+	    }
+	}
 }

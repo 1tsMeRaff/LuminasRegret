@@ -11,9 +11,9 @@ public class OBJ_Lantern extends Entity{
 		type = type_light;
 		name = "Lentera";
 		down1 = setup("/objects/lantern", gp.tileSize, gp.tileSize);
-		description = "[Lentera]\nIlluminates your \nsurroundings.";
-		price = 200;
-		lightRadius = 250;
+		description = "[Lentera]\nIlluminates your \nsurroundings."; // Teks yang akan muncul di menu inventory
+		price = 200; // Harga barang di in-game
+		lightRadius = 250; // Jarak pandang
 		
 	}
 	

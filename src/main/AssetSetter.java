@@ -140,6 +140,13 @@ public class AssetSetter {
 		gp.obj[mapNum][i].worldY = gp.tileSize*28;
 		i++;
 		
+		mapNum = 1;
+		i = 0;
+		
+//		gp.obj[mapNum][i] = new OBJ_Chest(gp,new OBJ_Key(gp));
+//		gp.obj[mapNum][i].worldX = gp.tileSize*25;
+//		gp.obj[mapNum][i].worldY = gp.tileSize*15;
+//		i++;
 	}
 	public void setNPC() {
 		
@@ -206,8 +213,10 @@ public class AssetSetter {
 		i++;
 		
 		gp.monster[mapNum][i] = new MON_GoblinKing(gp);
-		gp.monster[mapNum][i].worldX = gp.tileSize * 26;
-		gp.monster[mapNum][i].worldY = gp.tileSize * 16;
+		gp.monster[mapNum][i].worldX = gp.tileSize * 25;
+		gp.monster[mapNum][i].worldY = gp.tileSize * 13;
+		gp.monster[mapNum][i].hpBarOn = true; // Pastikan HP bar aktif
+        gp.monster[mapNum][i].boss = true; // Pastikan flag boss aktif
 		i++;
 	}
 	
