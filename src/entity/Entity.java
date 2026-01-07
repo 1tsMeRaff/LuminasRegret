@@ -71,6 +71,7 @@ public class Entity {
 	public int coin;
 	public Entity currentWeapon;
 	public Entity currentShield;
+	public Entity currenLight;
 	public Projectile projectile;
 	public int projectileIndex = -1;
 	
@@ -86,6 +87,7 @@ public class Entity {
 	public int useCost;
 	public int price;
 	public int knockBackPower = 0; 
+	public int lightRadius;
 	
 	// Tipe Equipment
 	public int type; // 0 = player, 1 = npc, 2 = monster
@@ -97,6 +99,7 @@ public class Entity {
 	public final int type_shield = 5;
 	public final int type_consumable = 6;
 	public final int type_pickupOnly = 7;
+	public final int type_light = 9;
 	public Entity currentLight;
 	
 	// Path Finder
