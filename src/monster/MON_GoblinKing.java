@@ -20,6 +20,7 @@ public class MON_GoblinKing extends Entity {
 		this.gp = gp;
 		
 		type = type_monster;
+		boss = true;
 		name = monName;
 		defaultSpeed = 1;
 		speed = defaultSpeed;
@@ -37,8 +38,8 @@ public class MON_GoblinKing extends Entity {
 		solidArea.height = area - 48;
 		solidAreaDefaultX = solidArea.x;
 		solidAreaDefaultY = solidArea.y;
-		attackArea.width = 170;
-		attackArea.height = 170;
+		attackArea.width = gp.tileSize * 3;
+		attackArea.height = gp.tileSize * 3;
 		
 		motion1_duration = 40;
 		motion2_duration = 85;
@@ -162,6 +163,7 @@ public class MON_GoblinKing extends Entity {
 			rage = true;
 			defaultSpeed++;
 			speed = defaultSpeed;
+			
 		}
 		
 		if(getTileDistance(gp.player) < 10) {

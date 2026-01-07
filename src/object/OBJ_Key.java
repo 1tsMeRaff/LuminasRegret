@@ -32,6 +32,7 @@ public class OBJ_Key extends Entity {
 		}
 		else {
 			gp.ui.currentDialogue = "apa yang kamu lakukan?";
+			gp.player.inventory.add(new OBJ_Key(gp));
 		}
 	}
 }

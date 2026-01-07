@@ -206,8 +206,8 @@ public class AssetSetter {
 		i++;
 		
 		gp.monster[mapNum][i] = new MON_GoblinKing(gp);
-		gp.monster[mapNum][i].worldX = gp.tileSize * 29;
-		gp.monster[mapNum][i].worldY = gp.tileSize * 38;
+		gp.monster[mapNum][i].worldX = gp.tileSize * 26;
+		gp.monster[mapNum][i].worldY = gp.tileSize * 16;
 		i++;
 	}
 	
