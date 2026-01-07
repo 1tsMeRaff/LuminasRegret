@@ -57,7 +57,7 @@ public class Player extends Entity {
     public void setDefaultValues() {
         
         worldX = gp.tileSize * 25;
-        worldY = gp.tileSize * 25;
+        worldY = gp.tileSize * 40;
         defaultSpeed = 4;
         speed = defaultSpeed;
         direction = "down";
@@ -100,6 +100,7 @@ public class Player extends Entity {
     	inventory.add(new OBJ_Axe(gp));
     	inventory.add(new OBJ_Key(gp));
     	inventory.add(new OBJ_Key(gp));
+
     }
     public int getAttack() {
     	attackArea = currentWeapon.attackArea;
@@ -407,6 +408,13 @@ public class Player extends Entity {
         		
         		gp.obj[gp.currentMap][i].use(this); //FIXED
         		gp.obj[gp.currentMap][i] = null; //FIXED
+        	}
+        	// OBSTACLE
+        	else if(gp.obj[gp.currentMap][i].type == type_obstacle) {
+        		if(keyH.enterPressed == true) {
+        			attackCanceled = true;
+        			gp.obj[gp.currentMap][i].interact();
+        		}
         	}
         	
         	//Inventory Items
