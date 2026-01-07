@@ -9,6 +9,7 @@ import main.GamePanel;
 import main.KeyHandler;
 import object.OBJ_Axe;
 import object.OBJ_Key;
+import object.OBJ_Lantern;
 import object.OBJ_Shield_Wood;
 import object.OBJ_Slash;
 import object.OBJ_Sword_Standard;
@@ -107,6 +108,7 @@ public class Player extends Entity {
     	inventory.add(new OBJ_Axe(gp));
     	inventory.add(new OBJ_Key(gp));
     	inventory.add(new OBJ_Key(gp));
+    	inventory.add(new OBJ_Lantern(gp));
 
     }
     public int getAttack() {
