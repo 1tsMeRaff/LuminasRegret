@@ -103,6 +103,7 @@ public class Entity {
 	public final int type_player = 0;
 	public final int type_npc = 1;
 	public final int type_monster = 2;
+	public final int type_monster_boss = 10;
 	public final int type_sword = 3;
 	public final int type_axe = 4;
 	public final int type_shield = 5;
@@ -261,11 +262,15 @@ public class Entity {
 		gp.cChecker.checkEntity(this, gp.npc);
 		gp.cChecker.checkEntity(this, gp.monster);
 		boolean contactPlayer = gp.cChecker.checkPlayer(this);
-		
-		
+
 		if(this.type == type_monster && contactPlayer == true) {
-			
-			damagePlayer(attack);
+		    
+		    // MODIFIKASI: Hanya berikan damage kontak jika monster BUKAN boss
+		    if(this.boss == false) {
+		        damagePlayer(attack);
+		    }
+		    // Jika boss == true, kode damage di atas akan dilewati.
+		    // Boss hanya akan memberikan damage melalui method attacking() Anda.
 		}
 
     }

@@ -138,18 +138,14 @@ public class EventHandler {
 	        else if((hit(1,11,39,"any") || hit(1,12,40,"any")) == true && gp.keyH.actionPressed == true) {
 	            teleport(0,36,35);
 	        }
-	        else if(hit(1,26,20,"any") == true && gp.bossBattleOn == false) { // ✅ Tambah kondisi
-	            goblinKing();
-	        }
 	    }
 	}
 
-	// Perbaiki method goblinKing():
 	public void goblinKing() {
 	    if(gp.bossBattleOn == false && gp.csManager.sceneNum == gp.csManager.NA) {
 	        gp.gameState = gp.cutsceneState;
 	        gp.csManager.startScene(gp.csManager.goblinKing);
-	        gp.bossBattleOn = true; // Set langsung agar tidak terpicu lagi
+	        gp.bossBattleOn = true;
 	    }
 	}
 }

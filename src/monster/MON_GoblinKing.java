@@ -26,11 +26,11 @@ public class MON_GoblinKing extends Entity {
 		speed = defaultSpeed;
 		maxLife = 50;
 		life = maxLife;
-		attack = 0;
+		attack = 2;
 		defense = 2;
 		exp = 50;
 		knockBackPower = 5;
-		sleep = true;
+//		sleep = true;
 		
 		int area = gp.tileSize * 5;
 		solidArea.x = 48;
@@ -39,11 +39,11 @@ public class MON_GoblinKing extends Entity {
 		solidArea.height = area - 48;
 		solidAreaDefaultX = solidArea.x;
 		solidAreaDefaultY = solidArea.y;
-		attackArea.width = gp.tileSize * 3;
-		attackArea.height = gp.tileSize * 3;
+		attackArea.width = gp.tileSize * 2;
+		attackArea.height = gp.tileSize * 4;
 		
-		motion1_duration = 40;
-		motion2_duration = 85;
+		motion1_duration = 25;
+		motion2_duration = 50;
 		
 		getImage();
 		getAttackImage();
@@ -146,10 +146,12 @@ public class MON_GoblinKing extends Entity {
 			}
 			
 			if(attacking) {
+				drawAttackArea(g2);
 				g2.drawImage(image, screenX, screenY, null);
 			}
 			else {
 				g2.drawImage(image, screenX, screenY, null);
+				
 			}
 			
 //             g2.setColor(java.awt.Color.RED);
@@ -233,6 +235,49 @@ public class MON_GoblinKing extends Entity {
 		if(i >= 75 && i < 100) {
 			dropItems(new OBJ_PlayerMana(gp));
 		}
+	}
+	
+	public void drawAttackArea(Graphics2D g2) {
+	    
+	    // Posisi layar berdasarkan world coordinates
+	    int screenX = worldX - gp.player.worldX + gp.player.screenX;
+	    int screenY = worldY - gp.player.worldY + gp.player.screenY;
+
+	    // Tentukan titik mulai gambar attackArea
+	    int areaX = screenX;
+	    int areaY = screenY;
+	    
+	    // Ukuran tubuh monster (5 tile)
+	    int monsterSize = gp.tileSize * 5;
+
+	    // Hitung posisi kotak serangan di depan tubuh monster
+	    switch(direction) {
+	        case "up": 
+	            areaY -= attackArea.height; 
+	            // Opsional: geser ke tengah tubuh
+	            areaX += (monsterSize / 2) - (attackArea.width / 2);
+	            break;
+	        case "down": 
+	            areaY += monsterSize; 
+	            areaX += (monsterSize / 2) - (attackArea.width / 2);
+	            break;
+	        case "left": 
+	            areaX -= attackArea.width; 
+	            areaY += (monsterSize / 2) - (attackArea.height / 2);
+	            break;
+	        case "right": 
+	            areaX += monsterSize; 
+	            areaY += (monsterSize / 2) - (attackArea.height / 2);
+	            break;
+	    }
+
+	    // Gambar visualisasi area (Merah transparan)
+	    g2.setColor(new java.awt.Color(255, 0, 0, 100)); 
+	    g2.fillRect(areaX, areaY, attackArea.width, attackArea.height);
+	    
+	    // Gambar outline
+	    g2.setColor(java.awt.Color.RED);
+	    g2.drawRect(areaX, areaY, attackArea.width, attackArea.height);
 	}
 }
 
