@@ -564,9 +564,6 @@ public class Player extends Entity {
     }
     public void draw(Graphics2D g2) {
         
-        BufferedImage image = null;
-        int tempScreenX = screenX;
-        int tempScreenY = screenY;
         
         switch(direction) {
             case "up":

@@ -74,6 +74,8 @@ public class Entity {
 	public Projectile projectile;
 	public int projectileIndex = -1;
 	
+	public int aggroRange;
+	
 	// Item Attributes
     public ArrayList<Entity> inventory = new ArrayList<>();
     public final int maxInventorySize = 20;

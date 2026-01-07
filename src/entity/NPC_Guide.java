@@ -65,13 +65,9 @@ public class NPC_Guide extends Entity {
             
             if (myPath.isEmpty()) {
                 
-                System.out.println("🔍 NPC Searching path...");
-                
                 boolean found = gp.pFinder.search(currentCol, currentRow, goalCol, goalRow);
                 
                 if (found && !gp.pFinder.pathList.isEmpty()) {
-                    System.out.println("✅ Path found! Copying to local memory...");
-                    
                     // COPY hasil pathfinder global ke path lokal NPC
                     myPath.clear();
                     myPath.addAll(gp.pFinder.pathList); 
@@ -97,10 +93,9 @@ public class NPC_Guide extends Entity {
     	super.speak();
 
         // Pastikan NPC berada tepat di tengah tile
-        if (!isAtTileCenter()) {
-            System.out.println("Aligning NPC to tile center first...");
-            alignToTileCenter();
-        }
+//        if (!isAtTileCenter()) {
+//            alignToTileCenter();
+//        }
 
         goalCol = 29;
         goalRow = 30;

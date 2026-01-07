@@ -1,5 +1,7 @@
 package object;
 
+import java.awt.Graphics2D;
+
 import entity.Projectile;
 import main.GamePanel;
 
@@ -12,7 +14,7 @@ public class OBJ_GreenProjectile extends Projectile {
         this.gp = gp;
         
         name = "GreenProjectile";
-        speed = 1;
+        speed = 4;
         maxLife = 80; // Maksimum jarak tempuh
         life = maxLife;
         attack = 2;
@@ -39,7 +41,7 @@ public class OBJ_GreenProjectile extends Projectile {
     }
     
     @Override
-    public void draw(java.awt.Graphics2D g2) {
+    public void draw(Graphics2D g2) {
         if (image != null && alive) {
             int screenX = worldX - gp.player.worldX + gp.player.screenX;
             int screenY = worldY - gp.player.worldY + gp.player.screenY;
