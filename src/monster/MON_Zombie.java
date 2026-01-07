@@ -23,7 +23,7 @@ public class MON_Zombie extends Entity {
 		speed = defaultSpeed;
 		maxLife = 4;
 		life = maxLife;
-		attack = 4;
+		attack = 2;
 		defense = 2;
 		exp = 10;
 		
