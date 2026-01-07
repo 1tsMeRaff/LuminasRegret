@@ -164,17 +164,16 @@ public class TileManager {
         setup(1, 145, "tile272(2)", false);
         setup(1, 146, "tile272", false);
         
-        // Setup tile yang kosong di world 1 dengan placeholder
+        
         for (int i = 0; i < 300; i++) {
             if (tile[1][i] == null) {
-                // Jika tile belum disetup, buat tile kosong dengan collision false
                 try {
                     tile[1][i] = new Tile();
                     tile[1][i].image = ImageIO.read(getClass().getResourceAsStream("/tiles/air.png"));
                     tile[1][i].image = new UtilityTool().scaleImage(tile[1][i].image, gp.tileSize, gp.tileSize);
                     tile[1][i].collision = false;
                 } catch (IOException e) {
-                    // Jika tidak ada file "air.png", buat tile dengan gambar null
+                	
                     tile[1][i] = new Tile();
                     tile[1][i].collision = false;
                 }

@@ -27,6 +27,7 @@ public class MON_GreenSlime extends Entity {
 		attack = 2;
 		defense = 0;
 		exp = 2;
+		aggroRange = 10;
 		projectile = new OBJ_GreenProjectile(gp);
 		
 		solidArea.x = 12;
@@ -52,17 +53,26 @@ public class MON_GreenSlime extends Entity {
 		right2 = setup("/monster/slimeright2", size, size);
 	}
 	public void setAction() {
+		
+		int xDistance = Math.abs(worldX - gp.player.worldX);
+		int yDistance = Math.abs(worldY - gp.player.worldY);
+		int tileDistance = (xDistance + yDistance) / gp.tileSize;
 	    
-	    if (onPath) {
-	        // 1. UPDATE GOAL SECARA REALTIME
+		if (onPath) {
+			
+			if(tileDistance > aggroRange) {
+				onPath = false;
+			}
+			
+			// UPDATE GOAL SECARA REALTIME
 	        int currentCol = (worldX + solidArea.x) / gp.tileSize;
 	        int currentRow = (worldY + solidArea.y) / gp.tileSize;
 	        int goalCol = (gp.player.worldX + gp.player.solidArea.x) / gp.tileSize;
 	        int goalRow = (gp.player.worldY + gp.player.solidArea.y) / gp.tileSize;
 
-	        // 2. LOGIKA MENEMBAK (Hanya saat probabilitas tepat)
+	        // LOGIKA MENEMBAK (Hanya saat probabilitas tepat)
 	        int i = new Random().nextInt(100) + 1;
-	        if (i > 99 && !projectile.alive && rangeAvailableCounter == 30) {
+	        if (i > 97 && !projectile.alive && rangeAvailableCounter == 30) {
 	            projectile.set(worldX, worldY, direction, true, this);
 	            
 	            // Check Vacancy - PINDAHKAN KE DALAM IF MENEMBAK
@@ -75,15 +85,20 @@ public class MON_GreenSlime extends Entity {
 	            rangeAvailableCounter = 0;
 	        }
 
-	        // 3. RE-PATHFINDING (Cari jalan setiap kali player bergerak)
+	        // Cari jalan setiap kali player bergerak
 	        searchPath(goalCol, goalRow);
+		}
+		else {
+			if(tileDistance < 5) {
+				int i = new Random().nextInt(100)+1;
+			}
+	        randomMovement();
+		}
+	    if (onPath) {
+	        
 
 	    } else {
-	        // Jarak deteksi (Opsional: Aggro otomatis jika player mendekat)
-//	        checkStartChasing(gp.player, 5, 100); 
-	        
-	        // Random movement jika tidak sedang mengejar
-	        randomMovement();
+	       
 	    }
 	}
 	
