@@ -1,36 +1,57 @@
 package tile;
 
+//Import untuk menggambar tile
 import java.awt.Color;
 import java.awt.Graphics2D;
+
+//Import untuk membaca file map (.txt)
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+//Import untuk membaca gambar tile
 import javax.imageio.ImageIO;
 
+//Import class utama game
 import main.GamePanel;
 import main.UtilityTool;
 
 public class TileManager {
     
+	// Referensi ke GamePanel agar bisa mengakses player, map, dan ukuran tile
     GamePanel gp;
+    
+    // Array tile per map
+    // tile[map][tileIndex]
     public Tile[][] tile;
+    
+    // Menyimpan layout map dari file txt
+    // mapTileNum[map][col][row]
     public int mapTileNum[][][];
+    
+    // Flag untuk menampilkan pathfinding (debug)
     boolean drawPath = true;
     
+    //Constructor TileManager Dipanggil saat game dijalankan
     public TileManager(GamePanel gp) {
         
+    	// Simpan referensi GamePanel
         this.gp = gp;
+        
+        // Inisialisasi array map
         mapTileNum = new int[gp.maxMap][gp.maxWorldCol][gp.maxWorldRow];
         
+        // Setiap map memiliki maksimal 300 jenis tile
         tile = new Tile[gp.maxMap][300];  // Setiap map memiliki array tile sendiri
         
+        // Load semua gambar tile
         getTileImage();    
-        loadMap("/maps/maps1.txt", 0);
-        loadMap("/maps/maps2.txt", 1);
+        loadMap("/maps/maps1.txt", 0); // Map pertama
+        loadMap("/maps/maps2.txt", 1); // Map kedua
     }
     
+    //Memuat tile untuk setiap map
     public void getTileImage() {
         
         // Setup tile untuk world 0 (map pertama)
@@ -40,6 +61,7 @@ public class TileManager {
         setupWorld1();
     }
     
+    //Setup tile khusus untuk MAP 0 
     private void setupWorld0() {
         setup(0, 0, "air", true); // dipakai
         setup(0, 2, "sungai11", true); // dipakai
@@ -108,8 +130,8 @@ public class TileManager {
         setup(0, 65, "portal", false); // dipakai
     }
     
+    //Setup tile khusus untuk MAP 1
     private void setupWorld1() {
-        // Untuk world 1, gunakan index yang sama tapi di array terpisah
         setup(1, 0, "hitam", true);
         setup(1, 1, "tile001", false);
         setup(1, 2, "tile002", true);
@@ -164,8 +186,11 @@ public class TileManager {
         setup(1, 145, "tile272(2)", false);
         setup(1, 146, "tile272", false);
         
-        
+        // Jika ada tile yang belum diset,
+        // maka otomatis diisi dengan tile "air"
         for (int i = 0; i < 300; i++) {
+        	
+        	// Jika tile belum ada
             if (tile[1][i] == null) {
                 try {
                     tile[1][i] = new Tile();
@@ -174,6 +199,7 @@ public class TileManager {
                     tile[1][i].collision = false;
                 } catch (IOException e) {
                 	
+                	// Jika gagal load gambar, tetap buat tile kosong
                     tile[1][i] = new Tile();
                     tile[1][i].collision = false;
                 }
@@ -181,14 +207,19 @@ public class TileManager {
         }
     }
     
+    //Method untuk membuat 1 tile
     public void setup(int mapIndex, int tileIndex, String imageName, boolean collision) {
         
         UtilityTool uTool = new UtilityTool();
         
         try {
+        	// Buat objek tile baru
             tile[mapIndex][tileIndex] = new Tile();
+         // Load gambar tile
             tile[mapIndex][tileIndex].image = ImageIO.read(getClass().getResourceAsStream("/tiles/" + imageName + ".png"));
+         // Sesuaikan ukuran tile
             tile[mapIndex][tileIndex].image = uTool.scaleImage(tile[mapIndex][tileIndex].image, gp.tileSize, gp.tileSize);
+         // Set collision tile
             tile[mapIndex][tileIndex].collision = collision;
             
         } catch (IOException e) {
@@ -196,6 +227,7 @@ public class TileManager {
         }
     }
     
+    //Membaca file map (.txt)
     public void loadMap(String filePath, int map) {
         try {
             InputStream is = getClass().getResourceAsStream(filePath);
@@ -204,6 +236,7 @@ public class TileManager {
             int col = 0;
             int row = 0;
             
+            // Membaca file baris per baris
             while (col < gp.maxWorldCol && row < gp.maxWorldRow) {
                 
                 String line = br.readLine();
@@ -229,26 +262,33 @@ public class TileManager {
         }
     }
     
+    //Menggambar tile sesuai map aktif
     public void draw(Graphics2D g2) {
         
         int worldCol = 0;
         int worldRow = 0;
-
+        
+        // Loop seluruh map
         while (worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
             
+        	// Ambil tile index dari map
             int tileNum = mapTileNum[gp.currentMap][worldCol][worldRow];
             
+            // Hitung posisi dunia
             int worldX = worldCol * gp.tileSize;
             int worldY = worldRow * gp.tileSize;
+            
+            // Konversi ke posisi layar
             int screenX = worldX - gp.player.worldX + gp.player.screenX;
             int screenY = worldY - gp.player.worldY + gp.player.screenY;
             
+            // Cek apakah tile masih dalam layar
             if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
                 worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
                 worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
                 worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
                 
-                // Gunakan currentMap untuk mengakses tile yang benar
+            	// Gambar tile sesuai map aktif
                 if (tile[gp.currentMap][tileNum] != null && tile[gp.currentMap][tileNum].image != null) {
                     g2.drawImage(tile[gp.currentMap][tileNum].image, screenX, screenY, null);
                 }
@@ -274,7 +314,7 @@ public class TileManager {
 //        }
     }
     
-    // Helper method untuk mendapatkan tile collision
+    // Mengecek apakah tile memiliki collision
     public boolean getTileCollision(int map, int col, int row) {
         int tileNum = mapTileNum[map][col][row];
         if (tile[map][tileNum] != null) {
