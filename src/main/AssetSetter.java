@@ -6,7 +6,10 @@ import monster.MON_GreenSlime;
 import monster.MON_Zombie;
 import object.OBJ_Axe;
 import object.OBJ_Bread;
+import object.OBJ_Chest;
 import object.OBJ_Coin_Bronze;
+import object.OBJ_Door;
+import object.OBJ_Door1;
 import object.OBJ_Key;
 import object.OBJ_Lantern;
 import object.OBJ_PlayerMana;
@@ -65,6 +68,84 @@ public class AssetSetter {
 		gp.obj[mapNum][i] = new OBJ_Bread(gp);
 		gp.obj[mapNum][i].worldX = gp.tileSize*12;
 		gp.obj[mapNum][i].worldY = gp.tileSize*26;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Chest(gp,new OBJ_Bread(gp));
+		gp.obj[mapNum][i].worldX = gp.tileSize*22;
+		gp.obj[mapNum][i].worldY = gp.tileSize*30;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Chest(gp,new OBJ_Bread(gp));
+		gp.obj[mapNum][i].worldX = gp.tileSize*18;
+		gp.obj[mapNum][i].worldY = gp.tileSize*22;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Chest(gp,new OBJ_Bread(gp));
+		gp.obj[mapNum][i].worldX = gp.tileSize*26;
+		gp.obj[mapNum][i].worldY = gp.tileSize*13;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Chest(gp,new OBJ_Shield_Iron(gp));
+		gp.obj[mapNum][i].worldX = gp.tileSize*38;
+		gp.obj[mapNum][i].worldY = gp.tileSize*18;
+		i++;
+		
+		mapNum = 1;
+		i = 0;
+		
+		gp.obj[mapNum][i] = new OBJ_Door(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize*26;
+		gp.obj[mapNum][i].worldY = gp.tileSize*37;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Door1(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize*26;
+		gp.obj[mapNum][i].worldY = gp.tileSize*36;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Door(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize*19;
+		gp.obj[mapNum][i].worldY = gp.tileSize*32;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Door1(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize*19;
+		gp.obj[mapNum][i].worldY = gp.tileSize*31;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Door(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize*26;
+		gp.obj[mapNum][i].worldY = gp.tileSize*23;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Door1(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize*26;
+		gp.obj[mapNum][i].worldY = gp.tileSize*22;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Key(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize*10;
+		gp.obj[mapNum][i].worldY = gp.tileSize*35;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Key(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize*23;
+		gp.obj[mapNum][i].worldY = gp.tileSize*10;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Key(gp);
+		gp.obj[mapNum][i].worldX = gp.tileSize*10;
+		gp.obj[mapNum][i].worldY = gp.tileSize*14;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Chest(gp,new OBJ_Key(gp));
+		gp.obj[mapNum][i].worldX = gp.tileSize*19;
+		gp.obj[mapNum][i].worldY = gp.tileSize*28;
+		i++;
+		
+		gp.obj[mapNum][i] = new OBJ_Chest(gp,new OBJ_Key(gp));
+		gp.obj[mapNum][i].worldX = gp.tileSize*32;
+		gp.obj[mapNum][i].worldY = gp.tileSize*28;
 		i++;
 		
 	}

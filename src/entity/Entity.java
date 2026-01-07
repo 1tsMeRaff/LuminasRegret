@@ -103,6 +103,7 @@ public class Entity {
 	public final int type_shield = 5;
 	public final int type_consumable = 6;
 	public final int type_pickupOnly = 7;
+	public final int type_obstacle = 8;
 	public final int type_light = 9;
 	public Entity currentLight;
 	
@@ -116,6 +117,29 @@ public class Entity {
     public Entity(GamePanel gp) {
         this.gp = gp;
     }
+    
+    public int getLeftX() {
+    	return worldX + solidArea.x;
+    }
+    public int getRightX() {
+    	return worldX + solidArea.x + solidArea.width;
+    }
+    public int getTopY() {
+    	return worldY + solidArea.y;
+    }
+    public int getBottomY() {
+    	return worldY + solidArea.y + solidArea.height;
+    }
+    public int getCol() {
+    	return (worldX + solidArea.x)/gp.tileSize;
+    }
+    public int getRow() {
+    	return (worldY + solidArea.y)/gp.tileSize;
+    }
+    
+    public void interact() {
+		
+	}
     
     // Check distance between entities
     public int getDistanceTo(Entity other) {
@@ -860,5 +884,36 @@ public class Entity {
         worldY = targetY;
         
         System.out.println("Aligned NPC to tile center: (" + currentCol + ", " + currentRow + ")");
+    }
+    
+    public int getDetected(Entity user, Entity target[][], String targetName) {
+    	
+    	int index = 999;
+    	
+    	//cek objek sekitar
+    	int nextWorldX = user.getLeftX();
+    	int nextWorldY = user.getTopY();
+    	
+    	switch(user.direction) {
+    	case "up": nextWorldY = user.getTopY()-1; break;
+    	case "down": nextWorldY = user.getBottomY()+1; break;
+    	case "left": nextWorldX = user.getLeftX()-1; break;
+    	case "right": nextWorldX = user.getRightX()+1; break;
+    	}
+    	int col = nextWorldX/gp.tileSize;
+    	int row = nextWorldY/gp.tileSize;
+    	
+    	for(int i = 0; i < target[1].length; i++) {
+    		if(target[gp.currentMap][i] !=null) {
+    			if(target[gp.currentMap][i].getCol() == col &&
+    					target[gp.currentMap][i].getRow() == row &&
+    					target[gp.currentMap][i].name.equals(targetName)) {
+    				
+    				index = i;
+    				break;
+    			}
+    		}
+    	}
+    	return index;
     }
 }
