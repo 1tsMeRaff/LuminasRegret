@@ -27,7 +27,6 @@ public class MON_GreenSlime extends Entity {
 		attack = 2;
 		defense = 0;
 		exp = 2;
-		aggroRange = 10;
 		projectile = new OBJ_GreenProjectile(gp);
 		
 		solidArea.x = 12;
@@ -54,52 +53,19 @@ public class MON_GreenSlime extends Entity {
 	}
 	public void setAction() {
 		
-		int xDistance = Math.abs(worldX - gp.player.worldX);
-		int yDistance = Math.abs(worldY - gp.player.worldY);
-		int tileDistance = (xDistance + yDistance) / gp.tileSize;
 	    
 		if (onPath) {
+			checkStopChasingOrNot(gp.player, 5, 100);
 			
-			if(tileDistance > aggroRange) {
-				onPath = false;
-			}
-			
-			// UPDATE GOAL SECARA REALTIME
-	        int currentCol = (worldX + solidArea.x) / gp.tileSize;
-	        int currentRow = (worldY + solidArea.y) / gp.tileSize;
-	        int goalCol = (gp.player.worldX + gp.player.solidArea.x) / gp.tileSize;
-	        int goalRow = (gp.player.worldY + gp.player.solidArea.y) / gp.tileSize;
+			// Cari jalan setiap kali player bergerak
+	        searchPath(getGoalCol(gp.player), getGoalRow(gp.player));
 
-	        // LOGIKA MENEMBAK (Hanya saat probabilitas tepat)
-	        int i = new Random().nextInt(100) + 1;
-	        if (i > 97 && !projectile.alive && rangeAvailableCounter == 30) {
-	            projectile.set(worldX, worldY, direction, true, this);
-	            
-	            // Check Vacancy - PINDAHKAN KE DALAM IF MENEMBAK
-	            for (int ii = 0; ii < gp.projectile[gp.currentMap].length; ii++) {
-	                if (gp.projectile[gp.currentMap][ii] == null) {
-	                    gp.projectile[gp.currentMap][ii] = projectile;
-	                    break;
-	                }
-	            }
-	            rangeAvailableCounter = 0;
-	        }
-
-	        // Cari jalan setiap kali player bergerak
-	        searchPath(goalCol, goalRow);
+	        checkShootOrNot(200, 30);
 		}
 		else {
-			if(tileDistance < 5) {
-				int i = new Random().nextInt(100)+1;
-			}
-	        randomMovement();
+			checkStartChasingOrNot(gp.player, 15, 100);
+			randomMovement();
 		}
-	    if (onPath) {
-	        
-
-	    } else {
-	       
-	    }
 	}
 	
 	public void searchPath(int goalCol, int goalRow) {
