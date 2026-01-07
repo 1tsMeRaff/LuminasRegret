@@ -31,7 +31,7 @@ public class OBJ_Key extends Entity {
 			gp.obj[gp.currentMap][objIndex + 1] = null;
 		}
 		else {
-			gp.ui.currentDialogue = "apa yang kamu lakukan";
+			gp.ui.currentDialogue = "apa yang kamu lakukan?";
 		}
 	}
 }

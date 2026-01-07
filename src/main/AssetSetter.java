@@ -2,6 +2,7 @@ package main;
 
 import entity.NPC_Guide;
 import entity.NPC_Merchant;
+import monster.MON_GoblinKing;
 import monster.MON_GreenSlime;
 import monster.MON_Zombie;
 import object.OBJ_Axe;
@@ -211,6 +212,11 @@ public class AssetSetter {
 		gp.monster[mapNum][i] = new MON_Zombie(gp);
 		gp.monster[mapNum][i].worldX = gp.tileSize * 11;
 		gp.monster[mapNum][i].worldY = gp.tileSize * 27;
+		i++;
+		
+		gp.monster[mapNum][i] = new MON_GoblinKing(gp);
+		gp.monster[mapNum][i].worldX = gp.tileSize * 29;
+		gp.monster[mapNum][i].worldY = gp.tileSize * 38;
 		i++;
 	}
 	

@@ -83,10 +83,19 @@ public class Player extends Entity {
     }
     public void setDefaultPositions() {
     	
-    	gp.currentMap = 0;
-        worldX = gp.tileSize * 23;
-        worldY = gp.tileSize * 23;
-        direction = "down";
+    	if(gp.currentMap == 0) {
+    		gp.currentMap = 0;
+            worldX = gp.tileSize * 23;
+            worldY = gp.tileSize * 23;
+            direction = "down";
+    	}
+    	else {
+    		gp.currentMap = 1;
+            worldX = gp.tileSize * 13;
+            worldY = gp.tileSize * 39;
+            direction = "down";
+    	}
+    	
     }
     
     public void restoreStatus() {

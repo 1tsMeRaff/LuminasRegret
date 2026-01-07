@@ -26,6 +26,7 @@ public class MON_Zombie extends Entity {
 		attack = 2;
 		defense = 2;
 		exp = 10;
+		knockBackPower = 5;
 		
 		solidArea.x = 4;
 		solidArea.y = 4;
@@ -48,7 +49,7 @@ public class MON_Zombie extends Entity {
 		int size = 64;
 		
 		up1 = setup("/monster/zombie_up1", size, size);
-		up2 = setup("/monster/zombie_up1", size, size);
+		up2 = setup("/monster/zombie_up2", size, size);
 		down1 = setup("/monster/zombie_down1", size, size);
 		down2 = setup("/monster/zombie_down2", size, size);
 		left1 = setup("/monster/zombie_left1", size, size);
