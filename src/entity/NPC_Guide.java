@@ -37,7 +37,7 @@ public class NPC_Guide extends Entity {
 	public void setDialogue() {
 		
 		
-		dialogues[0] = "Hello World";
+		dialogues[0] = "Halo petualang /n aku tahu kamu juga mencari harta itu";
 		dialogues[1] = "Hello World 2";
 		dialogues[2] = "Hello World 3";
 		dialogues[3] = "Hello World 4";

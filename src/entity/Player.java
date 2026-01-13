@@ -344,7 +344,6 @@ public class Player extends Entity {
             }
         }
         
-        // ... Sisa kode (Invincible counter, Life regen, dll) biarkan sama ...
         if(invincible == true) {
             invincibleCounter++;
             if(invincibleCounter > 40) {
@@ -404,7 +403,7 @@ public class Player extends Entity {
     		if (i != 999) {
     			attackCanceled = true;
     			gp.gameState = gp.dialogueState;
-                gp.npc[gp.currentMap][i].speak(); //FIXED
+                gp.npc[gp.currentMap][i].speak();
         		gp.keyH.actionPressed = false;
             }
     	}
