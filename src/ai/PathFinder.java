@@ -157,7 +157,6 @@ public class PathFinder {
         return false;
     }
     
-    // --- HELPER METHODS SAMA SEPERTI YANG KAMU BUAT SEBELUMNYA ---
     
     private boolean isValidCoordinate(int col, int row) {
         return col >= 0 && col < gp.maxWorldCol && row >= 0 && row < gp.maxWorldRow;
@@ -219,7 +218,7 @@ public class PathFinder {
         Node current = goalNode;
         pathList.clear();
         while (current != null && current != startNode) {
-            pathList.add(0, current); // Tambah ke depan list agar urutannya dari start -> goal
+            pathList.add(0, current); 
             current = current.parent;
         }
     }

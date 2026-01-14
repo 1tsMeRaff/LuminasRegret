@@ -68,14 +68,11 @@ public class NPC_Guide extends Entity {
                 boolean found = gp.pFinder.search(currentCol, currentRow, goalCol, goalRow);
                 
                 if (found && !gp.pFinder.pathList.isEmpty()) {
-                    // COPY hasil pathfinder global ke path lokal NPC
                     myPath.clear();
                     myPath.addAll(gp.pFinder.pathList); 
                     
-                    // Langsung jalan frame ini
                     followImprovedPath();
                 } else {
-                    System.out.println("❌ Path not found via Pathfinder!");
                     onPath = false;
                     myPath.clear();
                 }
@@ -92,10 +89,9 @@ public class NPC_Guide extends Entity {
     	
     	super.speak();
 
-        // Pastikan NPC berada tepat di tengah tile
-//        if (!isAtTileCenter()) {
-//            alignToTileCenter();
-//        }
+        if (!isAtTileCenter()) {
+            alignToTileCenter();
+        }
 
         goalCol = 29;
         goalRow = 30;
