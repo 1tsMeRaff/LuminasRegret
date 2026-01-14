@@ -341,6 +341,13 @@ public class UI {
         g2.setFont(g2.getFont().deriveFont(Font.PLAIN,28F));
         x += gp.tileSize;
         y += gp.tileSize;
+        
+        if (currentDialogue != null) {
+            for (String line : currentDialogue.split("\n")) {
+                g2.drawString(line, x, y);
+                y += 40; // Memberi jarak antar baris
+            }
+        }
     }
     
     public void drawCharacterScreen() {
