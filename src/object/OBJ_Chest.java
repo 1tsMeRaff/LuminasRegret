@@ -1,6 +1,5 @@
 package object;
 
-//berikan comment pada setiap code nya
 import entity.Entity;
 
 //Import GamePanel untuk akses player, UI, dan sound

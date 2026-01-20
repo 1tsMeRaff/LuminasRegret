@@ -1,100 +1,80 @@
 package tile;
 
-//Import untuk menggambar tile
-import java.awt.Color;
+
 import java.awt.Graphics2D;
 
-//Import untuk membaca file map (.txt)
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-//Import untuk membaca gambar tile
 import javax.imageio.ImageIO;
 
-//Import class utama game
 import main.GamePanel;
 import main.UtilityTool;
 
 public class TileManager {
     
-	// Referensi ke GamePanel agar bisa mengakses player, map, dan ukuran tile
     GamePanel gp;
     
-    // Array tile per map
-    // tile[map][tileIndex]
     public Tile[][] tile;
     
-    // Menyimpan layout map dari file txt
-    // mapTileNum[map][col][row]
     public int mapTileNum[][][];
     
-    // Flag untuk menampilkan pathfinding (debug)
-    boolean drawPath = true;
-    
-    //Constructor TileManager Dipanggil saat game dijalankan
     public TileManager(GamePanel gp) {
         
-    	// Simpan referensi GamePanel
         this.gp = gp;
         
-        // Inisialisasi array map
         mapTileNum = new int[gp.maxMap][gp.maxWorldCol][gp.maxWorldRow];
         
-        // Setiap map memiliki maksimal 300 jenis tile
-        tile = new Tile[gp.maxMap][300];  // Setiap map memiliki array tile sendiri
+        tile = new Tile[gp.maxMap][300];
         
-        // Load semua gambar tile
         getTileImage();    
-        loadMap("/maps/maps1.txt", 0); // Map pertama
-        loadMap("/maps/maps2.txt", 1); // Map kedua
+        loadMap("/maps/maps1.txt", 0); 
+        loadMap("/maps/maps2.txt", 1); 
     }
     
-    //Memuat tile untuk setiap map
     public void getTileImage() {
         
-        // Setup tile untuk world 0 (map pertama)
         setupWorld0();
         
-        // Setup tile untuk world 1 (map kedua)
         setupWorld1();
     }
     
-    //Setup tile khusus untuk MAP 0 
+    //Setup tile khusus untuk MAP 0
     private void setupWorld0() {
-        setup(0, 0, "air", true); // dipakai
-        setup(0, 2, "sungai11", true); // dipakai
-        setup(0, 3, "sungai01", true); // dipakai
-        setup(0, 4, "jembatan1", false); // dipakai
-        setup(0, 5, "rumah", true); // dipakai
-        setup(0, 6, "pohon3", true); // dipakai
-        setup(0, 7, "jalan01", false); // dipakai
-        setup(0, 8, "pohon5", true); // dipakai
-        setup(0, 9, "batu4", false); // dipakai
+        setup(0, 0, "air", true); 
+        setup(0, 2, "sungai11", true); 
+        setup(0, 3, "sungai01", true); 
+        setup(0, 4, "jembatan1", false); 
+        setup(0, 5, "rumah", true); 
+        setup(0, 6, "pohon3", true); 
+        setup(0, 7, "jalan01", false); 
+        setup(0, 8, "pohon5", true); 
+        setup(0, 9, "batu4", false); 
         setup(0, 10, "jalan04", false);
-        setup(0, 11, "jalan4", false); // dipakai
-        setup(0, 12, "jalan11", false); // dipakai
-        setup(0, 13, "jalan12", false); // dipakai
-        setup(0, 14, "jalan13", false); // dipakai
-        setup(0, 15, "jalan14", false); // dipakai
-        setup(0, 16, "jalan15", false); // dipakai
-        setup(0, 17, "jalan4", true); // dipakai
+        setup(0, 11, "jalan4", false);
+        setup(0, 12, "jalan11", false); 
+        setup(0, 13, "jalan12", false); 
+        setup(0, 14, "jalan13", false); 
+        setup(0, 15, "jalan14", false); 
+        setup(0, 16, "jalan15", false);
+        setup(0, 17, "jalan4", true);
         setup(0, 18, "batu2", true);
         setup(0, 19, "batu3", true);
-        setup(0, 20, "semak1", false); // dipakai
+        setup(0, 20, "semak1", false);
         setup(0, 21, "semak2", false);
         setup(0, 22, "jalan14", true);
-        setup(0, 23, "jalan2", false); // dipakai
-        setup(0, 24, "jalan3", false); // dipakai
+        setup(0, 23, "jalan2", false);
+        setup(0, 24, "jalan3", false);
         setup(0, 25, "jembatan2", true);
-        setup(0, 26, "jalan5", false); // dipakai
-        setup(0, 27, "jalan6", false); // dipakai
-        setup(0, 28, "jalan7", false); // dipakai        
-        setup(0, 29, "jalan8", false); // dipakai
+        setup(0, 26, "jalan5", false); 
+        setup(0, 27, "jalan6", false); 
+        setup(0, 28, "jalan7", false);         
+        setup(0, 29, "jalan8", false); 
         setup(0, 30, "pohon4", false);
-        setup(0, 31, "jembatan2", false); // dipakai
-        setup(0, 32, "jembatan3", false); // dipakai
+        setup(0, 31, "jembatan2", false); 
+        setup(0, 32, "jembatan3", false); 
         setup(0, 33, "rumah", false);
         setup(0, 34, "sungai04", false);
         setup(0, 35, "semak1", true);
@@ -102,32 +82,32 @@ public class TileManager {
         setup(0, 37, "sungai07", true);
         setup(0, 38, "sungai02", true);
         setup(0, 39, "sungai03", true);
-        setup(0, 40, "rumput", false); // dipakai
+        setup(0, 40, "rumput", false); 
         setup(0, 41, "sungai05", true);
         setup(0, 42, "sungai06", true);
-        setup(0, 43, "sungai01", false); // dipakai
-        setup(0, 44, "sungai02", false); // dipakai
-        setup(0, 45, "sungai03", false); // dipakai
-        setup(0, 46, "sungai04", false); // dipakai
-        setup(0, 47, "sungai05", false); // dipakai
-        setup(0, 48, "sungai06", false); // dipakai
-        setup(0, 49, "sungai07", false); // dipakai
-        setup(0, 50, "sungai08", false); // dipakai
+        setup(0, 43, "sungai01", false); 
+        setup(0, 44, "sungai02", false); 
+        setup(0, 45, "sungai03", false); 
+        setup(0, 46, "sungai04", false); 
+        setup(0, 47, "sungai05", false); 
+        setup(0, 48, "sungai06", false); 
+        setup(0, 49, "sungai07", false); 
+        setup(0, 50, "sungai08", false); 
         setup(0, 51, "sungai6", true);
-        setup(0, 52, "sungai5", true); // dipakai
-        setup(0, 53, "sungai10", false); // dipakai
-        setup(0, 54, "sungai11", false); // dipakai
-        setup(0, 55, "sungai12", false); // dipakai
-        setup(0, 56, "sungai2", true); // dipakai
-        setup(0, 57, "sungai8", true);  // dipakai
-        setup(0, 58, "sungai4", true); // dipakai
-        setup(0, 59, "tanah", false); // dipakai
-        setup(0, 60, "sungai6", true); // dipakai
-        setup(0, 61, "sungai7", true); // dipakai
-        setup(0, 62, "sungai3", true); // dipakai
-        setup(0, 63, "pohon2", true); // dipakai
-        setup(0, 64, "trunk", false); // dipakai
-        setup(0, 65, "portal", false); // dipakai
+        setup(0, 52, "sungai5", true); 
+        setup(0, 53, "sungai10", false); 
+        setup(0, 54, "sungai11", false); 
+        setup(0, 55, "sungai12", false); 
+        setup(0, 56, "sungai2", true); 
+        setup(0, 57, "sungai8", true);  
+        setup(0, 58, "sungai4", true); 
+        setup(0, 59, "tanah", false); 
+        setup(0, 60, "sungai6", true); 
+        setup(0, 61, "sungai7", true); 
+        setup(0, 62, "sungai3", true); 
+        setup(0, 63, "pohon2", true); 
+        setup(0, 64, "trunk", false); 
+        setup(0, 65, "portal", false);
     }
     
     //Setup tile khusus untuk MAP 1
@@ -186,11 +166,8 @@ public class TileManager {
         setup(1, 145, "tile272(2)", false);
         setup(1, 146, "tile272", false);
         
-        // Jika ada tile yang belum diset,
-        // maka otomatis diisi dengan tile "air"
         for (int i = 0; i < 300; i++) {
         	
-        	// Jika tile belum ada
             if (tile[1][i] == null) {
                 try {
                     tile[1][i] = new Tile();
@@ -199,7 +176,6 @@ public class TileManager {
                     tile[1][i].collision = false;
                 } catch (IOException e) {
                 	
-                	// Jika gagal load gambar, tetap buat tile kosong
                     tile[1][i] = new Tile();
                     tile[1][i].collision = false;
                 }
@@ -207,19 +183,14 @@ public class TileManager {
         }
     }
     
-    //Method untuk membuat 1 tile
     public void setup(int mapIndex, int tileIndex, String imageName, boolean collision) {
         
         UtilityTool uTool = new UtilityTool();
         
         try {
-        	// Buat objek tile baru
             tile[mapIndex][tileIndex] = new Tile();
-         // Load gambar tile
             tile[mapIndex][tileIndex].image = ImageIO.read(getClass().getResourceAsStream("/tiles/" + imageName + ".png"));
-         // Sesuaikan ukuran tile
             tile[mapIndex][tileIndex].image = uTool.scaleImage(tile[mapIndex][tileIndex].image, gp.tileSize, gp.tileSize);
-         // Set collision tile
             tile[mapIndex][tileIndex].collision = collision;
             
         } catch (IOException e) {
@@ -227,7 +198,6 @@ public class TileManager {
         }
     }
     
-    //Membaca file map (.txt)
     public void loadMap(String filePath, int map) {
         try {
             InputStream is = getClass().getResourceAsStream(filePath);
@@ -236,7 +206,6 @@ public class TileManager {
             int col = 0;
             int row = 0;
             
-            // Membaca file baris per baris
             while (col < gp.maxWorldCol && row < gp.maxWorldRow) {
                 
                 String line = br.readLine();
@@ -262,33 +231,25 @@ public class TileManager {
         }
     }
     
-    //Menggambar tile sesuai map aktif
     public void draw(Graphics2D g2) {
         
         int worldCol = 0;
         int worldRow = 0;
         
-        // Loop seluruh map
         while (worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
             
-        	// Ambil tile index dari map
             int tileNum = mapTileNum[gp.currentMap][worldCol][worldRow];
             
-            // Hitung posisi dunia
             int worldX = worldCol * gp.tileSize;
             int worldY = worldRow * gp.tileSize;
-            
-            // Konversi ke posisi layar
             int screenX = worldX - gp.player.worldX + gp.player.screenX;
             int screenY = worldY - gp.player.worldY + gp.player.screenY;
             
-            // Cek apakah tile masih dalam layar
             if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
                 worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
                 worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
                 worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
                 
-            	// Gambar tile sesuai map aktif
                 if (tile[gp.currentMap][tileNum] != null && tile[gp.currentMap][tileNum].image != null) {
                     g2.drawImage(tile[gp.currentMap][tileNum].image, screenX, screenY, null);
                 }
@@ -301,20 +262,8 @@ public class TileManager {
             }
         }
         
-//        if(drawPath == true) {
-//        	
-//        	g2.setColor(new Color(255,0,0,70));
-//            for(int i = 0; i < gp.pFinder.pathList.size(); i++) {
-//                int worldX = gp.pFinder.pathList.get(i).col * gp.tileSize;
-//                int worldY = gp.pFinder.pathList.get(i).row * gp.tileSize;
-//                int screenX = worldX - gp.player.worldX + gp.player.screenX;
-//                int screenY = worldY - gp.player.worldY + gp.player.screenY;
-//                g2.fillRect(screenX, screenY, gp.tileSize, gp.tileSize);
-//            }
-//        }
     }
     
-    // Mengecek apakah tile memiliki collision
     public boolean getTileCollision(int map, int col, int row) {
         int tileNum = mapTileNum[map][col][row];
         if (tile[map][tileNum] != null) {
