@@ -1,16 +1,27 @@
-# Eclipse
+# AI Agent Workspaces & Customizations
+.agents/
+.agents
+.gemini/
+
+# Eclipse & IDEs
 /bin/
 .classpath
 .project
 .settings/
 .metadata/
+.vscode/
+.idea/
+*.iml
 
 # Compiled class files  
 *.class
 
-# OS files
+# OS & Temporary files
 .DS_Store
 Thumbs.db
+desktop.ini
+*.tmp
+*.log
 
 # Build files
 target/

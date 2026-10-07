@@ -13,7 +13,9 @@ import object.OBJ_Lantern;
 import object.OBJ_Shield_Wood;
 import object.OBJ_Slash;
 import object.OBJ_Sword_Standard;
+import tile_interactive.InteractiveTile;
 
+@SuppressWarnings("this-escape")
 public class Player extends Entity {
     
     KeyHandler keyH;
@@ -73,7 +75,7 @@ public class Player extends Entity {
         dexterity = 1;
         exp = 0;
         nextLevelExp = 5;
-        coin = 500;
+        coin = 20;
         currentWeapon = new OBJ_Sword_Standard(gp);
         currentShield = new OBJ_Shield_Wood(gp);
         currentLight = null;
@@ -114,8 +116,6 @@ public class Player extends Entity {
     	inventory.clear();
     	inventory.add(currentWeapon);
     	inventory.add(currentShield);
-    	inventory.add(new OBJ_Lantern(gp));
-
     }
     public int getAttack() {
     	attackArea = currentWeapon.attackArea;
@@ -225,33 +225,51 @@ public class Player extends Entity {
             dashCoolDown--;
         }
         
-        if(gp.keyH.rangeKeyPressed == true && rangeAvailableCounter == 30 && projectile.haveResource(this) == true) {
-    	    
-    	    projectile.set(worldX, worldY, direction, true, this);
-    	    
-    	    projectile.substractResource(this);
-    	    
-    	    // Get Vacancy
-    	    for(int i = 0; i < gp.projectile[gp.currentMap].length; i++) {
-    	    	if(gp.projectile[gp.currentMap][i] == null) {
-    	    		gp.projectile[gp.currentMap][i] = projectile;
-    	    		projectile.projectileIndex = i;
-    	    		break;
-    	    	}
-    	    }
-    	    
-    	    rangeAvailableCounter = 0;
-    	}
+        if(gp.keyH.rangeKeyPressed == true && rangeAvailableCounter >= 30) {
+            if(projectile.haveResource(this)) {
+                object.OBJ_Slash newSlash = new object.OBJ_Slash(gp);
+                newSlash.set(worldX, worldY, direction, true, this);
+                newSlash.substractResource(this);
+
+                // Cari slot kosong di array projectile map aktif
+                for(int i = 0; i < gp.projectile[gp.currentMap].length; i++) {
+                    if(gp.projectile[gp.currentMap][i] == null) {
+                        gp.projectile[gp.currentMap][i] = newSlash;
+                        newSlash.projectileIndex = i;
+                        break;
+                    }
+                }
+                gp.playSE(8); // SFX Swipe / Magic wave
+                rangeAvailableCounter = 0;
+            } else {
+                gp.ui.addMessage("Mana tidak cukup!");
+                rangeAvailableCounter = 15; // Cooldown singkat untuk mencegah spam notifikasi
+            }
+        }
 
         // 2. LOGIKA ATTACK
         if(attacking == true) {
             attacking();
+            return; // KUNCI GERAKAN: Player berhenti sejenak saat mengayunkan pedang/kapak
         }
         
-        // 3. MOVEMENT NORMAL & INPUT
-        else if(keyH.upPressed == true || keyH.downPressed == true || 
-                keyH.leftPressed == true || keyH.rightPressed == true || 
-                keyH.actionPressed == true || keyH.dashKeyPressed == true) {
+        // 3. LOGIKA INTERAKSI & AKSI (KEYBOARD: E / ENTER / SPACE)
+        if(keyH.actionPressed == true || keyH.enterPressed == true) {
+            keyH.actionPressed = false;
+            keyH.enterPressed = false;
+
+            boolean interacted = interactNearest();
+            if(!interacted && attackCanceled == false) {
+                gp.playSE(7);
+                attacking = true;
+                spriteCounter = 0;
+            }
+            attackCanceled = false;
+        }
+
+        // 4. MOVEMENT NORMAL & INPUT
+        if(keyH.upPressed == true || keyH.downPressed == true || 
+           keyH.leftPressed == true || keyH.rightPressed == true || keyH.dashKeyPressed == true) {
             
             // --- AKTIVASI DASH (Q) ---
             if(keyH.dashKeyPressed == true && dashCoolDown == 0 && attackCanceled == false) {
@@ -260,64 +278,89 @@ public class Player extends Entity {
                  return;
             }
 
-            // --- TENTUKAN ARAH ---
-            if (keyH.upPressed == true) { direction = "up"; }
-            if (keyH.downPressed == true) { direction = "down"; }
-            if (keyH.leftPressed == true) { direction = "left"; }
-            if (keyH.rightPressed == true) { direction = "right"; }
+            // Tentukan pergerakan per-sumbu (X dan Y)
+            boolean moveX = false;
+            boolean moveY = false;
+            String dirX = "";
+            String dirY = "";
+
+            if (keyH.upPressed) { moveY = true; dirY = "up"; }
+            else if (keyH.downPressed) { moveY = true; dirY = "down"; }
+
+            if (keyH.leftPressed) { moveX = true; dirX = "left"; }
+            else if (keyH.rightPressed) { moveX = true; dirX = "right"; }
             
             // Cek apakah player menekan tombol vertikal DAN horizontal bersamaan
             boolean isMovingDiagonal = (keyH.upPressed || keyH.downPressed) && 
                                        (keyH.leftPressed || keyH.rightPressed);
             
             if(isMovingDiagonal) {
-                // Kurangi speed sekitar 30% saat diagonal agar total vektornya sama
                 speed = (int)Math.round(defaultSpeed * 0.707); 
-                // Contoh: Jika speed 4, diagonal jadi 3.
             } else {
                 speed = defaultSpeed;
             }
 
-            // --- CEK COLLISION ---
-            collisionOn = false;
-            gp.cChecker.checkTile(this);
-            
-            int objIndex = gp.cChecker.checkObject(this, true);
-            pickUpObject(objIndex);
-            
-            int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
-            interactNPC(npcIndex);
-            
-            int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
-            contactMonster(monsterIndex);
-            
-            gp.cChecker.checkEntity(this, gp.iTile);
-            gp.eHandler.checkEvent();
-            
-            // --- GERAKKAN PLAYER ---
-            // Kita tidak pakai moveX/moveY float lagi karena sudah dihandle speed integer di atas
-            if (collisionOn == false && keyH.actionPressed == false) {
-                
-                // Gerakan Diagonal Manual (agar collision checker tetap akurat per axis)
-                if(isMovingDiagonal) {
-                    // Update posisi berdasarkan tombol yang ditekan, bukan cuma "direction" terakhir
-                    if(keyH.upPressed)    worldY -= speed;
-                    if(keyH.downPressed)  worldY += speed;
-                    if(keyH.leftPressed)  worldX -= speed;
-                    if(keyH.rightPressed) worldX += speed;
-                } else {
-                    // Gerakan Lurus (Up/Down/Left/Right)
-                    switch(direction) {
-                        case "up":    worldY -= speed; break;
-                        case "down":  worldY += speed; break;
-                        case "left":  worldX -= speed; break;
-                        case "right": worldX += speed; break;
-                    }
+            // --- CEK PER-AXIS COLLISION (WALL SLIDING) ---
+            boolean canMoveX = false;
+            boolean canMoveY = false;
+            String origDirection = direction;
+
+            // 1. Cek Sumbu X Independen
+            if (moveX) {
+                direction = dirX;
+                collisionOn = false;
+                gp.cChecker.checkTile(this);
+                int objIndex = gp.cChecker.checkObject(this, true);
+                pickUpObject(objIndex);
+                int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
+                interactNPC(npcIndex);
+                int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
+                contactMonster(monsterIndex);
+                gp.cChecker.checkEntity(this, gp.iTile);
+                gp.eHandler.checkEvent();
+
+                if (!collisionOn) {
+                    canMoveX = true;
                 }
+            }
+
+            // 2. Cek Sumbu Y Independen
+            if (moveY) {
+                direction = dirY;
+                collisionOn = false;
+                gp.cChecker.checkTile(this);
+                int objIndex = gp.cChecker.checkObject(this, true);
+                pickUpObject(objIndex);
+                int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
+                interactNPC(npcIndex);
+                int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
+                contactMonster(monsterIndex);
+                gp.cChecker.checkEntity(this, gp.iTile);
+                gp.eHandler.checkEvent();
+
+                if (!collisionOn) {
+                    canMoveY = true;
+                }
+            }
+
+            // --- GERAKKAN PLAYER DENGAN SMOOTH SLIDING ---
+            if (canMoveX) {
+                if (dirX.equals("left")) worldX -= speed;
+                else if (dirX.equals("right")) worldX += speed;
+                direction = dirX;
+            }
+            if (canMoveY) {
+                if (dirY.equals("up")) worldY -= speed;
+                else if (dirY.equals("down")) worldY += speed;
+                if (!canMoveX || moveY) {
+                    direction = dirY;
+                }
+            }
+            if (!canMoveX && !canMoveY) {
+                direction = origDirection;
             }
             
             if(life <= 0) {
-
             	gp.stopMusic();
         		gp.playSE(10);
             	gp.gameState = gp.gameOverState;
@@ -325,15 +368,6 @@ public class Player extends Entity {
             
             // Kembalikan speed ke normal untuk perhitungan frame berikutnya
             speed = defaultSpeed;
-            
-            // Attack Input
-            if(keyH.actionPressed == true && attackCanceled == false) {
-                gp.playSE(7);
-                attacking = true;
-                spriteCounter = 0;
-            }
-            
-            attackCanceled = false;
             
             // Sprite Animation
             spriteCounter++;
@@ -350,7 +384,7 @@ public class Player extends Entity {
                  if(dashing == false) { 
                      invincible = false;
                      invincibleCounter = 0;
-                 }
+                  }
             }
         }
         if(rangeAvailableCounter < 30) {
@@ -359,54 +393,334 @@ public class Player extends Entity {
     }
     
     public void pickUpObject(int i) {
-    	
         if (i != 999) {
-        	
-        	//Pickup Only Items
-        	if(gp.obj[gp.currentMap][i].type == type_pickupOnly) { //FIXED
-        		
-        		gp.obj[gp.currentMap][i].use(this); //FIXED
-        		gp.obj[gp.currentMap][i] = null; //FIXED
-        	}
-        	// OBSTACLE
-        	else if(gp.obj[gp.currentMap][i].type == type_obstacle) {
-        		if(keyH.enterPressed == true) {
-        			attackCanceled = true;
-        			gp.obj[gp.currentMap][i].interact();
-        		}
-        	}
-        	
-        	//Inventory Items
-        	else {
-        		String text;
-            	
-            	if(inventory.size() != maxInventorySize) {
-            		
-            		inventory.add(gp.obj[gp.currentMap][i]); //FIXED
-            		gp.playSE(1);
-            		text = "Mendapat" + gp.obj[gp.currentMap][i].name + "!"; //FIXED
-            	}
-            	else {
-            		text = "Inventory penuh!!!";
-            	}
-            	gp.ui.addMessage(text);
-            	gp.obj[gp.currentMap][i] = null; //FIXED DONT'S FORGET THIS
-        	}
-        	
+            // Pickup Only Items (koin, mana potion, dsb)
+            if(gp.obj[gp.currentMap][i].type == type_pickupOnly) {
+                gp.obj[gp.currentMap][i].use(this);
+                gp.obj[gp.currentMap][i] = null;
+            }
+            // Non-obstacle item di tanah bisa langsung diambil saat diinjak
+            else if(gp.obj[gp.currentMap][i].type != type_obstacle) {
+                pickUpSpecificItem(gp.obj[gp.currentMap][i]);
+            }
+        }
+    }
+
+    public void pickUpSpecificItem(Entity item) {
+        if (item == null) return;
+        if (inventory.size() < maxInventorySize) {
+            inventory.add(item);
+            gp.playSE(1);
+            String text = "Mendapat " + item.name + "!";
+            if(item instanceof object.OBJ_Relic) {
+                gp.qManager.completeCurrentAndAdvance(quest.QuestType.RETURN_TO_GUIDE);
+            } else if(gp.qManager.getCurrentQuest() == quest.QuestType.GET_TOOLS) {
+                if(hasItem("Kapak") && hasItem("Lentera")) {
+                    gp.qManager.completeCurrentAndAdvance(quest.QuestType.CLEAR_PATH);
+                }
+            }
+            gp.ui.addMessage(text);
+            removeObj(item);
+        } else {
+            gp.ui.addMessage("Inventory penuh!!!");
+        }
+    }
+
+    private void removeObj(Entity target) {
+        if (gp.obj == null || gp.currentMap >= gp.obj.length || gp.obj[gp.currentMap] == null) return;
+        for (int i = 0; i < gp.obj[gp.currentMap].length; i++) {
+            if (gp.obj[gp.currentMap][i] == target) {
+                gp.obj[gp.currentMap][i] = null;
+                break;
+            }
+        }
+    }
+
+    private boolean isEntityInArray(Entity target, Entity[] arr) {
+        if (arr == null) return false;
+        for (Entity e : arr) {
+            if (e == target) return true;
+        }
+        return false;
+    }
+    
+    public boolean hasItem(String itemName) {
+        if(currentWeapon != null && currentWeapon.name.equalsIgnoreCase(itemName)) return true;
+        if(currentShield != null && currentShield.name.equalsIgnoreCase(itemName)) return true;
+        if(currentLight != null && currentLight.name.equalsIgnoreCase(itemName)) return true;
+        for(Entity item : inventory) {
+            if(item != null && item.name.equalsIgnoreCase(itemName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean removeItem(String itemName) {
+        if (itemName == null) return false;
+        for (int i = 0; i < inventory.size(); i++) {
+            Entity item = inventory.get(i);
+            if (item != null && item.name != null && item.name.equalsIgnoreCase(itemName)) {
+                inventory.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void faceTowards(int targetCenterX, int targetCenterY) {
+        int dx = targetCenterX - getCenterX();
+        int dy = targetCenterY - getCenterY();
+        if (Math.abs(dx) > Math.abs(dy)) {
+            direction = (dx >= 0) ? "right" : "left";
+        } else {
+            direction = (dy >= 0) ? "down" : "up";
+        }
+    }
+
+    private String getOppositeDirection(String dir) {
+        switch (dir) {
+            case "up": return "down";
+            case "down": return "up";
+            case "left": return "right";
+            case "right": return "left";
+            default: return "down";
+        }
+    }
+
+    private boolean isFacing(int dx, int dy) {
+        switch (direction) {
+            case "up":    return dy <= 24 && Math.abs(dx) <= Math.abs(dy) + 32;
+            case "down":  return dy >= -24 && Math.abs(dx) <= Math.abs(dy) + 32;
+            case "left":  return dx <= 24 && Math.abs(dy) <= Math.abs(dx) + 32;
+            case "right": return dx >= -24 && Math.abs(dy) <= Math.abs(dx) + 32;
+            default:      return true;
+        }
+    }
+
+    public Entity getNearbyInteractable() {
+        int playerCenterX = getCenterX();
+        int playerCenterY = getCenterY();
+        int maxDist = (int)(gp.tileSize * 2.2); // ~105 px
+
+        Entity bestTarget = null;
+        double minDistance = Double.MAX_VALUE;
+
+        // 1. Cek NPCs
+        if (gp.npc != null && gp.currentMap >= 0 && gp.currentMap < gp.npc.length && gp.npc[gp.currentMap] != null) {
+            for (int i = 0; i < gp.npc[gp.currentMap].length; i++) {
+                Entity n = gp.npc[gp.currentMap][i];
+                if (n != null && n.alive) {
+                    int dx = n.getCenterX() - playerCenterX;
+                    int dy = n.getCenterY() - playerCenterY;
+                    double dist = Math.hypot(dx, dy);
+
+                    if (dist <= maxDist) {
+                        boolean facing = isFacing(dx, dy);
+                        if (dist <= gp.tileSize * 1.5 || facing) {
+                            double score = facing ? (dist * 0.7) : dist;
+                            if (score < minDistance) {
+                                minDistance = score;
+                                bestTarget = n;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Cek Objects (Chest, Door, Item di tanah)
+        if (gp.obj != null && gp.currentMap >= 0 && gp.currentMap < gp.obj.length && gp.obj[gp.currentMap] != null) {
+            for (int i = 0; i < gp.obj[gp.currentMap].length; i++) {
+                Entity o = gp.obj[gp.currentMap][i];
+                if (o != null) {
+                    int dx = o.getCenterX() - playerCenterX;
+                    int dy = o.getCenterY() - playerCenterY;
+                    double dist = Math.hypot(dx, dy);
+
+                    if (dist <= maxDist) {
+                        boolean facing = isFacing(dx, dy);
+                        if (dist <= gp.tileSize * 1.5 || facing) {
+                            double score = facing ? (dist * 0.7) : dist;
+                            if (score < minDistance) {
+                                minDistance = score;
+                                bestTarget = o;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Cek Interactive Tiles (Pohon kering)
+        if (bestTarget == null && gp.iTile != null && gp.currentMap >= 0 && gp.currentMap < gp.iTile.length && gp.iTile[gp.currentMap] != null) {
+            for (int i = 0; i < gp.iTile[gp.currentMap].length; i++) {
+                InteractiveTile it = gp.iTile[gp.currentMap][i];
+                if (it != null && it.destructible) {
+                    int dx = it.getCenterX() - playerCenterX;
+                    int dy = it.getCenterY() - playerCenterY;
+                    double dist = Math.hypot(dx, dy);
+
+                    if (dist <= maxDist && (dist <= gp.tileSize * 1.5 || isFacing(dx, dy))) {
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            bestTarget = it;
+                        }
+                    }
+                }
+            }
+        }
+
+        return bestTarget;
+    }
+
+    public boolean interactWith(Entity target) {
+        if (target == null) return false;
+
+        attackCanceled = true;
+        faceTowards(target.getCenterX(), target.getCenterY());
+
+        // A. Jika NPC
+        if (target instanceof NPC_Guide || target instanceof NPC_Merchant || (gp.npc != null && isEntityInArray(target, gp.npc[gp.currentMap]))) {
+            target.direction = getOppositeDirection(this.direction);
+            gp.ui.npc = target;
+            target.speak();
+            return true;
+        }
+
+        // B. Jika Interactive Tile (Pohon kering)
+        if (target instanceof InteractiveTile) {
+            InteractiveTile it = (InteractiveTile) target;
+            if (it.isCorrectItem(this)) {
+                attacking = true;
+                spriteCounter = 0;
+                attackCanceled = false;
+                gp.playSE(1); // Suara ayunan tebasan kapak
+                for (int i = 0; i < gp.iTile[gp.currentMap].length; i++) {
+                    if (gp.iTile[gp.currentMap][i] == it) {
+                        gp.iTile[gp.currentMap][i] = null;
+                        break;
+                    }
+                }
+                generateParticle(it, it);
+                return true;
+            } else {
+                gp.gameState = gp.dialogueState;
+                gp.ui.npc = null;
+                gp.ui.currentSpeakerName = "Rintangan";
+                gp.ui.currentDialogue = "Semak duri ini terlalu lebat.\nKamu memerlukan Kapak untuk menebasnya!";
+                return true;
+            }
+        }
+
+        // C. Jika Object
+        if (target.type == type_pickupOnly) {
+            target.use(this);
+            removeObj(target);
+            return true;
+        } else if (target.type == type_obstacle) {
+            gp.ui.npc = null;
+            target.interact();
+            return true;
+        } else {
+            pickUpSpecificItem(target);
+            return true;
+        }
+    }
+
+    public boolean interactNearest() {
+        Entity target = getNearbyInteractable();
+        if (target != null) {
+            return interactWith(target);
+        }
+        return false;
+    }
+
+    public boolean interactAtLocation(int worldTargetX, int worldTargetY) {
+        int playerCenterX = getCenterX();
+        int playerCenterY = getCenterY();
+        int maxClickDist = (int)(gp.tileSize * 1.5); // ~72 px (radius 1.5 tile)
+
+        // 1. Cek apakah klik mengenai NPC
+        if (gp.npc != null && gp.currentMap >= 0 && gp.currentMap < gp.npc.length && gp.npc[gp.currentMap] != null) {
+            for (int i = 0; i < gp.npc[gp.currentMap].length; i++) {
+                Entity n = gp.npc[gp.currentMap][i];
+                if (n != null && n.alive) {
+                    if (worldTargetX >= n.worldX && worldTargetX <= n.worldX + gp.tileSize &&
+                        worldTargetY >= n.worldY && worldTargetY <= n.worldY + gp.tileSize) {
+                        double dist = Math.hypot(n.getCenterX() - playerCenterX, n.getCenterY() - playerCenterY);
+                        if (dist <= maxClickDist) {
+                            return interactWith(n);
+                        } else {
+                            faceTowards(n.getCenterX(), n.getCenterY());
+                            gp.ui.addMessage("Mendekatlah untuk berbicara!");
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Cek apakah klik mengenai Object
+        if (gp.obj != null && gp.currentMap >= 0 && gp.currentMap < gp.obj.length && gp.obj[gp.currentMap] != null) {
+            for (int i = 0; i < gp.obj[gp.currentMap].length; i++) {
+                Entity o = gp.obj[gp.currentMap][i];
+                if (o != null) {
+                    if (worldTargetX >= o.worldX && worldTargetX <= o.worldX + gp.tileSize &&
+                        worldTargetY >= o.worldY && worldTargetY <= o.worldY + gp.tileSize) {
+                        double dist = Math.hypot(o.getCenterX() - playerCenterX, o.getCenterY() - playerCenterY);
+                        if (dist <= maxClickDist) {
+                            return interactWith(o);
+                        } else {
+                            faceTowards(o.getCenterX(), o.getCenterY());
+                            gp.ui.addMessage("Mendekatlah untuk berinteraksi!");
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Cek apakah klik mengenai Interactive Tile
+        if (gp.iTile != null && gp.currentMap >= 0 && gp.currentMap < gp.iTile.length && gp.iTile[gp.currentMap] != null) {
+            for (int i = 0; i < gp.iTile[gp.currentMap].length; i++) {
+                InteractiveTile it = gp.iTile[gp.currentMap][i];
+                if (it != null && it.destructible) {
+                    if (worldTargetX >= it.worldX && worldTargetX <= it.worldX + gp.tileSize &&
+                        worldTargetY >= it.worldY && worldTargetY <= it.worldY + gp.tileSize) {
+                        double dist = Math.hypot(it.getCenterX() - playerCenterX, it.getCenterY() - playerCenterY);
+                        if (dist <= maxClickDist) {
+                            return interactWith(it);
+                        } else {
+                            faceTowards(it.getCenterX(), it.getCenterY());
+                            gp.ui.addMessage("Mendekatlah untuk menebas!");
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public void attackTowards(int worldTargetX, int worldTargetY) {
+        faceTowards(worldTargetX, worldTargetY);
+        if (!attacking) {
+            attacking = true;
+            spriteCounter = 0;
+            gp.playSE(7);
         }
     }
     
-    
     public void interactNPC(int i) {
-    	
-    	if(gp.keyH.actionPressed == true) {
-    		if (i != 999) {
-    			attackCanceled = true;
-    			gp.gameState = gp.dialogueState;
-                gp.npc[gp.currentMap][i].speak();
-        		gp.keyH.actionPressed = false;
+        if (i != 999) {
+            if (gp.keyH.actionPressed == true || gp.keyH.enterPressed == true) {
+                gp.keyH.actionPressed = false;
+                gp.keyH.enterPressed = false;
+                interactWith(gp.npc[gp.currentMap][i]);
             }
-    	}
+        }
     }
     
     public void contactMonster(int i) {
@@ -430,7 +744,7 @@ public class Player extends Entity {
     	
     	if(i != 999) {
     		
-    		if(gp.monster[gp.currentMap][i].invincible == false) { //FIXED
+    		if(gp.monster[gp.currentMap][i].invincible == false && gp.monster[gp.currentMap][i].dying == false) { //FIXED
     			
     			gp.playSE(5);
     			if(knockBackPower > 0) {
@@ -442,7 +756,7 @@ public class Player extends Entity {
     				damage = 0;
     			}
     			gp.monster[gp.currentMap][i].life -= damage; //FIXED
-    			gp.ui.addMessage(damage + "damage!");
+    			gp.ui.addMessage(damage + " damage!");
     			gp.monster[gp.currentMap][i].invincible = true; //FIXED
     			gp.monster[gp.currentMap][i].damageReaction(); //FIXED
     			

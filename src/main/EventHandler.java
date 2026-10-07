@@ -5,77 +5,64 @@ import entity.Entity;
 public class EventHandler {
 	
 	GamePanel gp;
-	EventRect eventRect[][][];
+	private final java.util.Map<Long, EventRect> eventMap = new java.util.HashMap<>();
 	
 	int previousEventX, previousEventY;
 	boolean canTouchEvent = true;
 	int tempMap, tempCol, tempRow;
 	
-	
 	public EventHandler(GamePanel gp) {
 		this.gp = gp;
-		
-		eventRect = new EventRect[gp.maxMap][gp.maxWorldCol][gp.maxWorldRow];
-		
-		int map = 0;
-		int col = 0;
-		int row = 0;
-		while(map < gp.maxMap && col  <gp.maxWorldCol && row < gp.maxWorldRow) {
-			
-			eventRect[map][col][row] = new EventRect();
-			eventRect[map][col][row].x = 8;
-			eventRect[map][col][row].y = 8;
-			eventRect[map][col][row].width = 32;
-			eventRect[map][col][row].height = 32;
-			eventRect[map][col][row].eventRectDefaultX = eventRect[map][col][row].x;
-			eventRect[map][col][row].eventRectDefaultY = eventRect[map][col][row].y;
-			
-			col++;
-			if(col == gp.maxWorldCol) {
-				col = 0;
-				row++;
-				
-				if(row == gp.maxWorldRow) {
-					row = 0;
-					map++;
-				}
-			}
-		}
 	}
-	
+
+	private long toKey(int map, int col, int row) {
+		return (((long) map) << 32) | (((long) col) << 16) | (long) row;
+	}
+
+	public EventRect getEventRect(int map, int col, int row) {
+		long key = toKey(map, col, row);
+		return eventMap.computeIfAbsent(key, k -> {
+			EventRect er = new EventRect();
+			er.x = 8;
+			er.y = 8;
+			er.width = 32;
+			er.height = 32;
+			er.eventRectDefaultX = er.x;
+			er.eventRectDefaultY = er.y;
+			return er;
+		});
+	}
 
 	public boolean hit(int map, int col, int row, String reqDirection) {
-		
 		boolean hit = false;
 		
 		if(map == gp.currentMap) {
+			int playerX = gp.player.worldX + gp.player.solidArea.x;
+			int playerY = gp.player.worldY + gp.player.solidArea.y;
+			int playerW = gp.player.solidArea.width;
+			int playerH = gp.player.solidArea.height;
 			
-			gp.player.solidArea.x = gp.player.worldX + gp.player.solidArea.x;
-			gp.player.solidArea.y = gp.player.worldY + gp.player.solidArea.y;
-			eventRect[map][col][row].x = col * gp.tileSize + eventRect[map][col][row].x;
-			eventRect[map][col][row].y = row * gp.tileSize + eventRect[map][col][row].y;
+			EventRect ev = getEventRect(map, col, row);
+			int evX = col * gp.tileSize + ev.eventRectDefaultX;
+			int evY = row * gp.tileSize + ev.eventRectDefaultY;
+			int evW = ev.width;
+			int evH = ev.height;
 			
-			if(gp.player.solidArea.intersects(eventRect[map][col][row]) && eventRect[map][col][row].eventDone == false) {
+			if(CollisionMath.intersects(playerX, playerY, playerW, playerH, evX, evY, evW, evH) && !ev.eventDone) {
 				if(gp.player.direction.equals(reqDirection) || reqDirection.contentEquals("any")) {
 					hit = true;
-					
 					previousEventX = gp.player.worldX;
 					previousEventY = gp.player.worldY;
 				}
 			}
-			
-			gp.player.solidArea.x = gp.player.solidAreaDefaultX;
-			gp.player.solidArea.y = gp.player.solidAreaDefaultY;
-			eventRect[map][col][row].x = eventRect[map][col][row].eventRectDefaultX;
-			eventRect[map][col][row].y = eventRect[map][col][row].eventRectDefaultY;
 		}
 		
 		return hit;
-		
 	}
 	public void damagePit(int gameState) {
 		
 		gp.gameState = gameState;
+		gp.ui.npc = null;
 		gp.ui.currentDialogue = "Damage";
 		gp.player.life -= 1;
 //		eventRect[map][col][row].eventDone = true;
@@ -85,6 +72,7 @@ public class EventHandler {
 		
 		if(gp.keyH.enterPressed == true) {
 			gp.gameState = gameState;
+			gp.ui.npc = null;
 			gp.player.attackCanceled = true;
 			gp.playSE(2);
 			gp.ui.currentDialogue = "Healing";
@@ -131,12 +119,23 @@ public class EventHandler {
 	        if(hit(0,23,12,"up") == true) {
 	            healingPool(gp.dialogueState);
 	        }
-	        // ❌ HAPUS DUPLIKASI: else if(hit(0,23,12,"up") == true) {healingPool(gp.dialogueState);}
 	        else if((hit(0,36,35,"any") || hit(0,36,37,"any")) == true && gp.keyH.actionPressed == true) {
+	            if(!gp.player.hasItem("Lentera")) {
+	                gp.gameState = gp.dialogueState;
+	                gp.ui.npc = null;
+	                gp.ui.currentDialogue = "Dungeon terlalu gelap tanpa Lentera!\nDapatkan Lentera terlebih dahulu di desa.";
+	                return;
+	            }
 	            teleport(1,11,39);
+	            if(gp.qManager.getCurrentQuest() == quest.QuestType.CLEAR_PATH) {
+	                gp.qManager.completeCurrentAndAdvance(quest.QuestType.EXPLORE_DUNGEON);
+	            }
 	        }
 	        else if((hit(1,11,39,"any") || hit(1,12,40,"any")) == true && gp.keyH.actionPressed == true) {
 	            teleport(0,36,35);
+	        }
+	        else if((hit(1,25,27,"any") || hit(1,25,26,"any")) == true) {
+	            goblinKing();
 	        }
 	    }
 	}
@@ -146,6 +145,9 @@ public class EventHandler {
 	        gp.gameState = gp.cutsceneState;
 	        gp.csManager.startScene(gp.csManager.goblinKing);
 	        gp.bossBattleOn = true;
+	        if(gp.qManager.getCurrentQuest() == quest.QuestType.EXPLORE_DUNGEON) {
+	            gp.qManager.completeCurrentAndAdvance(quest.QuestType.DEFEAT_BOSS);
+	        }
 	    }
 	}
 }

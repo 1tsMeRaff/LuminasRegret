@@ -129,51 +129,36 @@ public class CollisionChecker {
             return index;
         }
         
-        // Simpan posisi asli solid area
-        Rectangle originalEntitySolidArea = new Rectangle(entity.solidArea);
-        entity.solidArea.x = entity.worldX + entity.solidArea.x;
-        entity.solidArea.y = entity.worldY + entity.solidArea.y;
-        
-        // Posisi solid area setelah bergerak
-        Rectangle futureSolidArea = new Rectangle(entity.solidArea);
+        int futureX = entity.worldX + entity.solidArea.x;
+        int futureY = entity.worldY + entity.solidArea.y;
+        int futureW = entity.solidArea.width;
+        int futureH = entity.solidArea.height;
         
         switch (direction) {
-            case "up": futureSolidArea.y -= entity.speed; break;
-            case "down": futureSolidArea.y += entity.speed; break;
-            case "left": futureSolidArea.x -= entity.speed; break;
-            case "right": futureSolidArea.x += entity.speed; break;
+            case "up": futureY -= entity.speed; break;
+            case "down": futureY += entity.speed; break;
+            case "left": futureX -= entity.speed; break;
+            case "right": futureX += entity.speed; break;
         }
         
         for (int i = 0; i < gp.obj[gp.currentMap].length; i++) {
-            if (gp.obj[gp.currentMap][i] != null) {
-                // Simpan posisi asli object
-                Rectangle originalObjSolidArea = new Rectangle(gp.obj[gp.currentMap][i].solidArea);
+            Entity obj = gp.obj[gp.currentMap][i];
+            if (obj != null) {
+                int objX = obj.worldX + obj.solidArea.x;
+                int objY = obj.worldY + obj.solidArea.y;
+                int objW = obj.solidArea.width;
+                int objH = obj.solidArea.height;
                 
-                // Hitung posisi object di world
-                Rectangle objWorldSolidArea = new Rectangle(
-                    gp.obj[gp.currentMap][i].worldX + gp.obj[gp.currentMap][i].solidArea.x,
-                    gp.obj[gp.currentMap][i].worldY + gp.obj[gp.currentMap][i].solidArea.y,
-                    gp.obj[gp.currentMap][i].solidArea.width,
-                    gp.obj[gp.currentMap][i].solidArea.height
-                );
-                
-                // Cek collision antara future solid area dan object
-                if (futureSolidArea.intersects(objWorldSolidArea)) {
-                    if (gp.obj[gp.currentMap][i].collision) {
+                if (CollisionMath.intersects(futureX, futureY, futureW, futureH, objX, objY, objW, objH)) {
+                    if (obj.collision) {
                         entity.collisionOn = true;
                     }
                     if (player) {
                         index = i;
                     }
                 }
-                
-                // Reset posisi object
-                gp.obj[gp.currentMap][i].solidArea.setBounds(originalObjSolidArea);
             }
         }
-        
-        // Reset posisi entity
-        entity.solidArea.setBounds(originalEntitySolidArea);
         return index;
     }
     
@@ -189,47 +174,32 @@ public class CollisionChecker {
             return index;
         }
         
-        // Simpan posisi asli solid area entity
-        Rectangle originalEntitySolidArea = new Rectangle(entity.solidArea);
-        entity.solidArea.x = entity.worldX + entity.solidArea.x;
-        entity.solidArea.y = entity.worldY + entity.solidArea.y;
-        
-        // Posisi solid area setelah bergerak
-        Rectangle futureSolidArea = new Rectangle(entity.solidArea);
+        int futureX = entity.worldX + entity.solidArea.x;
+        int futureY = entity.worldY + entity.solidArea.y;
+        int futureW = entity.solidArea.width;
+        int futureH = entity.solidArea.height;
         
         switch (direction) {
-            case "up": futureSolidArea.y -= entity.speed; break;
-            case "down": futureSolidArea.y += entity.speed; break;
-            case "left": futureSolidArea.x -= entity.speed; break;
-            case "right": futureSolidArea.x += entity.speed; break;
+            case "up": futureY -= entity.speed; break;
+            case "down": futureY += entity.speed; break;
+            case "left": futureX -= entity.speed; break;
+            case "right": futureX += entity.speed; break;
         }
         
         for (int i = 0; i < target[gp.currentMap].length; i++) {
-            if (target[gp.currentMap][i] != null && target[gp.currentMap][i] != entity) {
-                // Simpan posisi asli target
-                Rectangle originalTargetSolidArea = new Rectangle(target[gp.currentMap][i].solidArea);
+            Entity tgt = target[gp.currentMap][i];
+            if (tgt != null && tgt != entity) {
+                int tgtX = tgt.worldX + tgt.solidArea.x;
+                int tgtY = tgt.worldY + tgt.solidArea.y;
+                int tgtW = tgt.solidArea.width;
+                int tgtH = tgt.solidArea.height;
                 
-                // Hitung posisi target di world
-                Rectangle targetWorldSolidArea = new Rectangle(
-                    target[gp.currentMap][i].worldX + target[gp.currentMap][i].solidArea.x,
-                    target[gp.currentMap][i].worldY + target[gp.currentMap][i].solidArea.y,
-                    target[gp.currentMap][i].solidArea.width,
-                    target[gp.currentMap][i].solidArea.height
-                );
-                
-                // Cek collision antara future solid area dan target
-                if (futureSolidArea.intersects(targetWorldSolidArea)) {
+                if (CollisionMath.intersects(futureX, futureY, futureW, futureH, tgtX, tgtY, tgtW, tgtH)) {
                     entity.collisionOn = true;
                     index = i;
                 }
-                
-                // Reset posisi target
-                target[gp.currentMap][i].solidArea.setBounds(originalTargetSolidArea);
             }
         }
-        
-        // Reset posisi entity
-        entity.solidArea.setBounds(originalEntitySolidArea);
         return index;
     }
     
@@ -237,39 +207,27 @@ public class CollisionChecker {
     public boolean checkPlayer(Entity entity) {
         if (gp.player == null) return false;
         
-        // Simpan posisi asli solid area entity
-        Rectangle originalEntitySolidArea = new Rectangle(entity.solidArea);
-        entity.solidArea.x = entity.worldX + entity.solidArea.x;
-        entity.solidArea.y = entity.worldY + entity.solidArea.y;
-        
-        // Posisi solid area setelah bergerak
-        Rectangle futureSolidArea = new Rectangle(entity.solidArea);
+        int futureX = entity.worldX + entity.solidArea.x;
+        int futureY = entity.worldY + entity.solidArea.y;
+        int futureW = entity.solidArea.width;
+        int futureH = entity.solidArea.height;
         
         switch (entity.direction) {
-            case "up": futureSolidArea.y -= entity.speed; break;
-            case "down": futureSolidArea.y += entity.speed; break;
-            case "left": futureSolidArea.x -= entity.speed; break;
-            case "right": futureSolidArea.x += entity.speed; break;
+            case "up": futureY -= entity.speed; break;
+            case "down": futureY += entity.speed; break;
+            case "left": futureX -= entity.speed; break;
+            case "right": futureX += entity.speed; break;
         }
         
-        // Hitung posisi player di world
-        Rectangle playerWorldSolidArea = new Rectangle(
-            gp.player.worldX + gp.player.solidArea.x,
-            gp.player.worldY + gp.player.solidArea.y,
-            gp.player.solidArea.width,
-            gp.player.solidArea.height
-        );
+        int playerX = gp.player.worldX + gp.player.solidArea.x;
+        int playerY = gp.player.worldY + gp.player.solidArea.y;
+        int playerW = gp.player.solidArea.width;
+        int playerH = gp.player.solidArea.height;
         
-        // Cek collision antara future solid area dan player
-        if (futureSolidArea.intersects(playerWorldSolidArea)) {
+        if (CollisionMath.intersects(futureX, futureY, futureW, futureH, playerX, playerY, playerW, playerH)) {
             entity.collisionOn = true;
-            // Reset posisi entity
-            entity.solidArea.setBounds(originalEntitySolidArea);
             return true;
         }
-        
-        // Reset posisi entity
-        entity.solidArea.setBounds(originalEntitySolidArea);
         return false;
     }
     
@@ -284,55 +242,47 @@ public class CollisionChecker {
             return index;
         }
         
-        // Simpan posisi asli solid area entity
-        Rectangle originalEntitySolidArea = new Rectangle(entity.solidArea);
-        entity.solidArea.x = entity.worldX + entity.solidArea.x;
-        entity.solidArea.y = entity.worldY + entity.solidArea.y;
+        int entitySolidX = entity.worldX + entity.solidArea.x;
+        int entitySolidY = entity.worldY + entity.solidArea.y;
         
-        // Gunakan attack area untuk interaksi
-        Rectangle attackArea = new Rectangle(entity.attackArea);
+        int atkX = 0;
+        int atkY = 0;
+        int atkW = entity.attackArea.width;
+        int atkH = entity.attackArea.height;
         
-        // Atur posisi attack area berdasarkan arah dan ukuran attack area
         switch (entity.direction) {
             case "up":
-                attackArea.x = entity.solidArea.x + (entity.solidArea.width / 2) - (attackArea.width / 2);
-                attackArea.y = entity.solidArea.y - attackArea.height;
+                atkX = entitySolidX + (entity.solidArea.width / 2) - (atkW / 2);
+                atkY = entitySolidY - atkH;
                 break;
             case "down":
-                attackArea.x = entity.solidArea.x + (entity.solidArea.width / 2) - (attackArea.width / 2);
-                attackArea.y = entity.solidArea.y + entity.solidArea.height;
+                atkX = entitySolidX + (entity.solidArea.width / 2) - (atkW / 2);
+                atkY = entitySolidY + entity.solidArea.height;
                 break;
             case "left":
-                attackArea.x = entity.solidArea.x - attackArea.width;
-                attackArea.y = entity.solidArea.y + (entity.solidArea.height / 2) - (attackArea.height / 2);
+                atkX = entitySolidX - atkW;
+                atkY = entitySolidY + (entity.solidArea.height / 2) - (atkH / 2);
                 break;
             case "right":
-                attackArea.x = entity.solidArea.x + entity.solidArea.width;
-                attackArea.y = entity.solidArea.y + (entity.solidArea.height / 2) - (attackArea.height / 2);
+                atkX = entitySolidX + entity.solidArea.width;
+                atkY = entitySolidY + (entity.solidArea.height / 2) - (atkH / 2);
                 break;
         }
         
         for (int i = 0; i < gp.iTile[gp.currentMap].length; i++) {
             InteractiveTile tile = gp.iTile[gp.currentMap][i];
             if (tile != null && tile.destructible) {
-                // Hitung posisi tile di world
-                Rectangle tileWorldSolidArea = new Rectangle(
-                    tile.worldX + tile.solidArea.x,
-                    tile.worldY + tile.solidArea.y,
-                    tile.solidArea.width,
-                    tile.solidArea.height
-                );
+                int tileX = tile.worldX + tile.solidArea.x;
+                int tileY = tile.worldY + tile.solidArea.y;
+                int tileW = tile.solidArea.width;
+                int tileH = tile.solidArea.height;
                 
-                // Cek collision dengan attack area
-                if (attackArea.intersects(tileWorldSolidArea)) {
+                if (CollisionMath.intersects(atkX, atkY, atkW, atkH, tileX, tileY, tileW, tileH)) {
                     index = i;
                     break;
                 }
             }
         }
-        
-        // Reset posisi entity
-        entity.solidArea.setBounds(originalEntitySolidArea);
         return index;
     }
     

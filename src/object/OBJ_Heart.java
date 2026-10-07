@@ -15,9 +15,9 @@ public class OBJ_Heart extends Entity {
 		name = "Heart";
 		value = 2;
 		down1 = setup("/objects/heart_collect", gp.tileSize, gp.tileSize);
-		image = setup("/objects/heart_full", gp.tileSize, gp.tileSize);
-		image2 = setup("/objects/heart_half", gp.tileSize, gp.tileSize);
-		image3 = setup("/objects/heart_blank", gp.tileSize, gp.tileSize);
+		image = setup("/objects/heart_full", 24, 24);
+		image2 = setup("/objects/heart_half", 24, 24);
+		image3 = setup("/objects/heart_blank", 24, 24);
 	} 
 	
 	public void use(Entity entity) {

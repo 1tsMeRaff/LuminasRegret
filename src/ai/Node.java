@@ -1,6 +1,6 @@
 package ai;
 
-public class Node {
+public class Node implements Comparable<Node> {
     public int col, row;
 
     public int gCost; // cost dari start
@@ -20,5 +20,13 @@ public class Node {
 
     public void calculateFCost() {
         fCost = gCost + hCost;
+    }
+
+    @Override
+    public int compareTo(Node other) {
+        if (this.fCost != other.fCost) {
+            return Integer.compare(this.fCost, other.fCost);
+        }
+        return Integer.compare(this.hCost, other.hCost);
     }
 }

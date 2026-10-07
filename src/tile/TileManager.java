@@ -2,6 +2,7 @@ package tile;
 
 
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import javax.imageio.ImageIO;
 import main.GamePanel;
 import main.UtilityTool;
 
+@SuppressWarnings("this-escape")
 public class TileManager {
     
     GamePanel gp;
@@ -166,66 +168,95 @@ public class TileManager {
         setup(1, 145, "tile272(2)", false);
         setup(1, 146, "tile272", false);
         
-        for (int i = 0; i < 300; i++) {
-        	
-            if (tile[1][i] == null) {
-                try {
-                    tile[1][i] = new Tile();
-                    tile[1][i].image = ImageIO.read(getClass().getResourceAsStream("/tiles/air.png"));
-                    tile[1][i].image = new UtilityTool().scaleImage(tile[1][i].image, gp.tileSize, gp.tileSize);
-                    tile[1][i].collision = false;
-                } catch (IOException e) {
-                	
-                    tile[1][i] = new Tile();
-                    tile[1][i].collision = false;
+        BufferedImage airImage = null;
+        try (InputStream is = getClass().getResourceAsStream("/tiles/air.png")) {
+            if (is != null) {
+                BufferedImage rawAir = ImageIO.read(is);
+                if (rawAir != null) {
+                    airImage = new UtilityTool().scaleImage(rawAir, gp.tileSize, gp.tileSize);
                 }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        for (int i = 0; i < 300; i++) {
+            if (tile[1][i] == null) {
+                tile[1][i] = new Tile();
+                tile[1][i].image = airImage;
+                tile[1][i].collision = false;
             }
         }
     }
     
     public void setup(int mapIndex, int tileIndex, String imageName, boolean collision) {
-        
         UtilityTool uTool = new UtilityTool();
-        
-        try {
-            tile[mapIndex][tileIndex] = new Tile();
-            tile[mapIndex][tileIndex].image = ImageIO.read(getClass().getResourceAsStream("/tiles/" + imageName + ".png"));
-            tile[mapIndex][tileIndex].image = uTool.scaleImage(tile[mapIndex][tileIndex].image, gp.tileSize, gp.tileSize);
-            tile[mapIndex][tileIndex].collision = collision;
-            
+        BufferedImage rawImage = null;
+        try (InputStream is = getClass().getResourceAsStream("/tiles/" + imageName + ".png")) {
+            if (is != null) {
+                rawImage = ImageIO.read(is);
+            }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        if (rawImage == null) {
+            java.io.File file = new java.io.File("res/tiles/" + imageName + ".png");
+            if (file.exists()) {
+                try {
+                    rawImage = ImageIO.read(file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        if (rawImage != null) {
+            tile[mapIndex][tileIndex] = new Tile();
+            tile[mapIndex][tileIndex].image = uTool.scaleImage(rawImage, gp.tileSize, gp.tileSize);
+            tile[mapIndex][tileIndex].collision = collision;
+        } else {
+            System.err.println("Tile resource not found: /tiles/" + imageName + ".png");
         }
     }
     
     public void loadMap(String filePath, int map) {
-        try {
-            InputStream is = getClass().getResourceAsStream(filePath);
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            
+        InputStream is = getClass().getResourceAsStream(filePath);
+        if (is == null) {
+            java.io.File file = new java.io.File("res" + filePath);
+            if (file.exists()) {
+                try {
+                    is = new java.io.FileInputStream(file);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        if (is == null) {
+            System.err.println("Map resource not found: " + filePath);
+            return;
+        }
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, java.nio.charset.StandardCharsets.UTF_8))) {
             int col = 0;
             int row = 0;
             
             while (col < gp.maxWorldCol && row < gp.maxWorldRow) {
-                
                 String line = br.readLine();
-                
-                while (col < gp.maxWorldCol) {
+                    if (line == null) break;
                     
                     String numbers[] = line.split(" ");
-                    
-                    int num = Integer.parseInt(numbers[col]);
-                    
-                    mapTileNum[map][col][row] = num;
-                    col++;
+                    while (col < gp.maxWorldCol && col < numbers.length) {
+                        int num = Integer.parseInt(numbers[col]);
+                        mapTileNum[map][col][row] = num;
+                        col++;
+                    }
+                    if (col >= gp.maxWorldCol) {
+                        col = 0;
+                        row++;
+                    }
                 }
-                if (col == gp.maxWorldCol) {
-                    col = 0;
-                    row++;
-                }
-            }
-            br.close();
-            
         } catch (Exception e) {
             e.printStackTrace();
         }

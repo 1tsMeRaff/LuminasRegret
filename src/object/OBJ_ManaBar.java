@@ -12,9 +12,9 @@ public class OBJ_ManaBar extends Entity {
         name = "Mana Bar";
 		value = 1;
         down1 = setup("/objects/mana_full", gp.tileSize, gp.tileSize);
-        image = down1;
+        image = setup("/objects/mana_full", 24, 24);
         down2 = setup("/objects/mana_blank", gp.tileSize, gp.tileSize);
-        image2 = down2;
+        image2 = setup("/objects/mana_blank", 24, 24);
     }
     
     public void use(Entity entity) {

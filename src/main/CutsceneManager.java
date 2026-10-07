@@ -132,32 +132,51 @@ public class CutsceneManager {
                 
                 // End cutscene
                 endScene();
+                gp.playAreaMusic();
             }
         }
     }
     
+    private void applyDialogue(String rawText) {
+        if (rawText != null && rawText.contains(":")) {
+            String[] parts = rawText.split(":", 2);
+            gp.ui.currentSpeakerName = parts[0].trim();
+            gp.ui.currentDialogue = parts[1].trim();
+        } else {
+            gp.ui.currentSpeakerName = "Peristiwa";
+            gp.ui.currentDialogue = rawText;
+        }
+    }
+
     private void startDialogue(String[] dialogue) {
         currentDialogue = dialogue;
         dialogueIndex = 0;
         dialogueActive = true;
         dialogueCounter = 0;
-        gp.ui.currentDialogue = currentDialogue[dialogueIndex];
+        applyDialogue(currentDialogue[dialogueIndex]);
         gp.gameState = gp.dialogueState;
     }
     
     private void nextDialogue() {
         dialogueIndex++;
         if(dialogueIndex < currentDialogue.length) {
-            gp.ui.currentDialogue = currentDialogue[dialogueIndex];
+            applyDialogue(currentDialogue[dialogueIndex]);
             dialogueCounter = 0;
         } else {
             // Dialog selesai, lanjut ke fase berikutnya
             dialogueActive = false;
+            gp.ui.currentSpeakerName = "";
             gp.gameState = gp.cutsceneState;
             scenePhase++;
         }
     }
     
+    public void advanceDialogue() {
+        if(dialogueActive) {
+            nextDialogue();
+        }
+    }
+
     public void handleDialogueInput() {
         if(dialogueActive && gp.keyH.actionPressed) {
             gp.keyH.actionPressed = false;

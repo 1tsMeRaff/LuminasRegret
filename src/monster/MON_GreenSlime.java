@@ -39,7 +39,7 @@ public class MON_GreenSlime extends Entity {
 		
 		getImage();
 	}
-	public void getImage() {
+	public final void getImage() {
 		
 		int size = 64;
 		
@@ -71,7 +71,7 @@ public class MON_GreenSlime extends Entity {
 	        int goalRow = (gp.player.worldY + gp.player.solidArea.y) / gp.tileSize;
 
 	        // LOGIKA MENEMBAK (Hanya saat probabilitas tepat)
-	        int i = new Random().nextInt(100) + 1;
+	        int i = java.util.concurrent.ThreadLocalRandom.current().nextInt(100) + 1;
 	        if (i > 97 && !projectile.alive && rangeAvailableCounter == 30) {
 	            projectile.set(worldX, worldY, direction, true, this);
 	            
@@ -89,9 +89,6 @@ public class MON_GreenSlime extends Entity {
 	        searchPath(goalCol, goalRow);
 		}
 		else {
-			if(tileDistance < 5) {
-				int i = new Random().nextInt(100)+1;
-			}
 	        randomMovement();
 		}
 	    if (onPath) {
@@ -137,7 +134,7 @@ public class MON_GreenSlime extends Entity {
 	public void checkDrop() {
 		
 		//Cast a Die
-		int i = new Random().nextInt(100)+1;
+		int i = java.util.concurrent.ThreadLocalRandom.current().nextInt(100) + 1;
 		
 		//Set the Monster Drop
 		if(i < 50) {

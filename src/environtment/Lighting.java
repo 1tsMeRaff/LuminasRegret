@@ -21,7 +21,7 @@ public class Lighting {
 		this.gp = gp;
 		setLightSource();
 	}
-	public void setLightSource() {
+	public final void setLightSource() {
 		
 		// Membuat buffered image (Berfungsi sebagai tempat "menggambar")
 		darknessFilter = new BufferedImage(gp.screenWidth, gp.screenHeight, BufferedImage.TYPE_INT_ARGB);

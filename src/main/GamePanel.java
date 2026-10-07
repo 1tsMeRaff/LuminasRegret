@@ -20,6 +20,7 @@ import environtment.EnvirontmentManager;
 import tile.TileManager;
 import tile_interactive.InteractiveTile;
 
+@SuppressWarnings({"serial", "this-escape"})
 public class GamePanel extends JPanel implements Runnable {
     
     private static final long serialVersionUID = 1L;
@@ -53,6 +54,7 @@ public class GamePanel extends JPanel implements Runnable {
     // System
     public TileManager tileM = new TileManager(this);
     public KeyHandler keyH = new KeyHandler(this);
+    public MouseHandler mouseH = new MouseHandler(this);
     Sound music = new Sound();
     Sound se = new Sound();
     public CollisionChecker cChecker = new CollisionChecker(this);
@@ -87,6 +89,10 @@ public class GamePanel extends JPanel implements Runnable {
     public final int transitionState = 7;
     public final int tradeState = 8;
     public final int cutsceneState = 9;
+    public final int gameClearState = 10;
+    
+    // Quest Manager
+    public final quest.QuestManager qManager = new quest.QuestManager(this);
     
     // Other
     public boolean bossBattleOn = false;
@@ -97,6 +103,8 @@ public class GamePanel extends JPanel implements Runnable {
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
         this.addKeyListener(keyH);
+        this.addMouseListener(mouseH);
+        this.addMouseMotionListener(mouseH);
         this.setFocusable(true);
     }
     
@@ -108,6 +116,7 @@ public class GamePanel extends JPanel implements Runnable {
     	aSetter.setInteractiveTile();
     	eManager.setup();
     	gameState = titleState;
+    	playMusic(4);
     	
     	tempScreen = new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_ARGB);
     	g2 = (Graphics2D)tempScreen.getGraphics();
@@ -131,6 +140,7 @@ public class GamePanel extends JPanel implements Runnable {
         	player.setItems();
         	aSetter.setObject();
         	aSetter.setInteractiveTile();
+        	qManager.setQuest(quest.QuestType.TALK_TO_GUIDE);
     	}
     }
     
@@ -144,6 +154,27 @@ public class GamePanel extends JPanel implements Runnable {
     	// GET FULL SCREEN WIDTH AND HEIGHT
     	screenWidth2 = Main.window.getWidth();
     	screenHeight2 = Main.window.getHeight();
+    }
+
+    public void toggleFullScreen() {
+        fullScreenOn = !fullScreenOn;
+        if (Main.window != null) {
+            Main.window.dispose();
+            Main.window.setUndecorated(fullScreenOn);
+            if (fullScreenOn) {
+                setFullScreen();
+            } else {
+                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                GraphicsDevice gd = ge.getDefaultScreenDevice();
+                gd.setFullScreenWindow(null);
+                screenWidth2 = screenWidth;
+                screenHeight2 = screenHeight;
+                Main.window.pack();
+                Main.window.setLocationRelativeTo(null);
+            }
+            Main.window.setVisible(true);
+        }
+        config.saveConfig();
     }
     
     public void startGameThread() {
@@ -199,17 +230,12 @@ public class GamePanel extends JPanel implements Runnable {
     		// Monster
     		for(int i = 0; i < monster[currentMap].length; i++) {
     			if(monster[currentMap][i] != null) {
-    				if(monster[currentMap][i].alive == true && monster[currentMap][i].dying == false) {
+    				if(monster[currentMap][i].alive == true) {
     					monster[currentMap][i].update();
     				}
     				if(monster[currentMap][i].alive == false) {
-    					// Update dying animation
-    					if(monster[currentMap][i].dying == true) {
-    						monster[currentMap][i].update();
-    					} else {
-    						monster[currentMap][i].checkDrop();
-    						monster[currentMap][i] = null;
-    					}
+    					monster[currentMap][i].checkDrop();
+    					monster[currentMap][i] = null;
     				}
     			}
     		}
@@ -253,17 +279,8 @@ public class GamePanel extends JPanel implements Runnable {
     		// Pause logic if needed
     	}
     	else if(gameState == dialogueState) {
-            // Handle dialogue input untuk cutscene
-            if(csManager.isDialogueActive()) {
-                csManager.handleDialogueInput();
-            } else {
-                // Dialog normal dari NPC
-                if(keyH.actionPressed == true) {
-                    gameState = playState;
-                    keyH.actionPressed = false;
-                }
-            }
-        }
+            // Dialogue advancement is event-driven via KeyHandler & MouseHandler
+    	}
         else if(gameState == cutsceneState) {
             // Update cutscene manager
             csManager.update();
@@ -278,6 +295,9 @@ public class GamePanel extends JPanel implements Runnable {
                 }
             }
         }
+
+        // Update Quest Manager
+        qManager.update();
     }
     
     public void drawToTempScreen() {
@@ -386,13 +406,17 @@ public class GamePanel extends JPanel implements Runnable {
     }
     
     public void drawToScreen() {
-    	
     	Graphics g = getGraphics();
-    	g.drawImage(tempScreen, 0, 0, screenWidth2, screenHeight2, null);
-    	g.dispose();
+    	if (g != null) {
+    		g.drawImage(tempScreen, 0, 0, screenWidth2, screenHeight2, null);
+    		g.dispose();
+    	}
     }
     
+    public int currentMusicId = -1;
+
     public void playMusic(int i) {
+        currentMusicId = i;
     	music.setFile(i);
     	music.play();
     	music.loop();
@@ -401,6 +425,23 @@ public class GamePanel extends JPanel implements Runnable {
     // Metode untuk menghentikan musik
     public void stopMusic() {
         music.stop();
+        currentMusicId = -1;
+    }
+
+    public void playAreaMusic() {
+        int targetMusic;
+        if(bossBattleOn) {
+            targetMusic = 3; // Boss theme
+        } else if(currentMap == 1) {
+            targetMusic = 2; // Dungeon theme
+        } else {
+            targetMusic = 0; // Overworld theme
+        }
+
+        if(currentMusicId != targetMusic) {
+            stopMusic();
+            playMusic(targetMusic);
+        }
     }
 
     // Metode untuk memutar Sound Effect (sekali main)
@@ -410,11 +451,46 @@ public class GamePanel extends JPanel implements Runnable {
         se.play();
     }
     
+    public void advanceDialogue() {
+        if(gameState != dialogueState) {
+            return;
+        }
+
+        if(csManager.isDialogueActive()) {
+            csManager.advanceDialogue();
+            return;
+        }
+
+        if(ui.npc != null) {
+            // Guard: Pastikan pemain masih berada di dekat NPC ini (maks 2.5 tile = 120px)
+            int dx = ui.npc.getCenterX() - player.getCenterX();
+            int dy = ui.npc.getCenterY() - player.getCenterY();
+            if (Math.hypot(dx, dy) <= tileSize * 2.5) {
+                ui.npc.speak();
+            } else {
+                // Pemain sudah menjauh dari NPC, tutup dialog secara aman
+                gameState = playState;
+                ui.npc = null;
+                ui.currentDialogue = "";
+                ui.currentSpeakerName = "";
+            }
+        } else {
+            gameState = playState;
+            ui.currentDialogue = "";
+            ui.currentSpeakerName = "";
+        }
+    }
+
     public void removeTempEntity() {
         for(int mapNum = 0; mapNum < maxMap; mapNum++) {
             for(int i = 0; i < obj[mapNum].length; i++) {
                 if(obj[mapNum][i] != null && obj[mapNum][i].temp == true) {
                     obj[mapNum][i] = null;
+                }
+            }
+            for(int i = 0; i < monster[mapNum].length; i++) {
+                if(monster[mapNum][i] != null && monster[mapNum][i].temp == true) {
+                    monster[mapNum][i] = null;
                 }
             }
         }

@@ -5,9 +5,12 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -23,17 +26,18 @@ public class UI {
     Font kingThings, kingThingsL, fusionPixel;
     BufferedImage heart_full, heart_half, heart_blank, playerMana_Full, playerMana_Blank, coin;
     public boolean messageOn = false;
-    ArrayList<String> message = new ArrayList<>();
-    ArrayList<Integer> messageCounter = new ArrayList<>();
+    public ArrayList<String> message = new ArrayList<>();
+    public ArrayList<Integer> messageCounter = new ArrayList<>();
     public boolean gameFinished = false;
     public String currentDialogue = " ";
+    public String currentSpeakerName = "";
     public int commandNum = 0;
     public int titleScreenState = 0;
     public int playerSlotCol = 0;
     public int playerSlotRow = 0;
     public int npcSlotCol = 0;
     public int npcSlotRow = 0;
-    int subState = 0;
+    public int subState = 0;
     int counter = 0;
     public Entity npc;
     
@@ -42,18 +46,9 @@ public class UI {
         this.gp = gp;
         
         
-        try {
-            InputStream is = getClass().getResourceAsStream("/font/Kingthings_Petrock.ttf");
-            kingThings = Font.createFont(Font.TRUETYPE_FONT, is);
-            is = getClass().getResourceAsStream("/font/Kingthings_Petrock_light.ttf");
-            kingThingsL = Font.createFont(Font.TRUETYPE_FONT, is);
-            is = getClass().getResourceAsStream("/font/fusion-pixel.ttf");
-            fusionPixel = Font.createFont(Font.TRUETYPE_FONT, is);
-        } catch (FontFormatException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        kingThings = loadFont("/font/Kingthings_Petrock.ttf", 28f);
+        kingThingsL = loadFont("/font/Kingthings_Petrock_light.ttf", 20f);
+        fusionPixel = loadFont("/font/fusion-pixel.ttf", 18f);
         
         // Create HUD Object
         Entity heart = new OBJ_Heart(gp);
@@ -69,6 +64,31 @@ public class UI {
         coin = bronzeCoin.down1;
         
     }
+
+    private Font loadFont(String path, float defaultSize) {
+        Font font = null;
+        InputStream is = getClass().getResourceAsStream(path);
+        if (is == null) {
+            File file = new File("res" + path);
+            if (file.exists()) {
+                try {
+                    is = new FileInputStream(file);
+                } catch (IOException ignored) {
+                }
+            }
+        }
+        if (is != null) {
+            try (InputStream stream = is) {
+                font = Font.createFont(Font.TRUETYPE_FONT, stream);
+            } catch (FontFormatException | IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (font == null) {
+            font = new Font("SansSerif", Font.PLAIN, (int)defaultSize);
+        }
+        return font;
+    }
     
     public void addMessage(String text) {
         
@@ -80,7 +100,9 @@ public class UI {
         
         this.g2 = g2;
         
-        g2.setFont(fusionPixel);
+        if (fusionPixel != null) {
+            g2.setFont(fusionPixel);
+        }
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2.setColor(Color.white);
         
@@ -94,6 +116,9 @@ public class UI {
             drawPlayerLife();
             drawMonsterLife();
             drawMessage();
+            drawQuestWidget();
+            drawQuestBanner();
+            drawInteractionPrompt();
         }
         //Pause State
         if(gp.gameState == gp.pauseState) {
@@ -104,6 +129,7 @@ public class UI {
         if(gp.gameState == gp.dialogueState) {
             drawPlayerLife();
             drawDialogueScreen();
+            drawQuestBanner();
         }
         //CharacterState
         if(gp.gameState == gp.characterState) {
@@ -126,31 +152,31 @@ public class UI {
         if(gp.gameState == gp.tradeState) {
             drawTradeScreen();
         }
+        //Game Clear State
+        if(gp.gameState == gp.gameClearState) {
+            drawGameClearScreen();
+        }
     }
     
     public void drawPlayerLife() {
-        
-        int x = gp.tileSize / 2;
-        int y = gp.tileSize / 2;
-        int i = 0;
+        int startX = 20;
+        int startY = 20;
+        int heartGap = 26; // 24px icon + 2px gap
 
-        int startX = x; 
-        
-        // DRAW MAX LIFE
+        // DRAW MAX LIFE (BLANK HEARTS)
+        int x = startX;
+        int y = startY;
+        int i = 0;
         while(i < gp.player.maxLife / 2) {
             g2.drawImage(heart_blank, x, y, null);
             i++;
-            x += gp.tileSize + 10;
+            x += heartGap;
         }
-        
-        int endX = x - 10; 
-        int totalHudWidth = endX - startX;
-        
-        // DRAW CURRENT LIFE
-        x = gp.tileSize / 2;
-        y = gp.tileSize / 2;
+
+        // DRAW CURRENT LIFE (HALF / FULL HEARTS)
+        x = startX;
+        y = startY;
         i = 0;
-        
         while(i < gp.player.life) {
             g2.drawImage(heart_half, x, y, null);
             i++;
@@ -158,33 +184,37 @@ public class UI {
                 g2.drawImage(heart_full, x, y, null);
             }
             i++;
-            x += gp.tileSize + 10;
-        }
-        
-        if(gp.player.life <= 0) {
-        	gp.player.life = 0;
+            x += heartGap;
         }
 
-        // DRAW MANA
-        int manaWidth = (gp.player.maxMana > 0) ? totalHudWidth / gp.player.maxMana : 0; 
-        
-        // Posisi Y Mana Bar (Sedikit di bawah hati)
-        y = (int) (gp.tileSize * 1.5); 
-        
-        x = startX;
-        i = 0;
-        while (i < gp.player.maxMana) {
-            g2.drawImage(playerMana_Blank, x, y, manaWidth, gp.tileSize, null);
-            i++;
-            x += manaWidth - 1; 
+        if(gp.player.life < 0) {
+            gp.player.life = 0;
         }
 
+        // DRAW MANA (COMPACT 24x24 CRYSTALS)
+        int manaGap = 26; // 24px icon + 2px gap
+        int manaY = startY + 28; // Placed right below heart row
+
+        // DRAW MAX MANA (BLANK CRYSTALS)
         x = startX;
         i = 0;
-        while (i < gp.player.mana) {
-            g2.drawImage(playerMana_Full, x, y, manaWidth, gp.tileSize, null);
+        while(i < gp.player.maxMana) {
+            g2.drawImage(playerMana_Blank, x, manaY, null);
             i++;
-            x += manaWidth - 1;
+            x += manaGap;
+        }
+
+        // DRAW CURRENT MANA (FULL CRYSTALS)
+        x = startX;
+        i = 0;
+        while(i < gp.player.mana) {
+            g2.drawImage(playerMana_Full, x, manaY, null);
+            i++;
+            x += manaGap;
+        }
+
+        if(gp.player.mana < 0) {
+            gp.player.mana = 0;
         }
     }
     
@@ -200,7 +230,7 @@ public class UI {
     			if(monster.hpBarOn && !monster.boss) {
 
     			    double oneScale = (double)gp.tileSize/monster.maxLife;
-    			    double hpBarValue = oneScale*monster.life;
+    			    double hpBarValue = oneScale * Math.max(0, monster.life);
 
     			    g2.setColor(new Color(35,35,35));
     			    g2.fillRect(monster.getScreenX()-1, monster.getScreenY()-16, gp.tileSize+2, 12);
@@ -215,23 +245,43 @@ public class UI {
     			    	monster.hpBarOn = false;
     			    }
     			}
-    			else if(monster.boss) {
+    			else if(monster.boss && gp.bossBattleOn) {
     				
+    				int displayLife = Math.max(0, monster.life);
     				double oneScale = (double)gp.tileSize * 8/monster.maxLife;
-    			    double hpBarValue = oneScale*monster.life;
+    			    double hpBarValue = oneScale * displayLife;
+    			    if (hpBarValue < 0) {
+    			        hpBarValue = 0;
+    			    }
     			    
     			    int x = gp.screenWidth/2 - gp.tileSize * 4;
     			    int y = gp.screenHeight - (gp.tileSize * 2);
 
     			    g2.setColor(new Color(35,35,35));
-    			    g2.fillRect(x-1, y-1, gp.tileSize * 8 + 2, 12);
+    			    g2.fillRect(x-1, y-1, gp.tileSize * 8 + 2, 16);
 
-    			    g2.setColor(new Color(255,0,30));
-    			    g2.fillRect(x, y, (int)hpBarValue, 20);
+    			    if(monster.rage) {
+    			        g2.setColor(new Color(255, 60, 0)); // Oranye merah membara saat fase 2 murka
+    			    } else {
+    			        g2.setColor(new Color(220, 20, 30));
+    			    }
+    			    g2.fillRect(x, y, (int)hpBarValue, 14);
     			    
-    			    g2.setFont(g2.getFont().deriveFont(Font.BOLD,24f));
+    			    g2.setFont(g2.getFont().deriveFont(Font.BOLD, 20f));
+    			    String title = monster.name;
+    			    if(monster.rage) {
+    			        title += " [FASE 2: MURKA]";
+    			        g2.setColor(new Color(255, 120, 120));
+    			    } else {
+    			        g2.setColor(Color.white);
+    			    }
+    			    g2.drawString(title, x + 4, y - 8);
+
+    			    // Tampilkan rasio angka HP di sisi kanan (clamped ke 0)
+    			    String hpRatio = displayLife + " / " + monster.maxLife;
+    			    int hpTextX = x + gp.tileSize * 8 - (int)g2.getFontMetrics().getStringBounds(hpRatio, g2).getWidth() - 4;
     			    g2.setColor(Color.white);
-    			    g2.drawString(monster.name, x + 4, y - 10);
+    			    g2.drawString(hpRatio, hpTextX, y - 8);
     			}
     		}
     	}
@@ -239,28 +289,53 @@ public class UI {
     
     public void drawMessage(){
         
-        int messageX = gp.tileSize;
-        int messageY = gp.tileSize * 4;
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 32F));
+        int messageX = 20;
+        int messageY = (int)(gp.tileSize * 3.5);
+        Font msgFont = (fusionPixel != null) ? fusionPixel.deriveFont(Font.PLAIN, 18F) : g2.getFont().deriveFont(Font.PLAIN, 18F);
+        g2.setFont(msgFont);
+        FontMetrics fm = g2.getFontMetrics();
 
         for(int i = 0; i < message.size(); i++) {
             if(message.get(i) != null) {
-                
-                g2.setColor(Color.black);
-                g2.drawString(message.get(i), messageX+2, messageY+2);
+                String text = message.get(i);
+                int textWidth = fm.stringWidth(text);
+                int textHeight = fm.getHeight();
+
+                // Sleek semi-transparent dark pill background
+                g2.setColor(new Color(15, 15, 20, 200));
+                g2.fillRoundRect(messageX, messageY - fm.getAscent() - 3, textWidth + 16, textHeight + 6, 8, 8);
+
+                // Elegant border accent
+                g2.setColor(new Color(230, 200, 110, 160));
+                g2.drawRoundRect(messageX, messageY - fm.getAscent() - 3, textWidth + 16, textHeight + 6, 8, 8);
+
+                // Text shadow & text
+                g2.setColor(new Color(0, 0, 0, 220));
+                g2.drawString(text, messageX + 9, messageY + 1);
                 g2.setColor(Color.white);
-                g2.drawString(message.get(i), messageX, messageY);
+                g2.drawString(text, messageX + 8, messageY);
 
                 int counter = messageCounter.get(i) + 1; // messageCounter++
                 messageCounter.set(i, counter); // set the counter to the array
-                messageY += 40; // Spacing antar pesan diperkecil sedikit
+                messageY += textHeight + 8; // Spacing antar pesan rapi dan proporsional
 
                 if(messageCounter.get(i) > 180) {
                     message.remove(i);
                     messageCounter.remove(i);
+                    i--;
                 }
             }
         }
+    }
+
+    public boolean containsMessage(String text) {
+        if (text == null) return false;
+        for (String msg : message) {
+            if (msg != null && msg.contains(text)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public void drawTitleScreen() {
@@ -330,24 +405,188 @@ public class UI {
     }
     
     public void drawDialogueScreen() {
-        
-        int x = gp.tileSize * 2;
-        int y = gp.tileSize * 5;
-        int width = gp.screenWidth - (gp.tileSize * 4);
-        int height = gp.tileSize * 3;
+        int x;
+        int y;
+        int width;
+        int height;
+
+        // Jika dalam mode dagang, sesuaikan lebar agar tidak bertabrakan dengan menu di kanan
+        if (gp.gameState == gp.tradeState) {
+            x = gp.tileSize;
+            width = (int)(gp.tileSize * 10.5);
+            height = (int)(gp.tileSize * 3.4);
+            y = gp.screenHeight - height - (int)(gp.tileSize * 0.4);
+        } else {
+            // Mode dialog biasa & cutscene: lebar proporsional 672px
+            x = gp.tileSize;
+            width = gp.screenWidth - (gp.tileSize * 2);
+            height = (int)(gp.tileSize * 3.4);
+            y = gp.screenHeight - height - (int)(gp.tileSize * 0.4);
+        }
         
         drawSubWindow(x, y, width, height);
+
+        // Speaker Name Tag Badge
+        if (currentSpeakerName != null && !currentSpeakerName.trim().isEmpty()) {
+            g2.setFont(fusionPixel != null ? fusionPixel.deriveFont(Font.BOLD, 15f) : g2.getFont().deriveFont(Font.BOLD, 15f));
+            int badgeW = (int) g2.getFontMetrics().getStringBounds(currentSpeakerName, g2).getWidth() + 32;
+            int badgeH = 28;
+            int badgeX = x + 20;
+            int badgeY = y - 14;
+
+            g2.setColor(new Color(15, 18, 30, 245));
+            g2.fillRoundRect(badgeX, badgeY, badgeW, badgeH, 12, 12);
+
+            g2.setColor(new Color(255, 215, 0));
+            g2.setStroke(new BasicStroke(2));
+            g2.drawRoundRect(badgeX, badgeY, badgeW, badgeH, 12, 12);
+
+            g2.drawString(currentSpeakerName, badgeX + 16, badgeY + 19);
+        }
         
-        g2.setFont(g2.getFont().deriveFont(Font.PLAIN,28F));
-        x += gp.tileSize;
-        y += gp.tileSize;
-        
-        if (currentDialogue != null) {
-            for (String line : currentDialogue.split("\n")) {
-                g2.drawString(line, x, y);
-                y += 40; // Memberi jarak antar baris
+        // Font dialog: 19F agar rapi, proporsional, dan tidak meluap
+        Font dialogueFont = (fusionPixel != null) ? fusionPixel.deriveFont(Font.PLAIN, 19F) : g2.getFont().deriveFont(Font.PLAIN, 19F);
+        g2.setFont(dialogueFont);
+        g2.setColor(Color.WHITE);
+
+        FontMetrics fm = g2.getFontMetrics();
+        int textPaddingX = 28;
+        int textPaddingY = 36;
+        int maxTextWidth = width - (textPaddingX * 2);
+        int textX = x + textPaddingX;
+        int textY = y + textPaddingY;
+        int lineHeight = 28;
+
+        if (currentDialogue != null && !currentDialogue.isEmpty()) {
+            ArrayList<String> wrappedLines = wrapDialogueText(currentDialogue, maxTextWidth, fm);
+            for (String line : wrappedLines) {
+                g2.drawString(line, textX, textY);
+                textY += lineHeight;
             }
         }
+
+        // Hint tombol lanjut di pojok kanan bawah
+        g2.setFont(dialogueFont.deriveFont(Font.BOLD, 13f));
+        String promptHint = "[E / ENTER / Klik] Lanjut ▶";
+        int hintW = (int) g2.getFontMetrics().getStringBounds(promptHint, g2).getWidth();
+        int hintX = x + width - hintW - 24;
+        int hintY = y + height - 16;
+        int alphaMod = (int) (Math.sin(System.currentTimeMillis() * 0.005) * 45 + 210);
+        alphaMod = Math.min(255, Math.max(80, alphaMod));
+        g2.setColor(new Color(255, 215, 0, alphaMod));
+        g2.drawString(promptHint, hintX, hintY);
+    }
+
+    public ArrayList<String> wrapDialogueText(String rawText, int maxWidth, FontMetrics fm) {
+        ArrayList<String> lines = new ArrayList<>();
+        if (rawText == null || rawText.trim().isEmpty()) {
+            return lines;
+        }
+
+        String[] paragraphs = rawText.split("\n", -1);
+        for (String para : paragraphs) {
+            if (para.trim().isEmpty()) {
+                lines.add("");
+                continue;
+            }
+            String[] words = para.split("\\s+");
+            StringBuilder currentLine = new StringBuilder();
+
+            for (String word : words) {
+                if (word.isEmpty()) continue;
+
+                if (currentLine.length() == 0) {
+                    if (fm.stringWidth(word) <= maxWidth) {
+                        currentLine.append(word);
+                    } else {
+                        // Kata lebih panjang dari lebar garis - potong per karakter
+                        for (int i = 0; i < word.length(); i++) {
+                            char c = word.charAt(i);
+                            if (fm.stringWidth(currentLine.toString() + c) <= maxWidth) {
+                                currentLine.append(c);
+                            } else {
+                                lines.add(currentLine.toString());
+                                currentLine = new StringBuilder();
+                                currentLine.append(c);
+                            }
+                        }
+                    }
+                } else {
+                    String testLine = currentLine + " " + word;
+                    if (fm.stringWidth(testLine) <= maxWidth) {
+                        currentLine.append(" ").append(word);
+                    } else {
+                        lines.add(currentLine.toString());
+                        currentLine = new StringBuilder();
+                        if (fm.stringWidth(word) <= maxWidth) {
+                            currentLine.append(word);
+                        } else {
+                            for (int i = 0; i < word.length(); i++) {
+                                char c = word.charAt(i);
+                                if (fm.stringWidth(currentLine.toString() + c) <= maxWidth) {
+                                    currentLine.append(c);
+                                } else {
+                                    lines.add(currentLine.toString());
+                                    currentLine = new StringBuilder();
+                                    currentLine.append(c);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (currentLine.length() > 0) {
+                lines.add(currentLine.toString());
+            }
+        }
+        return lines;
+    }
+
+    public void drawInteractionPrompt() {
+        Entity target = gp.player.getNearbyInteractable();
+        if (target == null) return;
+
+        int screenX = target.worldX - gp.player.worldX + gp.player.screenX;
+        int screenY = target.worldY - gp.player.worldY + gp.player.screenY;
+
+        // Tentukan teks prompt berdasarkan tipe entity
+        String actionText;
+        if (target instanceof entity.NPC_Guide || target instanceof entity.NPC_Merchant) {
+            actionText = "[E / Klik] Bicara";
+        } else if (target instanceof object.OBJ_Chest) {
+            actionText = "[E / Klik] Buka Peti";
+        } else if (target instanceof object.OBJ_Door || target instanceof object.OBJ_Door1) {
+            actionText = "[E / Klik] Buka Pintu";
+        } else if (target instanceof tile_interactive.InteractiveTile) {
+            actionText = "[E / Klik] Tebas";
+        } else if (target.type == target.type_pickupOnly || target.type == target.type_sword || target.type == target.type_axe || target.type == target.type_shield || target.type == target.type_consumable) {
+            actionText = "[E / Klik] Ambil";
+        } else {
+            actionText = "[E / Klik] Interaksi";
+        }
+
+        g2.setFont(fusionPixel != null ? fusionPixel.deriveFont(Font.BOLD, 13f) : g2.getFont().deriveFont(Font.BOLD, 13f));
+        int textWidth = (int) g2.getFontMetrics().getStringBounds(actionText, g2).getWidth();
+        int boxW = textWidth + 16;
+        int boxH = 22;
+
+        // Floating bounce animation
+        double bobOffset = Math.sin(System.currentTimeMillis() * 0.006) * 3;
+        int boxX = screenX + (gp.tileSize / 2) - (boxW / 2);
+        int boxY = (int) (screenY - 14 + bobOffset);
+
+        // Draw shadow & background
+        g2.setColor(new Color(15, 20, 35, 220));
+        g2.fillRoundRect(boxX, boxY, boxW, boxH, 10, 10);
+
+        // Border glow
+        g2.setColor(new Color(255, 215, 0, 230));
+        g2.setStroke(new BasicStroke(1.5f));
+        g2.drawRoundRect(boxX, boxY, boxW, boxH, 10, 10);
+
+        // Text
+        g2.setColor(Color.WHITE);
+        g2.drawString(actionText, boxX + 8, boxY + 15);
     }
     
     public void drawCharacterScreen() {
@@ -529,17 +768,27 @@ public class UI {
                 dFrameY = frameY - dFrameHeight;
             }
 
-            //DRAW DESCRIPTION TEXT
-            int textX = dFrameX + 20;
-            int textY = dFrameY + gp.tileSize;
-            g2.setFont(g2.getFont().deriveFont(28F));
-
             int itemIndex = getItemIndexOnSlot(slotCol, slotRow);
             if(itemIndex < entity.inventory.size()) {
-                drawSubWindow(dFrameX,dFrameY,dFrameWidth,dFrameHeight);
-                for(String line : entity.inventory.get(itemIndex).description.split("\n")) {
-                    g2.drawString(line,textX,textY);
-                    textY += 32;
+                drawSubWindow(dFrameX, dFrameY, dFrameWidth, dFrameHeight);
+
+                Font descFont = (fusionPixel != null) ? fusionPixel.deriveFont(Font.PLAIN, 16F) : g2.getFont().deriveFont(Font.PLAIN, 16F);
+                g2.setFont(descFont);
+                g2.setColor(Color.WHITE);
+
+                FontMetrics fm = g2.getFontMetrics();
+                int textX = dFrameX + 18;
+                int textY = dFrameY + 30;
+                int maxTextWidth = dFrameWidth - 36;
+                int lineHeight = 22;
+
+                String desc = entity.inventory.get(itemIndex).description;
+                if (desc != null && !desc.isEmpty()) {
+                    ArrayList<String> descLines = wrapDialogueText(desc, maxTextWidth, fm);
+                    for (String line : descLines) {
+                        g2.drawString(line, textX, textY);
+                        textY += lineHeight;
+                    }
                 }
             }
         }
@@ -628,8 +877,7 @@ public class UI {
         if (commandNum == 0) {
             g2.drawString(">", textX-20, textY);
             if (gp.keyH.enterPressed) {
-                gp.fullScreenOn = !gp.fullScreenOn;
-                subState = 1;
+                gp.toggleFullScreen();
             }
         }
 
@@ -811,6 +1059,7 @@ public class UI {
     	    gp.player.worldY = gp.tileSize * gp.eHandler.tempRow;
     	    gp.eHandler.previousEventX = gp.player.worldX;
     	    gp.eHandler.previousEventY = gp.player.worldY;
+    	    gp.playAreaMusic();
     	}
     }
     
@@ -822,6 +1071,7 @@ public class UI {
             case 2: trade_sell(); break;
         }
         gp.keyH.enterPressed = false;
+        gp.keyH.actionPressed = false;
     }
 
     public void trade_select() {
@@ -840,28 +1090,37 @@ public class UI {
         g2.drawString("Beli", x, y);
         if(commandNum == 0) {
             g2.drawString(">", x-24, y);
-            if(gp.keyH.actionPressed) { 
+            if(gp.keyH.actionPressed || gp.keyH.enterPressed) { 
             	subState = 1;
             	gp.keyH.actionPressed = false;
+            	gp.keyH.enterPressed = false;
+            	gp.playSE(9);
             }
         }
         y += gp.tileSize;
         g2.drawString("Jual", x, y);
         if(commandNum == 1) {
             g2.drawString(">", x-24, y);
-            if(gp.keyH.actionPressed) {
+            if(gp.keyH.actionPressed || gp.keyH.enterPressed) {
             	subState = 2;
             	gp.keyH.actionPressed = false;
+            	gp.keyH.enterPressed = false;
+            	gp.playSE(9);
             }
         }
         y += gp.tileSize;
         g2.drawString("Keluar", x, y);
         if(commandNum == 2) {
             g2.drawString(">", x-24, y);
-            if(gp.keyH.actionPressed) {
+            if(gp.keyH.actionPressed || gp.keyH.enterPressed) {
                 commandNum = 0;
                 gp.gameState = gp.playState;
                 gp.keyH.actionPressed = false;
+                gp.keyH.enterPressed = false;
+                npc = null;
+                currentDialogue = "";
+                currentSpeakerName = "";
+                gp.playSE(9);
             }
         }
     }
@@ -892,26 +1151,31 @@ public class UI {
             g2.drawImage(coin, priceX - 16, priceY - 19, 32, 32, null);
             g2.drawString("" + price, priceX + 24, priceY + 8);
 
-            // Proses Pembelian saat Enter ditekan
-            if(gp.keyH.actionPressed == true) {
+            // Proses Pembelian saat Enter / E / Space ditekan
+            if(gp.keyH.actionPressed == true || gp.keyH.enterPressed == true) {
+                gp.keyH.actionPressed = false;
+                gp.keyH.enterPressed = false;
                 if(price > gp.player.coin) {
                     subState = 0;
                     gp.gameState = gp.dialogueState;
                     currentDialogue = "Koinmu tidak cukup untuk membeli itu!";
                     gp.playSE(10);
-                    gp.keyH.actionPressed = false;
                 }
                 else if(gp.player.inventory.size() == gp.player.maxInventorySize) {
                     subState = 0;
                     gp.gameState = gp.dialogueState;
                     currentDialogue = "Tasmu sudah penuh!";
-                    gp.keyH.actionPressed = false;
                 }
                 else {
                     gp.player.coin -= price;
                     gp.player.inventory.add(npc.inventory.get(itemIndex));
                     gp.playSE(12);
-                    gp.keyH.actionPressed = false;
+
+                    if(gp.qManager.getCurrentQuest() == quest.QuestType.GET_TOOLS) {
+                        if(gp.player.hasItem("Kapak") && gp.player.hasItem("Lentera")) {
+                            gp.qManager.completeCurrentAndAdvance(quest.QuestType.CLEAR_PATH);
+                        }
+                    }
                 }
             }
         }
@@ -950,9 +1214,10 @@ public class UI {
             drawSubWindow(priceX, priceY, priceWidth, priceHeight);
             g2.drawString("Harga: " + price, priceX + 20, priceY + 32);
 
-            if(gp.keyH.actionPressed) {
-                // Reset enterPressed dulu
+            if(gp.keyH.actionPressed || gp.keyH.enterPressed) {
+                // Reset flag input
                 gp.keyH.actionPressed = false;
+                gp.keyH.enterPressed = false;
                 
                 // Cek apakah item sedang dipakai (Equipped)
                 if(gp.player.inventory.get(itemIndex) == gp.player.currentWeapon || 
@@ -963,13 +1228,11 @@ public class UI {
                     gp.gameState = gp.dialogueState;
                     currentDialogue = "Lepaskan item sebelum menjualnya!";
                     gp.playSE(10); 
-                    gp.keyH.actionPressed = false;
                     
                 } else {
                     gp.player.coin += price;
                     gp.player.inventory.remove(itemIndex);
                     gp.playSE(12);
-                    gp.keyH.actionPressed = false;
                     
                     if(playerSlotCol > 0 && itemIndex % 5 == 0) {
                         playerSlotCol--;
@@ -1011,5 +1274,147 @@ public class UI {
         int lenght = (int)g2.getFontMetrics().getStringBounds(text, g2).getWidth();
         int x = tailX - lenght;
         return x;
+    }
+
+    public void drawQuestWidget() {
+        if(gp.qManager.getCurrentQuest() == null) return;
+
+        int width = 290;
+        int height = 75;
+        int x = gp.screenWidth - width - 16;
+        int y = 14;
+
+        // Background box transparan elegan
+        g2.setColor(new Color(0, 0, 0, 185));
+        g2.fillRoundRect(x, y, width, height, 18, 18);
+
+        // Border aksen emas
+        g2.setColor(new Color(255, 215, 0, 210));
+        g2.setStroke(new BasicStroke(2));
+        g2.drawRoundRect(x, y, width, height, 18, 18);
+
+        // Header
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 13f));
+        g2.setColor(new Color(255, 215, 0));
+        g2.drawString("MISI AKTIF", x + 14, y + 20);
+
+        // Judul Quest
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 16f));
+        g2.setColor(Color.WHITE);
+        g2.drawString(gp.qManager.getCurrentQuest().getTitle(), x + 14, y + 42);
+
+        // Deskripsi ringkas
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 11f));
+        g2.setColor(new Color(210, 210, 210));
+        String desc = gp.qManager.getCurrentQuest().getDescription();
+        if(desc.length() > 42) {
+            desc = desc.substring(0, 39) + "...";
+        }
+        g2.drawString(desc, x + 14, y + 62);
+    }
+
+    public void drawQuestBanner() {
+        if(!gp.qManager.isBannerActive()) return;
+
+        float alpha = gp.qManager.getBannerAlpha();
+        if(alpha < 0f) alpha = 0f;
+        if(alpha > 1f) alpha = 1f;
+
+        java.awt.Composite originalComposite = g2.getComposite();
+        g2.setComposite(java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, alpha));
+
+        int bWidth = 420;
+        int bHeight = 65;
+        int bX = gp.screenWidth / 2 - bWidth / 2;
+        int bY = gp.tileSize * 2;
+
+        // Banner box
+        g2.setColor(new Color(15, 15, 25, 235));
+        g2.fillRoundRect(bX, bY, bWidth, bHeight, 20, 20);
+
+        g2.setColor(new Color(255, 215, 0));
+        g2.setStroke(new BasicStroke(3));
+        g2.drawRoundRect(bX, bY, bWidth, bHeight, 20, 20);
+
+        // Header
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 18f));
+        g2.setColor(new Color(255, 215, 0));
+        int headerX = getXforCenteredText(gp.qManager.getBannerHeader());
+        g2.drawString(gp.qManager.getBannerHeader(), headerX, bY + 28);
+
+        // Subtext
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 14f));
+        g2.setColor(Color.WHITE);
+        int textX = getXforCenteredText(gp.qManager.getBannerText());
+        g2.drawString(gp.qManager.getBannerText(), textX, bY + 50);
+
+        g2.setComposite(originalComposite);
+    }
+
+    public void drawGameClearScreen() {
+        g2.setColor(new Color(0, 0, 0, 225));
+        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+
+        int textY = gp.tileSize * 2;
+
+        // Title
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 54f));
+        String title = "LUMINA'S REGRET";
+        g2.setColor(new Color(130, 95, 0));
+        g2.drawString(title, getXforCenteredText(title) + 3, textY + 3);
+        g2.setColor(new Color(255, 215, 0));
+        g2.drawString(title, getXforCenteredText(title), textY);
+
+        // Subtitle
+        textY += 45;
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 22f));
+        g2.setColor(Color.WHITE);
+        String sub = "- KUTUKAN TELAH TERANGKAT -";
+        g2.drawString(sub, getXforCenteredText(sub), textY);
+
+        // Narrative
+        textY += 40;
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 15f));
+        g2.setColor(new Color(215, 215, 215));
+        String line1 = "Dengan kembalinya Relik Suci, kedamaian menyelimuti tanah Lumina.";
+        String line2 = "Goblin King telah ditaklukkan dan kegelapan sirna untuk selamanya.";
+        g2.drawString(line1, getXforCenteredText(line1), textY);
+        textY += 25;
+        g2.drawString(line2, getXforCenteredText(line2), textY);
+
+        // Stats Subwindow
+        int boxW = gp.tileSize * 7;
+        int boxH = (int)(gp.tileSize * 2.2);
+        int boxX = gp.screenWidth / 2 - boxW / 2;
+        int boxY = textY + 20;
+        drawSubWindow(boxX, boxY, boxW, boxH);
+
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 15f));
+        g2.setColor(new Color(255, 215, 0));
+        g2.drawString("Statistik Petualang:", boxX + 24, boxY + 30);
+
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 14f));
+        g2.setColor(Color.WHITE);
+        g2.drawString("Level Akhir: " + gp.player.level + "   |   Koin: " + gp.player.coin, boxX + 24, boxY + 56);
+        g2.drawString("HP Maksimal: " + gp.player.maxLife + "   |   Mana: " + gp.player.maxMana, boxX + 24, boxY + 80);
+
+        // Options
+        int optY = boxY + boxH + 40;
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 24f));
+
+        String opt1 = "Main Lagi (Restart)";
+        int opt1X = getXforCenteredText(opt1);
+        g2.drawString(opt1, opt1X, optY);
+        if(commandNum == 0) {
+            g2.drawString(">", opt1X - 30, optY);
+        }
+
+        optY += 40;
+        String opt2 = "Menu Utama (Title Screen)";
+        int opt2X = getXforCenteredText(opt2);
+        g2.drawString(opt2, opt2X, optY);
+        if(commandNum == 1) {
+            g2.drawString(">", opt2X - 30, optY);
+        }
     }
 }

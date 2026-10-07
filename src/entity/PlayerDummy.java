@@ -12,7 +12,7 @@ public class PlayerDummy extends Entity {
 		name = npcName;
 		getPlayerImage();
 	}
-	  public void getPlayerImage() {
+	  public final void getPlayerImage() {
 	        
 	        up1 = setup("/player/top1", gp.tileSize, gp.tileSize);
 	        up2 = setup("/player/top2", gp.tileSize, gp.tileSize);

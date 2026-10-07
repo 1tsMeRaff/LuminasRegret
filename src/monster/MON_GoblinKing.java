@@ -7,12 +7,17 @@ import java.util.Random;
 import entity.Entity;
 import main.GamePanel;
 import object.OBJ_Coin_Bronze;
+import object.OBJ_GreenProjectile;
 import object.OBJ_Heart;
 import object.OBJ_PlayerMana;
 
 public class MON_GoblinKing extends Entity {
 	
 	public static final String monName = "Goblin King"; 
+	public int shootCounter = 0;
+	public int summonCounter = 0;
+	public boolean phase2Triggered = false;
+	private int summonToggle = 0; 
 
 	public MON_GoblinKing(GamePanel gp) {
 		super(gp);
@@ -49,7 +54,7 @@ public class MON_GoblinKing extends Entity {
 		getAttackImage();
 	}
 	
-	public void getImage() {
+	public final void getImage() {
 		
 		int size = 5;
 		
@@ -63,7 +68,7 @@ public class MON_GoblinKing extends Entity {
 		right2 = setup("/monster/goblin_right2", gp.tileSize * size, gp.tileSize * size);
 	}
 	
-	public void getAttackImage() {
+	public final void getAttackImage() {
 		
 		int size = 5;
 	
@@ -145,17 +150,23 @@ public class MON_GoblinKing extends Entity {
 				break;
 			}
 			
+			if(rage) {
+				java.awt.Composite origComp = g2.getComposite();
+				g2.setComposite(java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, 0.35f));
+				g2.setColor(new java.awt.Color(255, 30, 30));
+				int pulse = (spriteCounter % 16);
+				int auraPad = 12 + pulse;
+				g2.fillOval(screenX - auraPad, screenY - auraPad, gp.tileSize * 5 + auraPad * 2, gp.tileSize * 5 + auraPad * 2);
+				g2.setComposite(origComp);
+			}
+
 			if(attacking) {
 				drawAttackArea(g2);
 				g2.drawImage(image, screenX, screenY, null);
 			}
 			else {
 				g2.drawImage(image, screenX, screenY, null);
-				
 			}
-			
-//             g2.setColor(java.awt.Color.RED);
-//             g2.drawRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, solidArea.height);
 		}
 	}
 
@@ -165,27 +176,124 @@ public class MON_GoblinKing extends Entity {
 		dialogues[1] = "Kamu akan mati disini!";
 		dialogues[2] = "SELAMAT DATANG DIKEMATIANMU!";
 	}
+
+	@Override
 	public void setAction() {
-		
-	    
-		if(!rage && life < maxLife / 3) {
+		// Deteksi Transisi Fase 2 (Enrage Mode) saat HP <= 50%
+		if (!phase2Triggered && life <= maxLife / 2) {
+			phase2Triggered = true;
 			rage = true;
-			defaultSpeed++;
+			defaultSpeed = 2;
 			speed = defaultSpeed;
-			
+			attack = 3;
+
+			gp.playSE(6);
+			gp.ui.addMessage("GOBLIN KING MURKA! FASE 2 DIMULAI!");
+			gp.qManager.showBanner("BOS MURKA!", "Goblin King memanggil minion dan melepaskan sihir kutukan!");
+
+			// Panggil 2 minion pengawal pertama (1 Slime & 1 Zombie)
+			summonMinions(2);
 		}
-		
-		if(getTileDistance(gp.player) < 10) {
-			
-			moveTowardPlayer(60);
-		}
-		else {
+
+		if (getTileDistance(gp.player) < 12) {
+			moveTowardPlayer(rage ? 30 : 60);
+		} else {
 			randomMovement();
 		}
-		
-		if(!attacking) {
-			checkAttackOnNot(60, gp.tileSize * 10, gp.tileSize * 5);
+
+		if (!attacking) {
+			checkAttackOnNot(rage ? 40 : 60, gp.tileSize * 10, gp.tileSize * 5);
 		}
+
+		// MEKANIK FASE 2
+		if (rage) {
+			// 1. Serangan Proyektil Energi Kutukan
+			shootCounter++;
+			if (shootCounter >= 140 && !attacking) {
+				shootCounter = 0;
+				if (getTileDistance(gp.player) <= 12) {
+					shootCursedProjectile();
+				}
+			}
+
+			// 2. Pemanggilan Minion Berkala
+			summonCounter++;
+			if (summonCounter >= 600) {
+				summonCounter = 0;
+				int activeMinions = countActiveMinions();
+				if (activeMinions < 2) {
+					summonMinions(1);
+					gp.ui.addMessage("Goblin King memanggil bala bantuan!");
+					gp.playSE(2);
+				}
+			}
+		}
+	}
+
+	public void shootCursedProjectile() {
+		int diffX = gp.player.worldX - worldX;
+		int diffY = gp.player.worldY - worldY;
+		String shootDir = direction;
+		if (Math.abs(diffX) > Math.abs(diffY)) {
+			shootDir = (diffX > 0) ? "right" : "left";
+		} else {
+			shootDir = (diffY > 0) ? "down" : "up";
+		}
+
+		OBJ_GreenProjectile p = new OBJ_GreenProjectile(gp);
+		int spawnX = worldX + (gp.tileSize * 5 / 2);
+		int spawnY = worldY + (gp.tileSize * 5 / 2);
+		p.set(spawnX, spawnY, shootDir, true, this);
+
+		for (int i = 0; i < gp.projectile[gp.currentMap].length; i++) {
+			if (gp.projectile[gp.currentMap][i] == null) {
+				gp.projectile[gp.currentMap][i] = p;
+				p.projectileIndex = i;
+				break;
+			}
+		}
+		gp.playSE(8);
+	}
+
+	public void summonMinions(int count) {
+		if (gp.monster == null || gp.currentMap >= gp.monster.length || gp.monster[gp.currentMap] == null) {
+			return;
+		}
+
+		for (int c = 0; c < count; c++) {
+			for (int i = 0; i < gp.monster[gp.currentMap].length; i++) {
+				if (gp.monster[gp.currentMap][i] == null) {
+					Entity minion;
+					if (summonToggle % 2 == 0) {
+						minion = new MON_GreenSlime(gp);
+						minion.worldX = worldX - gp.tileSize * 2;
+						minion.worldY = worldY + gp.tileSize * 2;
+					} else {
+						minion = new MON_Zombie(gp);
+						minion.worldX = worldX + gp.tileSize * 6;
+						minion.worldY = worldY + gp.tileSize * 2;
+					}
+					minion.temp = true;
+					gp.monster[gp.currentMap][i] = minion;
+					summonToggle++;
+					break;
+				}
+			}
+		}
+	}
+
+	public int countActiveMinions() {
+		if (gp.monster == null || gp.currentMap >= gp.monster.length || gp.monster[gp.currentMap] == null) {
+			return 0;
+		}
+		int count = 0;
+		for (int i = 0; i < gp.monster[gp.currentMap].length; i++) {
+			Entity m = gp.monster[gp.currentMap][i];
+			if (m != null && m != this && m.alive) {
+				count++;
+			}
+		}
+		return count;
 	}
 	
 	public void searchPath(int goalCol, int goalRow) {
@@ -221,20 +329,21 @@ public class MON_GoblinKing extends Entity {
 		onPath = true;
 	}
 	public void checkDrop() {
+		// Akhiri pertarungan boss & buka pintu arena yang terkunci
+		gp.bossBattleOn = false;
+		gp.removeTempEntity();
+		gp.playAreaMusic();
 		
-		//Cast a Die
-		int i = new Random().nextInt(100)+1;
+		// Drop wajib Relik Lumina
+		dropItems(new object.OBJ_Relic(gp));
 		
-		//Set the Monster Drop
-		if(i < 50) {
-			dropItems(new OBJ_Coin_Bronze (gp));
-		}
-		if(i >= 50 && i < 75) {
-			dropItems(new OBJ_Heart(gp));
-		}
-		if(i >= 75 && i < 100) {
-			dropItems(new OBJ_PlayerMana(gp));
-		}
+		// Bonus drops
+		dropItems(new OBJ_Coin_Bronze(gp));
+		dropItems(new OBJ_Heart(gp));
+		
+		gp.ui.addMessage("Goblin King dikalahkan! Ambil Relik Lumina!");
+		gp.qManager.showBanner("BOS DIKALAHKAN!", "Ambil Relik Lumina yang terjatuh!");
+		gp.playSE(2);
 	}
 	
 	public void drawAttackArea(Graphics2D g2) {

@@ -6,7 +6,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 
-public class Sound {
+public class Sound implements AutoCloseable {
     
     Clip clip;
     URL soundURL[] = new URL[30];
@@ -15,26 +15,54 @@ public class Sound {
     float volume;
     
     public Sound() {
-        soundURL[0] = getClass().getResource("/sound/Theme.wav");
-        soundURL[1] = getClass().getResource("/sound/Coin.wav");
-        soundURL[2] = getClass().getResource("/sound/Theme.wav");
-        soundURL[3] = getClass().getResource("/sound/Theme.wav");
-        soundURL[4] = getClass().getResource("/sound/Theme.wav");
-        soundURL[5] = getClass().getResource("/sound/bonk.wav");
-        soundURL[6] = getClass().getResource("/sound/receivedamage.wav");
-        soundURL[7] = getClass().getResource("/sound/swingweapon.wav");
-        soundURL[8] = getClass().getResource("/sound/levelup.wav");
-        soundURL[9] = getClass().getResource("/sound/swipe.wav");
-        soundURL[10] = getClass().getResource("/sound/windows.wav");
-        soundURL[11] = getClass().getResource("/sound/stairs.wav");
-        soundURL[12] = getClass().getResource("/sound/swipe.wav");
-        soundURL[13] = getClass().getResource("/sound/swipe.wav");
-        soundURL[14] = getClass().getResource("/sound/swipe.wav");
+        soundURL[0] = loadSoundURL("/sound/overworld.wav");
+        soundURL[1] = loadSoundURL("/sound/Coin.wav");
+        soundURL[2] = loadSoundURL("/sound/dungeon.wav");
+        soundURL[3] = loadSoundURL("/sound/boss.wav");
+        soundURL[4] = loadSoundURL("/sound/title.wav");
+        soundURL[5] = loadSoundURL("/sound/bonk.wav");
+        soundURL[6] = loadSoundURL("/sound/receivedamage.wav");
+        soundURL[7] = loadSoundURL("/sound/swingweapon.wav");
+        soundURL[8] = loadSoundURL("/sound/levelup.wav");
+        soundURL[9] = loadSoundURL("/sound/swipe.wav");
+        soundURL[10] = loadSoundURL("/sound/windows.wav");
+        soundURL[11] = loadSoundURL("/sound/stairs.wav");
+        soundURL[12] = loadSoundURL("/sound/swipe.wav");
+        soundURL[13] = loadSoundURL("/sound/swipe.wav");
+        soundURL[14] = loadSoundURL("/sound/swipe.wav");
+    }
+
+    private URL loadSoundURL(String path) {
+        URL url = getClass().getResource(path);
+        if (url == null) {
+            java.io.File file = new java.io.File("res" + path);
+            if (file.exists()) {
+                try {
+                    url = file.toURI().toURL();
+                } catch (java.net.MalformedURLException ignored) {
+                }
+            }
+        }
+        return url;
     }
     
+    public void closeCurrentClip() {
+        if (clip != null) {
+            if (clip.isRunning()) {
+                clip.stop();
+            }
+            clip.close();
+            clip = null;
+            fc = null;
+        }
+    }
+
     public void setFile(int i) {
-        try {
-            AudioInputStream ais = AudioSystem.getAudioInputStream(soundURL[i]);
+        if (i < 0 || i >= soundURL.length || soundURL[i] == null) {
+            return;
+        }
+        closeCurrentClip();
+        try (AudioInputStream ais = AudioSystem.getAudioInputStream(soundURL[i])) {
             clip = AudioSystem.getClip();
             clip.open(ais);
             
@@ -45,8 +73,7 @@ public class Sound {
             checkVolume();
             
         } catch(Exception e) {
-            // Penting: print error jika file tidak ditemukan atau clip gagal dibuka
-            System.out.println("Error loading sound: " + e.getMessage());
+            System.err.println("Error loading sound ID " + i + ": " + e.getMessage());
         }
     }
     
@@ -69,7 +96,6 @@ public class Sound {
     }
     
     public void checkVolume() {
-        // Tambahkan pengaman IF agar tidak NullPointerException
         if (fc != null) {
             switch(volumeScale) {
                 case 0: volume = -80f; break; // Mute
@@ -78,8 +104,14 @@ public class Sound {
                 case 3: volume = -5f; break;
                 case 4: volume = 1f; break;
                 case 5: volume = 6f; break; // Max
+                default: volume = -5f; break;
             }
             fc.setValue(volume);
         }
+    }
+
+    @Override
+    public void close() {
+        closeCurrentClip();
     }
 }

@@ -50,6 +50,7 @@ public class OBJ_Chest extends Entity {
 		
 		// Mengubah game state ke dialog
 		gp.gameState = gp.dialogueState;
+		gp.ui.npc = null;
 		
 		// Jika peti belum pernah dibuka
 		if(opened == false) {

@@ -34,7 +34,7 @@ public class OBJ_Slash extends Projectile {
         getImage();
     }
 
-    public void getImage() {
+    public final void getImage() {
         // Gunakan 1 gambar untuk semua arah (ukuran tileSize penuh)
         image = setup("/projectile/rangeatt000", gp.tileSize, gp.tileSize);
         

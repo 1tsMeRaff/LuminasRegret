@@ -8,12 +8,7 @@ import main.GamePanel;
 
 public class OBJ_Door1 extends Entity {
 	
-	// Referensi ke GamePanel
-	GamePanel gp;
-	
 	public OBJ_Door1(GamePanel gp) {
-		
-		// Memanggil constructor dari Entity
 		super(gp);
 		
 		type = type_obstacle;
@@ -32,9 +27,22 @@ public class OBJ_Door1 extends Entity {
 		solidAreaDefaultY = solidArea.y;
 	}
 	public void interact() {
-		
-		gp.gameState = gp.dialogueState;
-		gp.ui.currentDialogue = "butuh kunci.";
+		gp.ui.npc = null;
+		if (gp.player.removeItem("Key") || gp.player.removeItem("Kunci")) {
+			gp.playSE(1);
+			gp.gameState = gp.dialogueState;
+			gp.ui.currentSpeakerName = "Pintu";
+			gp.ui.currentDialogue = "Kamu membuka pintu dengan kunci!";
+			for (int i = 0; i < gp.obj[gp.currentMap].length; i++) {
+				if (gp.obj[gp.currentMap][i] == this) {
+					gp.obj[gp.currentMap][i] = null;
+					break;
+				}
+			}
+		} else {
+			gp.gameState = gp.dialogueState;
+			gp.ui.currentSpeakerName = "Pintu";
+			gp.ui.currentDialogue = "Pintu ini terkunci rapat.\nKamu membutuhkan Kunci untuk membukanya.";
+		}
 	}
-
 }

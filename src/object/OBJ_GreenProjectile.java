@@ -35,7 +35,7 @@ public class OBJ_GreenProjectile extends Projectile {
         getImage();
     }
 
-    public void getImage() {
+    public final void getImage() {
         //1 gambar untuk semua arah
         image = setup("/projectile/balls005", gp.tileSize / 2, gp.tileSize / 2);
     }

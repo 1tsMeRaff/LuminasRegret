@@ -15,6 +15,7 @@ public class OBJ_Bread extends Entity {
 	    type = type_consumable;
 	    name = "Roti";
 	    value = 2;
+	    price = 5;
 	    down1 = setup("/objects/bread", gp.tileSize, gp.tileSize);
 	    description = "[" + name + "]\n Hanya roti biasa.";
 	}

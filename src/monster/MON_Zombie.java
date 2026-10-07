@@ -44,7 +44,7 @@ public class MON_Zombie extends Entity {
 		getAttackImage();
 	}
 	
-	public void getImage() {
+	public final void getImage() {
 		
 		int size = 64;
 		
@@ -58,7 +58,7 @@ public class MON_Zombie extends Entity {
 		right2 = setup("/monster/zombie_right2", size, size);
 	}
 	
-	public void getAttackImage() {
+	public final void getAttackImage() {
 		
 		int size = 192;
 	
@@ -211,7 +211,7 @@ public class MON_Zombie extends Entity {
 	public void checkDrop() {
 		
 		//Cast a Die
-		int i = new Random().nextInt(100)+1;
+		int i = java.util.concurrent.ThreadLocalRandom.current().nextInt(100) + 1;
 		
 		//Set the Monster Drop
 		if(i < 50) {

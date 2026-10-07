@@ -15,7 +15,7 @@ import ai.Node;
 import main.GamePanel;
 import main.UtilityTool;
 
-public class Entity {
+public class Entity implements object.Item {
 	
 	protected GamePanel gp;
 	public BufferedImage up1, up2, down1, down2, left1, left2, right1, right2;
@@ -79,10 +79,10 @@ public class Entity {
 	public int motion2_duration;
 	public Entity currentWeapon;
 	public Entity currentShield;
-	public Entity currenLight;
 	public Projectile projectile;
 	public int projectileIndex = -1;
 	public boolean boss;
+	public boolean hasHitThisSwing = false;
 	
 	public int aggroRange;
 	
@@ -207,7 +207,7 @@ public class Entity {
 	
 	public void dropItems(Entity droppedItem) {
 		
-		for(int i = 0; i < gp.obj[1].length; i++) {
+		for(int i = 0; i < gp.obj[gp.currentMap].length; i++) {
 			if(gp.obj[gp.currentMap][i] == null) {
 				gp.obj[gp.currentMap][i] = droppedItem;
 				gp.obj[gp.currentMap][i].worldX = worldX; //the dead monsters worldX
@@ -277,6 +277,14 @@ public class Entity {
 	public void update() {
 		
 		collisionOn = false;
+
+		if(dying == true) {
+			dyingCounter++;
+			if(dyingCounter > 40) {
+				alive = false;
+			}
+			return;
+		}
 		
 		if(sleep == false) {
 			
@@ -391,21 +399,33 @@ public class Entity {
             solidArea.width = attackArea.width;
             solidArea.height = attackArea.height;
             
-            if(type == type_monster) {
-            	if(gp.cChecker.checkPlayer(this)) {
-            		damagePlayer(attack);
-            	}
-            }
-            else {
-            	// Check Collision dengan senjata
-                int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
-                gp.player.damageMonster(monsterIndex, this, attack, currentWeapon.knockBackPower);
-                
-                int iTileIndex = gp.cChecker.checkInteractiveTile(this);
-                gp.player.damageInteractiveTile(iTileIndex);
-                
-                int projectileIndex = gp.cChecker.checkEntity(this, gp.projectile);
-                gp.player.damageProjectile(projectileIndex);
+            // Sinkronisasi damage: hanya apply damage satu kali pada impact frame
+            if(!hasHitThisSwing) {
+                if(type == type_monster) {
+                    if(gp.cChecker.checkPlayer(this)) {
+                        damagePlayer(attack);
+                        hasHitThisSwing = true;
+                    }
+                }
+                else {
+                    int monsterIndex = gp.cChecker.checkEntity(this, gp.monster);
+                    if(monsterIndex != 999) {
+                        gp.player.damageMonster(monsterIndex, this, attack, currentWeapon.knockBackPower);
+                        hasHitThisSwing = true;
+                    }
+                    
+                    int iTileIndex = gp.cChecker.checkInteractiveTile(this);
+                    if(iTileIndex != 999) {
+                        gp.player.damageInteractiveTile(iTileIndex);
+                        hasHitThisSwing = true;
+                    }
+                    
+                    int projectileIndex = gp.cChecker.checkEntity(this, gp.projectile);
+                    if(projectileIndex != 999) {
+                        gp.player.damageProjectile(projectileIndex);
+                        hasHitThisSwing = true;
+                    }
+                }
             }
             
             worldX = currentWorldX;
@@ -418,6 +438,7 @@ public class Entity {
             spriteNum = 1;
             spriteCounter = 0;
             attacking = false;
+            hasHitThisSwing = false;
         }
     }
 	
@@ -525,21 +546,18 @@ public class Entity {
 		}
 	}
 	public void dyingAnimation(Graphics2D g2) {
+		// Efek dissolve bertahap (alpha memudar dari 1.0 ke 0.0)
+		float alpha = Math.max(0.1f, 1f - ((float) dyingCounter / 42f));
 		
-		dyingCounter++;
+		// Kedipan cepat dramatis sebelum lenyap
+		if ((dyingCounter / 4) % 2 == 0) {
+			changeAlpha(g2, alpha * 0.25f);
+		} else {
+			changeAlpha(g2, alpha);
+		}
 		
-		int i = 5;
-		
-		if(dyingCounter <= i) {changeAlpha(g2, 0f);}
-		if(dyingCounter <= i && dyingCounter <= i*2) {changeAlpha(g2, 1f);}
-		if(dyingCounter <= i*2 && dyingCounter <= i*3) {changeAlpha(g2, 0f);}
-		if(dyingCounter <= i*3 && dyingCounter <= i*4) {changeAlpha(g2, 1f);}
-		if(dyingCounter <= i*4 && dyingCounter <= i*5) {changeAlpha(g2, 0f);}
-		if(dyingCounter <= i*5 && dyingCounter <= i*6) {changeAlpha(g2, 1f);}
-		if(dyingCounter <= i*6 && dyingCounter <= i*7) {changeAlpha(g2, 0f);}
-		if(dyingCounter <= i*7 && dyingCounter <= i*8) {changeAlpha(g2, 0f);}
-		if(dyingCounter > i*8) {
-			alive = false;
+		if (dyingCounter >= 40) {
+			generateParticle(this, this);
 		}
 	}
 	
@@ -547,17 +565,32 @@ public class Entity {
 		
 		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alphaValue));
 	}
-	public BufferedImage setup(String imagePath, int widht, int height) {
-		
-	    UtilityTool uTool = new UtilityTool();
+	public static BufferedImage setup(String imagePath, int widht, int height) {
 	    BufferedImage image = null;
-	    
-	    try {
-	        image = ImageIO.read(getClass().getResourceAsStream(imagePath + ".png"));
-	        image = uTool.scaleImage(image, widht, height);
-	        
+	    try (java.io.InputStream is = Entity.class.getResourceAsStream(imagePath + ".png")) {
+	        if (is != null) {
+	            image = ImageIO.read(is);
+	        }
 	    } catch (IOException e) {
 	        e.printStackTrace();
+	    }
+
+	    if (image == null) {
+	        java.io.File file = new java.io.File("res" + imagePath + ".png");
+	        if (file.exists()) {
+	            try {
+	                image = ImageIO.read(file);
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    }
+
+	    if (image != null) {
+	        UtilityTool uTool = new UtilityTool();
+	        image = uTool.scaleImage(image, widht, height);
+	    } else {
+	        System.err.println("Resource image not found: " + imagePath + ".png");
 	    }
 	    return image;
 	}
@@ -739,7 +772,7 @@ public class Entity {
         }
         
         if(targetInRange) {
-        	int i = new Random().nextInt(rate);
+        	int i = java.util.concurrent.ThreadLocalRandom.current().nextInt(rate);
         	if(i == 0) {
         		attacking = true;
         		spriteNum = 1;
@@ -750,12 +783,12 @@ public class Entity {
     }
     
     public void checkShootOrNot(int rate, int shotInterval) {
-        int i = new Random().nextInt(rate);
+        int i = java.util.concurrent.ThreadLocalRandom.current().nextInt(rate);
         if (i == 0 && projectile.alive == false && rangeAvailableCounter == shotInterval) {
             projectile.set(worldX, worldY, direction, true, this);
 
             // CHECK VACANCY
-            for (int ii = 0; ii < gp.projectile[i].length; ii++) {
+            for (int ii = 0; ii < gp.projectile[gp.currentMap].length; ii++) {
                 if (gp.projectile[gp.currentMap][ii] == null) {
                     gp.projectile[gp.currentMap][ii] = projectile;
                     break;
@@ -768,7 +801,7 @@ public class Entity {
     public void checkStartChasingOrNot(Entity target, int distance, int rate) {
     	
     	if(getTileDistance(target) < distance) {
-    		int i = new Random().nextInt(rate);
+    		int i = java.util.concurrent.ThreadLocalRandom.current().nextInt(rate);
     		if(i == 0) {
     			onPath = true;
     		}
@@ -778,7 +811,7 @@ public class Entity {
     public void checkStopChasingOrNot(Entity target, int distance, int rate) {
     	
     	if(getTileDistance(target) > distance) {
-    		int i = new Random().nextInt(rate);
+    		int i = java.util.concurrent.ThreadLocalRandom.current().nextInt(rate);
     		if(i == 0) {
     			onPath = false;
     		}
@@ -786,13 +819,13 @@ public class Entity {
     }
     
     public int getCenterX() {
-        int centerX = worldX + left1.getWidth() / 2;
-        return centerX;
+        int w = (left1 != null) ? left1.getWidth() : (down1 != null ? down1.getWidth() : gp.tileSize);
+        return worldX + w / 2;
     }
 
     public int getCenterY() {
-        int centerY = worldY + up1.getHeight() / 2;
-        return centerY;
+        int h = (up1 != null) ? up1.getHeight() : (down1 != null ? down1.getHeight() : gp.tileSize);
+        return worldY + h / 2;
     }
 
     public int getXdistance(Entity target) {
@@ -823,8 +856,7 @@ public class Entity {
     public void randomMovement() {
         actionLockCounter++;
         if (actionLockCounter >= 120) {
-            Random random = new Random();
-            int i = random.nextInt(100);
+            int i = java.util.concurrent.ThreadLocalRandom.current().nextInt(100);
             
             if (i < 25) direction = "up";
             else if (i < 50) direction = "down";
@@ -948,11 +980,11 @@ public class Entity {
     	int col = nextWorldX/gp.tileSize;
     	int row = nextWorldY/gp.tileSize;
     	
-    	for(int i = 0; i < target[1].length; i++) {
-    		if(target[gp.currentMap][i] !=null) {
+    	for(int i = 0; i < target[gp.currentMap].length; i++) {
+    		if(target[gp.currentMap][i] != null) {
     			if(target[gp.currentMap][i].getCol() == col &&
     					target[gp.currentMap][i].getRow() == row &&
-    					target[gp.currentMap][i].name.equals(targetName)) {
+    					targetName.equals(target[gp.currentMap][i].name)) {
     				
     				index = i;
     				break;
@@ -961,4 +993,27 @@ public class Entity {
     	}
     	return index;
     }
+
+    @Override
+    public String getName() { return name; }
+    @Override
+    public String getDescription() { return description; }
+    @Override
+    public BufferedImage getItemImage() { return down1 != null ? down1 : image; }
+    @Override
+    public int getItemType() { return type; }
+    @Override
+    public int getPrice() { return price; }
+    @Override
+    public int getValue() { return value; }
+    @Override
+    public int getAttackValue() { return attackValue; }
+    @Override
+    public int getDefenseValue() { return defenseValue; }
+    @Override
+    public int getUseCost() { return useCost; }
+    @Override
+    public int getKnockBackPower() { return knockBackPower; }
+    @Override
+    public int getLightRadius() { return lightRadius; }
 }
