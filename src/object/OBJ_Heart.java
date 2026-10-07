@@ -5,13 +5,35 @@ import main.GamePanel;
 
 public class OBJ_Heart extends Entity {
 	
-
+	GamePanel gp;
+	
 	public OBJ_Heart(GamePanel gp) {
 		super(gp);
+		this.gp = gp;
 		
+		type = type_pickupOnly;
 		name = "Heart";
-		image = setup("/objects/heart_full", gp.tileSize, gp.tileSize);
-		image2 = setup("/objects/heart_half", gp.tileSize, gp.tileSize);
-		image3 = setup("/objects/heart_blank", gp.tileSize, gp.tileSize);
+		value = 2;
+		down1 = setup("/objects/heart_collect", gp.tileSize, gp.tileSize);
+		image = setup("/objects/heart_full", 24, 24);
+		image2 = setup("/objects/heart_half", 24, 24);
+		image3 = setup("/objects/heart_blank", 24, 24);
+	} 
+	
+	public void use(Entity entity) {
+		
+		gp.playSE(1);
+		gp.ui.addMessage("Life +" + value);
+		if(entity.life == entity.maxLife) {
+			entity.life = entity.maxLife;
+		}
+		else if(entity.life + 1 == entity.maxLife) {
+			entity.life += 1;
+		}
+		else {
+			entity.life += value;
+		}
+		
 	}
+		
 }

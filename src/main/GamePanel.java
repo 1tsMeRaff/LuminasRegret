@@ -5,14 +5,22 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import javax.swing.JPanel;
+
+import ai.PathFinder;
 import entity.Entity;
 import entity.Player;
+import environtment.EnvirontmentManager;
 import tile.TileManager;
+import tile_interactive.InteractiveTile;
 
+@SuppressWarnings({"serial", "this-escape"})
 public class GamePanel extends JPanel implements Runnable {
     
     private static final long serialVersionUID = 1L;
@@ -23,33 +31,50 @@ public class GamePanel extends JPanel implements Runnable {
     
     public final int tileSize = originalTileSize * scale; // 48x48 tile
     public final int maxScreenCol = 16;
-    public final int maxScreenRow = 12;
+    public final int maxScreenRow = 9;
     public final int screenWidth = tileSize * maxScreenCol; // 768px 
-    public final int screenHeight = tileSize * maxScreenRow; // 576px
+    public final int screenHeight = tileSize * maxScreenRow; // 432px
     
     // WORLD SETTINGS
     public final int maxWorldCol = 50;
     public final int maxWorldRow = 50;
+    public final int maxMap = 10;
+    public int currentMap = 0;
+    
+    // Full Screen
+    int screenWidth2 = screenWidth;
+    int screenHeight2 = screenHeight;
+    BufferedImage tempScreen;
+    Graphics2D g2;
+    public boolean fullScreenOn = false;
     
     //FPS
     int FPS = 60;
     
     // System
-    TileManager tileM = new TileManager(this);
+    public TileManager tileM = new TileManager(this);
     public KeyHandler keyH = new KeyHandler(this);
+    public MouseHandler mouseH = new MouseHandler(this);
     Sound music = new Sound();
     Sound se = new Sound();
     public CollisionChecker cChecker = new CollisionChecker(this);
     public AssetSetter aSetter = new AssetSetter(this);
     public UI ui = new UI(this);
     public EventHandler eHandler = new EventHandler(this);
+    Config config = new Config(this);
+    public PathFinder pFinder = new PathFinder(this);
+    EnvirontmentManager eManager = new EnvirontmentManager(this);
+    public CutsceneManager csManager = new CutsceneManager(this);
     Thread gameThread;
     
     // Entity & Object
     public Player player = new Player(this,keyH);
-    public Entity obj[] = new Entity[10];
-    public Entity npc[] = new Entity[10];
-    public Entity monster[] = new Entity[20];
+    public Entity obj[][] = new Entity[maxMap][20];
+    public Entity npc[][] = new Entity[maxMap][10];
+    public Entity monster[][] = new Entity[maxMap][20];
+    public InteractiveTile iTile[][] = new InteractiveTile[maxMap][500];
+    public Entity projectile[][] = new Entity[maxMap][50];
+    public ArrayList<Entity> particleList = new ArrayList<>();
     ArrayList<Entity> entityList = new ArrayList<>();
     
     // Game State
@@ -59,7 +84,18 @@ public class GamePanel extends JPanel implements Runnable {
     public final int pauseState = 2;
     public final int dialogueState = 3;
     public final int characterState = 4; 
+    public final int optionsState = 5;
+    public final int gameOverState = 6;
+    public final int transitionState = 7;
+    public final int tradeState = 8;
+    public final int cutsceneState = 9;
+    public final int gameClearState = 10;
     
+    // Quest Manager
+    public final quest.QuestManager qManager = new quest.QuestManager(this);
+    
+    // Other
+    public boolean bossBattleOn = false;
     
     public GamePanel() {
         
@@ -67,6 +103,8 @@ public class GamePanel extends JPanel implements Runnable {
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
         this.addKeyListener(keyH);
+        this.addMouseListener(mouseH);
+        this.addMouseMotionListener(mouseH);
         this.setFocusable(true);
     }
     
@@ -75,10 +113,70 @@ public class GamePanel extends JPanel implements Runnable {
     	aSetter.setObject();
     	aSetter.setNPC();
     	aSetter.setMonster();
-//    	playMusic(0);
+    	aSetter.setInteractiveTile();
+    	eManager.setup();
     	gameState = titleState;
+    	playMusic(4);
+    	
+    	tempScreen = new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_ARGB);
+    	g2 = (Graphics2D)tempScreen.getGraphics();
+    	
+    	if(fullScreenOn == true) {
+    		setFullScreen();
+    	}
+    }
+    
+    public void resetGame(boolean restart) {
+    	
+    	removeTempEntity();
+    	bossBattleOn = false;
+    	player.setDefaultPositions();
+    	player.restoreStatus();
+    	aSetter.setNPC();
+    	aSetter.setMonster();
+    	
+    	if(restart) {
+    		player.setDefaultValues();
+        	player.setItems();
+        	aSetter.setObject();
+        	aSetter.setInteractiveTile();
+        	qManager.setQuest(quest.QuestType.TALK_TO_GUIDE);
+    	}
+    }
+    
+    public void setFullScreen() {
+    	
+    	// GET LOCAL SCREEN DEVICE
+    	GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    	GraphicsDevice gd = ge.getDefaultScreenDevice();
+    	gd.setFullScreenWindow(Main.window);
+
+    	// GET FULL SCREEN WIDTH AND HEIGHT
+    	screenWidth2 = Main.window.getWidth();
+    	screenHeight2 = Main.window.getHeight();
     }
 
+    public void toggleFullScreen() {
+        fullScreenOn = !fullScreenOn;
+        if (Main.window != null) {
+            Main.window.dispose();
+            Main.window.setUndecorated(fullScreenOn);
+            if (fullScreenOn) {
+                setFullScreen();
+            } else {
+                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                GraphicsDevice gd = ge.getDefaultScreenDevice();
+                gd.setFullScreenWindow(null);
+                screenWidth2 = screenWidth;
+                screenHeight2 = screenHeight;
+                Main.window.pack();
+                Main.window.setLocationRelativeTo(null);
+            }
+            Main.window.setVisible(true);
+        }
+        config.saveConfig();
+    }
+    
     public void startGameThread() {
         
         gameThread = new Thread(this);
@@ -105,56 +203,106 @@ public class GamePanel extends JPanel implements Runnable {
 
             if (delta >= 1) {
                 update();      // Update game logic
-                repaint();     // Render frame
+                drawToTempScreen();
+                drawToScreen();
                 delta--;
                 drawCount++;
             }
-
-            // FPS counter (opsional)
-//            if (timer >= 1000000000) {  // Jika sudah 1 detik
-//                System.out.println("FPS: " + drawCount);
-//                drawCount = 0;
-//                timer = 0;
-//            }
         }
     }
-    
     
     public void update() {
     	
     	if(gameState == playState) {
+    		// Check events
+    		eHandler.checkEvent();
+    		
     		//Player
     		player.update();
     		
     		//NPC 
-    		for(int i = 0; i < npc.length; i++) {
-    			if(npc[i] != null) {
-    				npc[i].update();
+    		for(int i = 0; i < npc[currentMap].length; i++) {
+    			if(npc[currentMap][i] != null) {
+    				npc[currentMap][i].update();
     			}
     		}
-    		for(int i = 0; i < monster.length; i++) {
-    			if(monster[i] != null) {
-    				if(monster[i].alive == true && monster[i].dying == false) {
-    					monster[i].update();
-    				}
-    				if(monster[i].alive == false) {
-    					monster[i] = null;
-    				}
-    			}
-    		}
-    	}
-    	if(gameState == pauseState) {
     		
+    		// Monster
+    		for(int i = 0; i < monster[currentMap].length; i++) {
+    			if(monster[currentMap][i] != null) {
+    				if(monster[currentMap][i].alive == true) {
+    					monster[currentMap][i].update();
+    				}
+    				if(monster[currentMap][i].alive == false) {
+    					monster[currentMap][i].checkDrop();
+    					monster[currentMap][i] = null;
+    				}
+    			}
+    		}
+    		
+    		// Projectile
+    		for(int i = 0; i < projectile[currentMap].length; i++) {
+    			if(projectile[currentMap][i] != null) {
+    				if(projectile[currentMap][i].alive == true) {
+    					projectile[currentMap][i].update();
+    				}
+    				if(projectile[currentMap][i].alive == false) {
+    					projectile[currentMap][i] = null;
+    				}
+    			}
+    		}
+    		
+    		// Particles
+    		for(int i = 0; i < particleList.size(); i++) {
+    			if(particleList.get(i) != null) {
+    				if(particleList.get(i).alive == true) {
+    					particleList.get(i).update();
+    				}
+    				if(particleList.get(i).alive == false) {
+    					particleList.remove(i);
+    					i--; // Adjust index after removal
+    				}
+    			}
+    		}
+    		
+    		// Interactive Tiles
+    		for(int i = 0; i  < iTile[currentMap].length; i++) {
+    			if(iTile[currentMap][i] != null) {
+    				iTile[currentMap][i].update();
+    			}
+    		}
+    		
+    		// Environment
+    		eManager.update();
     	}
-        
-        
+    	else if(gameState == pauseState) {
+    		// Pause logic if needed
+    	}
+    	else if(gameState == dialogueState) {
+            // Dialogue advancement is event-driven via KeyHandler & MouseHandler
+    	}
+        else if(gameState == cutsceneState) {
+            // Update cutscene manager
+            csManager.update();
+            
+            // Also update player for animation if needed
+            player.update();
+            
+            // Update NPCs untuk cutscene
+            for(int i = 0; i < npc[currentMap].length; i++) {
+                if(npc[currentMap][i] != null) {
+                    npc[currentMap][i].update();
+                }
+            }
+        }
+
+        // Update Quest Manager
+        qManager.update();
     }
     
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D)g;
-        
-        // Debug
+    public void drawToTempScreen() {
+    	
+    	// Debug
         long drawStart = 0;
         if(keyH.showDebugText == true) {
         	drawStart = System.nanoTime();
@@ -168,51 +316,73 @@ public class GamePanel extends JPanel implements Runnable {
         	//Tile
         	tileM.draw(g2);
         	
+        	// INTERACTIVE TILE
+        	for(int i = 0; i < iTile[currentMap].length; i++) {
+        		if(iTile[currentMap][i] != null) {
+        			iTile[currentMap][i].draw(g2);
+        		}
+        	}
+        	
         	// Add Entities To The List
         	entityList.add(player);
         	
-        	for(int i = 0; i < npc.length; i++) {
-        		if(npc[i] != null) {
-        			entityList.add(npc[i]);
+        	for(int i = 0; i < npc[currentMap].length; i++) {
+        		if(npc[currentMap][i] != null) {
+        			entityList.add(npc[currentMap][i]);
         		}
         	}
         	
-        	for(int i = 0; i < obj.length; i ++) {
-        		if(obj[i] != null) {
-        			entityList.add(obj[i]);
+        	for(int i = 0; i < obj[currentMap].length; i ++) {
+        		if(obj[currentMap][i] != null) {
+        			entityList.add(obj[currentMap][i]);
         		}
         	}
         	
-        	for(int i = 0; i < monster.length; i ++) {
-        		if(monster[i] != null) {
-        			entityList.add(monster[i]);
+        	for(int i = 0; i < monster[currentMap].length; i ++) {
+        		if(monster[currentMap][i] != null) {
+        			entityList.add(monster[currentMap][i]);
         		}
         	}
         	
-        	// Sort
+        	for(int i = 0; i < projectile[currentMap].length; i ++) {
+        		if(projectile[currentMap][i]!= null) {
+        			entityList.add(projectile[currentMap][i]);
+        		}
+        	}
+        	
+        	for(int i = 0; i < particleList.size(); i ++) {
+        		if(particleList.get(i) != null) {
+        			entityList.add(particleList.get(i));
+        		}
+        	}
+        	
+        	// Sort by Y position for correct drawing order
         	Collections.sort(entityList, new Comparator<Entity>() {
-
 				@Override
 				public int compare(Entity e1, Entity e2) {
-					
-					int result = Integer.compare(e1.worldY, e2.worldY);
-					return result;
+					return Integer.compare(e1.worldY, e2.worldY);
 				}
-        		
-			});
+        	});
             
             // Draw Entities
         	for(int i = 0; i < entityList.size(); i++) {
         		entityList.get(i).draw(g2);
         	}
+        	
         	// Empty Entity List
         	entityList.clear();
+        	
+        	// Environment
+        	eManager.draw(g2);
+        	
+        	// Cutscene 
+        	if(gameState == cutsceneState) {
+        		csManager.draw(g2);
+        	}
         	
             // UI
             ui.draw(g2);
         }
-       
-        
         
         //Debug
         if(keyH.showDebugText == true) {
@@ -222,33 +392,107 @@ public class GamePanel extends JPanel implements Runnable {
             g2.setFont(new Font("Arial", Font.PLAIN, 20));
             g2.setColor(Color.white);
             int x = 10;
-            int y = 400;
+            int y = 200;
             int lineHeight = 20;
             
             g2.drawString("WorldX" + player.worldX, x, y); y += lineHeight;
             g2.drawString("WorldY" + player.worldY, x, y); y += lineHeight;
             g2.drawString("Col" + (player.worldX + player.solidArea.x)/tileSize, x, y); y += lineHeight;
             g2.drawString("Row" + (player.worldY + player.solidArea.y)/tileSize, x, y); y += lineHeight;
+            g2.drawString("Game State: " + gameState, x, y); y += lineHeight;
+            g2.drawString("Boss Battle: " + bossBattleOn, x, y); y += lineHeight;
             g2.drawString("Draw time = "+ passed, x, y);
         }
-        
-        
-        g2.dispose();      //dispose graphics object
     }
-    public void playMusic(int i) {
-        music.setFile(i);
-        music.play();
-        music.loop();
+    
+    public void drawToScreen() {
+    	Graphics g = getGraphics();
+    	if (g != null) {
+    		g.drawImage(tempScreen, 0, 0, screenWidth2, screenHeight2, null);
+    		g.dispose();
+    	}
     }
+    
+    public int currentMusicId = -1;
 
+    public void playMusic(int i) {
+        currentMusicId = i;
+    	music.setFile(i);
+    	music.play();
+    	music.loop();
+    }
+    
     // Metode untuk menghentikan musik
     public void stopMusic() {
         music.stop();
+        currentMusicId = -1;
+    }
+
+    public void playAreaMusic() {
+        int targetMusic;
+        if(bossBattleOn) {
+            targetMusic = 3; // Boss theme
+        } else if(currentMap == 1) {
+            targetMusic = 2; // Dungeon theme
+        } else {
+            targetMusic = 0; // Overworld theme
+        }
+
+        if(currentMusicId != targetMusic) {
+            stopMusic();
+            playMusic(targetMusic);
+        }
     }
 
     // Metode untuk memutar Sound Effect (sekali main)
     public void playSE(int i) {
         se.setFile(i);
+        se.checkVolume();
         se.play();
+    }
+    
+    public void advanceDialogue() {
+        if(gameState != dialogueState) {
+            return;
+        }
+
+        if(csManager.isDialogueActive()) {
+            csManager.advanceDialogue();
+            return;
+        }
+
+        if(ui.npc != null) {
+            // Guard: Pastikan pemain masih berada di dekat NPC ini (maks 2.5 tile = 120px)
+            int dx = ui.npc.getCenterX() - player.getCenterX();
+            int dy = ui.npc.getCenterY() - player.getCenterY();
+            if (Math.hypot(dx, dy) <= tileSize * 2.5) {
+                ui.npc.speak();
+            } else {
+                // Pemain sudah menjauh dari NPC, tutup dialog secara aman
+                gameState = playState;
+                ui.npc = null;
+                ui.currentDialogue = "";
+                ui.currentSpeakerName = "";
+            }
+        } else {
+            gameState = playState;
+            ui.currentDialogue = "";
+            ui.currentSpeakerName = "";
+        }
+    }
+
+    public void removeTempEntity() {
+        for(int mapNum = 0; mapNum < maxMap; mapNum++) {
+            for(int i = 0; i < obj[mapNum].length; i++) {
+                if(obj[mapNum][i] != null && obj[mapNum][i].temp == true) {
+                    obj[mapNum][i] = null;
+                }
+            }
+            for(int i = 0; i < monster[mapNum].length; i++) {
+                if(monster[mapNum][i] != null && monster[mapNum][i].temp == true) {
+                    monster[mapNum][i] = null;
+                }
+            }
+        }
     }
 }
