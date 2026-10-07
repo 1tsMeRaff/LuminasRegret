@@ -25,3 +25,5 @@ desktop.ini
 
 # Build files
 target/
+*.jar
+web/*.jar

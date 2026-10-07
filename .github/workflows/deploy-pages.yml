@@ -1,0 +1,43 @@
+name: Deploy to GitHub Pages (gh-pages)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java SE 21 LTS
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Verify Clean Compilation (0 Warnings, 0 Errors)
+        run: |
+          mkdir -p bin
+          javac -Xlint:all -Werror -encoding UTF-8 -cp "res" -d bin $(find src -name "*.java")
+
+      - name: Package Standalone Production JAR
+        run: |
+          chmod +x scripts/build-jar.sh
+          ./scripts/build-jar.sh web/LuminasRegret.jar
+
+      - name: Deploy Web Portal & Game Artifact to gh-pages Branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web
+          publish_branch: gh-pages
+          force_orphan: true
+          commit_message: "deploy: update Lumina's Regret web player & standalone JAR [skip ci]"
