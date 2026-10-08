@@ -57,7 +57,14 @@ LuminasRegret/
 │   │   └── world/      # World spawners & events (AssetSetter.java)
 │   │       └── event/  # Event bus & cinematics (EventHandler.java, EventRect.java, CutsceneManager.java)
 │   └── ui/             # Dynamic HUD & typography presentation (UI.java)
-└── [Documentation]     # AGENTS.md, Architecture.md, Patterns.md, Roadmap.md, Run.md, Testing.md
+├── docs/               # Technical architecture & engineering specifications
+│   ├── Architecture.md # Core loop, rendering layers, AABB math
+│   ├── Patterns.md     # Idiomatic patterns & Effective Java compliance
+│   ├── Roadmap.md      # Development phases & milestones
+│   ├── Run.md          # Execution guides & JVM options
+│   ├── Testing.md      # Test harness catalog & execution procedures
+│   └── report.md       # Full architecture audit report
+└── AGENTS.md           # Master operational guide for AI agents
 ```
 
 ---
