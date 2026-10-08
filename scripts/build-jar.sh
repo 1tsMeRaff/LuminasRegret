@@ -10,9 +10,9 @@ echo "========================================="
 # Clean bin
 rm -rf bin && mkdir -p bin
 
-# Compile source files
-echo "Compiling Java SE 21 sources..."
-javac -Xlint:all -Werror -encoding UTF-8 -cp "res" -d "bin" $(find src -name "*.java")
+# Compile source files targeting Java 8 bytecode
+echo "Compiling Java SE sources (targeting bytecode Java 8)..."
+javac --release 8 -Xlint:all,-options -Werror -encoding UTF-8 -cp "res" -d "bin" $(find src -name "*.java")
 echo "Compilation successful (0 errors, 0 warnings)."
 
 # Ensure target directory exists
