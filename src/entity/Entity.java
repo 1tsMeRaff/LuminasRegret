@@ -608,7 +608,6 @@ public class Entity implements object.Item {
 	}
 
 	public void stopPathFinding() {
-	    System.out.println("🛑 stopPathFinding() called");
 	    this.onPath = false;
 	    this.goalCol = -1;
 	    this.goalRow = -1;
@@ -619,17 +618,12 @@ public class Entity implements object.Item {
 	}
 	
     public void followPath() {
-        System.out.println("--- followPath() called ---");
-        
         if (gp.pFinder.pathList.isEmpty()) {
-            System.out.println("PathList is empty, waiting...");
             direction = "down";
             return;
         }
         
         Node nextNode = gp.pFinder.pathList.get(0);
-        System.out.println("Next node: " + nextNode.col + ", " + nextNode.row);
-        
         int targetX = nextNode.col * gp.tileSize + gp.tileSize / 2;
         int targetY = nextNode.row * gp.tileSize + gp.tileSize / 2;
         
@@ -639,24 +633,14 @@ public class Entity implements object.Item {
         int dx = targetX - centerX;
         int dy = targetY - centerY;
         
-        System.out.println("Target: " + targetX + ", " + targetY);
-        System.out.println("Center: " + centerX + ", " + centerY);
-        System.out.println("Diff: " + dx + ", " + dy);
-        
         int threshold = gp.tileSize / 4;
         
         if(Math.abs(dx) < threshold && Math.abs(dy) < threshold) {
-            System.out.println("Reached node, removing from path");
             gp.pFinder.pathList.remove(0);
             
             if(gp.pFinder.pathList.isEmpty()) {
-                System.out.println("Path finished!");
                 return;
             }
-            
-            // Update to next node
-            nextNode = gp.pFinder.pathList.get(0);
-            System.out.println("Moving to next node: " + nextNode.col + ", " + nextNode.row);
         }
         
         // Tentukan arah
@@ -665,8 +649,6 @@ public class Entity implements object.Item {
         } else {
             direction = (dy > 0) ? "down" : "up";
         }
-        
-        System.out.println("Selected direction: " + direction);
     }
     
     // PATH FOLLOWING
@@ -723,22 +705,17 @@ public class Entity implements object.Item {
     }
     
     public void determineDirection(int dx, int dy) {
-    	
         if (Math.abs(dx) > Math.abs(dy)) {
             if (dx > 0) {
                 direction = "right";
-                System.out.println("→ Moving RIGHT to reach center");
             } else {
                 direction = "left";
-                System.out.println("← Moving LEFT to reach center");
             }
         } else {
             if (dy > 0) {
                 direction = "down";
-                System.out.println("↓ Moving DOWN to reach center");
             } else {
                 direction = "up";
-                System.out.println("↑ Moving UP to reach center");
             }
         }
     }
@@ -908,8 +885,6 @@ public class Entity implements object.Item {
         } else {
             direction = (dy > 0) ? "down" : "up";
         }
-        
-        System.out.println("Centering to tile (" + tileX + ", " + tileY + ")");
     }
     
     // PERHITUNGAN POSISI TILE
@@ -959,8 +934,6 @@ public class Entity implements object.Item {
         
         worldX = targetX;
         worldY = targetY;
-        
-        System.out.println("Aligned NPC to tile center: (" + currentCol + ", " + currentRow + ")");
     }
     
     public int getDetected(Entity user, Entity target[][], String targetName) {
