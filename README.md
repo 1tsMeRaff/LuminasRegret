@@ -89,18 +89,16 @@ javac -Xlint:all -encoding UTF-8 -cp "res" -d bin $(find src -name "*.java")
 
 ### 3. Jalankan Permainan
 ```bash
-java -cp "bin:res" main.Main        # Linux / macOS
-java -cp "bin;res" main.Main        # Windows (PowerShell / CMD)
+java -cp "bin:res" com.luminasregret.engine.core.Main        # Linux / macOS
+java -cp "bin;res" com.luminasregret.engine.core.Main        # Windows (PowerShell / CMD)
 ```
 
 ### 4. Menjalankan Automated Sanity Tests (Headless)
-Game dilengkapi dengan rangkaian automated unit & sanity test headless di folder `scratch/`:
-```bash
-java -Djava.awt.headless=true -cp "bin;res" scratch.UnifiedInputSystemSanityTest
-java -Djava.awt.headless=true -cp "bin;res" scratch.BugfixesAndImprovementsSanityTest
-java -Djava.awt.headless=true -cp "bin;res" scratch.MultiPhaseBossAndMagicTest
-java -Djava.awt.headless=true -cp "bin;res" scratch.QuestProgressionTest
+Game dilengkapi dengan rangkaian automated unit & sanity test headless:
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/run-tests.ps1
 ```
+Atau panduan lengkap pengujian dapat dilihat di [Testing.md](docs/Testing.md).
 
 ---
 
@@ -110,6 +108,13 @@ java -Djava.awt.headless=true -cp "bin;res" scratch.QuestProgressionTest
 LuminasRegret/
 ├── .github/workflows/  # CI/CD Automated Build & Test pipeline
 ├── bin/                # Output binary file .class terkompilasi
+├── docs/               # Dokumentasi teknis & arsitektur proyek
+│   ├── Architecture.md # Cetak biru arsitektur sistem & loop 60 FPS
+│   ├── Patterns.md     # Penerapan desain pola & Effective Java
+│   ├── Roadmap.md      # Roadmap pengembangan & milestone rilis
+│   ├── Run.md          # Panduan eksekusi desktop, tuning JVM & DPI
+│   ├── Testing.md      # Katalog automated sanity & headless testing
+│   └── report.md       # Laporan inspeksi & audit arsitektur menyeluruh
 ├── res/                # Aset game (sprites, tiles, maps, sounds, fonts)
 │   ├── font/           # Font retro pixel-art TTF
 │   ├── maps/           # Map plaintext 50x50 tile (worldV3.txt, dungeon01.txt)
@@ -118,17 +123,14 @@ LuminasRegret/
 │   ├── objects/        # Sprite item, senjata, relik, kunci, peti, HUD
 │   ├── player/         # Animasi gerak, ayunan tebas senjata, perisai
 │   └── sound/          # File audio uncompressed WAV (BGM & SFX)
-├── src/                # Source code inti Java SE
-│   ├── ai/             # A* Pathfinding (Node, PathFinder)
-│   ├── entity/         # Dynamic actors (Entity, Player, NPCs, PlayerDummy)
-│   ├── environtment/   # Sistem pencahayaan dinamis & siklus waktu
-│   ├── main/           # Game loop, input handling, collision, UI, audio engine
-│   ├── monster/        # AI monster, stats, combat behavior, loot drops
-│   ├── object/         # Item interaktif, senjata, proyektil, peralatan
-│   ├── quest/          # State machine quest engine (QuestManager, QuestType)
-│   ├── tile/           # Map loader, layer renderer, collision registration
-│   └── tile_interactive/# Objek lingkungan destruktif (IT_DryTree)
-└── [Dokumentasi]       # Architecture.md, Patterns.md, Testing.md, Roadmap.md, Run.md, report.md
+├── scripts/            # Helper automation scripts (compile, build-jar, run-tests)
+├── src/com/luminasregret/ # Source code modular Java SE (Reverse-Domain Standard)
+│   ├── engine/         # Sub-sistem inti (core, audio, gfx, input, physics, ai)
+│   ├── game/           # Domain gameplay (entity, monster, object, quest, tile, world)
+│   └── ui/             # Dynamic HUD, menu interaktif & typography presentation
+├── web/                # WebAssembly web portal player (CheerpJ)
+├── AGENTS.md           # Master operational guide untuk AI Coding Agent
+└── README.md           # Halaman utama repositori
 ```
 
 ---
