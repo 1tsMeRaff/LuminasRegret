@@ -124,6 +124,7 @@ public class GamePanel extends JPanel implements Runnable {
     	aSetter.setMonster();
     	aSetter.setInteractiveTile();
     	eManager.setup();
+    	se.initSoundPool();
     	gameState = titleState;
     	playMusic(4);
     	
@@ -229,9 +230,9 @@ public class GamePanel extends JPanel implements Runnable {
             long frameTime = System.nanoTime() - currentTime;
             long remainingTime = ((long)drawInterval - frameTime) / 1000000;
 
-            if (remainingTime > 2) {
+            if (remainingTime > 3) {
                 try {
-                    Thread.sleep(remainingTime);
+                    Thread.sleep(remainingTime - 1);
                 } catch (InterruptedException ignored) {}
             } else {
                 // Yield to browser event loop cooperatively without forcing 15ms setTimeout penalty
@@ -352,35 +353,35 @@ public class GamePanel extends JPanel implements Runnable {
         		}
         	}
         	
-        	// Add Entities To The List
+        	// Add Visible Entities To The List (Frustum Camera Culling to minimize sort overhead)
         	entityList.add(player);
         	
         	for(int i = 0; i < npc[currentMap].length; i++) {
-        		if(npc[currentMap][i] != null) {
+        		if(npc[currentMap][i] != null && npc[currentMap][i].inCamera()) {
         			entityList.add(npc[currentMap][i]);
         		}
         	}
         	
         	for(int i = 0; i < obj[currentMap].length; i ++) {
-        		if(obj[currentMap][i] != null) {
+        		if(obj[currentMap][i] != null && obj[currentMap][i].inCamera()) {
         			entityList.add(obj[currentMap][i]);
         		}
         	}
         	
         	for(int i = 0; i < monster[currentMap].length; i ++) {
-        		if(monster[currentMap][i] != null) {
+        		if(monster[currentMap][i] != null && monster[currentMap][i].inCamera()) {
         			entityList.add(monster[currentMap][i]);
         		}
         	}
         	
         	for(int i = 0; i < projectile[currentMap].length; i ++) {
-        		if(projectile[currentMap][i]!= null) {
+        		if(projectile[currentMap][i] != null && projectile[currentMap][i].inCamera()) {
         			entityList.add(projectile[currentMap][i]);
         		}
         	}
         	
         	for(int i = 0; i < particleList.size(); i ++) {
-        		if(particleList.get(i) != null) {
+        		if(particleList.get(i) != null && particleList.get(i).inCamera()) {
         			entityList.add(particleList.get(i));
         		}
         	}
@@ -486,11 +487,9 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
-    // Metode untuk memutar Sound Effect (sekali main)
+    // Metode untuk memutar Sound Effect (sekali main via preloaded pool)
     public void playSE(int i) {
-        se.setFile(i);
-        se.checkVolume();
-        se.play();
+        se.playSE(i);
     }
     
     public void advanceDialogue() {

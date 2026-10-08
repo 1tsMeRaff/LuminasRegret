@@ -69,7 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
             updateProgress(45, 'Menginisialisasi Virtual JVM...');
             await cheerpjInit({
                 version: 8,
-                status: "none"
+                status: "none",
+                javaProperties: [
+                    "sun.java2d.opengl=false",
+                    "sun.java2d.d3d=false",
+                    "sun.java2d.noddraw=true",
+                    "sun.java2d.pmoffscreen=false"
+                ]
             });
 
             updateProgress(65, 'Menyiapkan Display Canvas 768x432...');

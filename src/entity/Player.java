@@ -31,6 +31,7 @@ public class Player extends Entity {
     public int dashCoolDown = 0;
     final int dashDuration = 8;     // 0.25 detik
     final int dashCoolDownMax = 40;  // Cooldown dash
+    public Entity nearbyInteractable;
     
     public Player(GamePanel gp, KeyHandler keyH) {
         
@@ -390,6 +391,7 @@ public class Player extends Entity {
         if(rangeAvailableCounter < 30) {
             rangeAvailableCounter++;
         }
+        nearbyInteractable = getNearbyInteractable();
     }
     
     public void pickUpObject(int i) {
@@ -629,7 +631,7 @@ public class Player extends Entity {
     }
 
     public boolean interactNearest() {
-        Entity target = getNearbyInteractable();
+        Entity target = (nearbyInteractable != null) ? nearbyInteractable : getNearbyInteractable();
         if (target != null) {
             return interactWith(target);
         }

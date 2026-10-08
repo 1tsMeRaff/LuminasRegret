@@ -42,13 +42,89 @@ public class UI {
     public Entity npc;
     
     
+    // Pre-allocated static colors to eliminate GC pressure in the hot render path
+    public static final Color COLOR_SHADOW_BLACK = new Color(0, 0, 0, 220);
+    public static final Color COLOR_HALF_BLACK = new Color(0, 0, 0, 150);
+    public static final Color COLOR_BG_DARK_PILL = new Color(15, 15, 20, 200);
+    public static final Color COLOR_GOLD_BORDER = new Color(230, 200, 110, 160);
+    public static final Color COLOR_HP_BG = new Color(35, 35, 35);
+    public static final Color COLOR_HP_RED = new Color(255, 0, 30);
+    public static final Color COLOR_HP_BOSS_RED = new Color(220, 20, 30);
+    public static final Color COLOR_HP_BOSS_RAGE = new Color(255, 60, 0);
+    public static final Color COLOR_BOSS_RAGE_TEXT = new Color(255, 120, 120);
+    public static final Color COLOR_PROMPT_BG = new Color(15, 20, 35, 220);
+    public static final Color COLOR_PROMPT_BORDER = new Color(255, 215, 0, 230);
+    public static final Color COLOR_QUEST_BG = new Color(0, 0, 0, 185);
+    public static final Color COLOR_QUEST_BORDER = new Color(255, 215, 0, 210);
+    public static final Color COLOR_QUEST_HEADER = new Color(255, 215, 0);
+    public static final Color COLOR_QUEST_DESC = new Color(210, 210, 210);
+    public static final Color COLOR_BANNER_BG = new Color(15, 15, 25, 235);
+    public static final Color COLOR_BANNER_GOLD = new Color(255, 215, 0);
+    public static final Color COLOR_SUBWINDOW_BG = new Color(0, 0, 0, 200);
+    public static final Color COLOR_CLEAR_OVERLAY = new Color(0, 0, 0, 225);
+    public static final Color COLOR_CLEAR_TITLE_SHADOW = new Color(130, 95, 0);
+    public static final Color COLOR_CLEAR_SUBTEXT = new Color(215, 215, 215);
+    public static final Color COLOR_TITLE_BG = new Color(0, 102, 102);
+    public static final Color COLOR_EQUIP_CURSOR = new Color(240, 190, 90);
+    public static final Color COLOR_BADGE_BG = new Color(15, 18, 30, 245);
+
+    // Pre-allocated static strokes
+    public static final BasicStroke STROKE_1_5 = new BasicStroke(1.5f);
+    public static final BasicStroke STROKE_2 = new BasicStroke(2.0f);
+    public static final BasicStroke STROKE_3 = new BasicStroke(3.0f);
+    public static final BasicStroke STROKE_5 = new BasicStroke(5.0f);
+
+    // Pre-cached fonts to avoid calling deriveFont() every frame
+    public Font fontPixel11Plain;
+    public Font fontPixel13Bold;
+    public Font fontPixel14Plain;
+    public Font fontPixel15Bold;
+    public Font fontPixel15Plain;
+    public Font fontPixel16Bold;
+    public Font fontPixel16Plain;
+    public Font fontPixel18Plain;
+    public Font fontPixel18Bold;
+    public Font fontPixel19Plain;
+    public Font fontPixel20Bold;
+    public Font fontPixel22Bold;
+    public Font fontPixel24Bold;
+    public Font fontPixel28Bold;
+    public Font fontPixel32Bold;
+    public Font fontPixel40Bold;
+    public Font fontPixel50Bold;
+    public Font fontPixel54Bold;
+    public Font fontPixel80Bold;
+    public Font fontPixel110Bold;
+    
     public UI(GamePanel gp) {
         this.gp = gp;
-        
         
         kingThings = loadFont("/font/Kingthings_Petrock.ttf", 28f);
         kingThingsL = loadFont("/font/Kingthings_Petrock_light.ttf", 20f);
         fusionPixel = loadFont("/font/fusion-pixel.ttf", 18f);
+
+        // Pre-derive all fonts once to eliminate GC overhead
+        Font baseFont = (fusionPixel != null) ? fusionPixel : new Font("SansSerif", Font.PLAIN, 18);
+        fontPixel11Plain = baseFont.deriveFont(Font.PLAIN, 11f);
+        fontPixel13Bold = baseFont.deriveFont(Font.BOLD, 13f);
+        fontPixel14Plain = baseFont.deriveFont(Font.PLAIN, 14f);
+        fontPixel15Bold = baseFont.deriveFont(Font.BOLD, 15f);
+        fontPixel15Plain = baseFont.deriveFont(Font.PLAIN, 15f);
+        fontPixel16Bold = baseFont.deriveFont(Font.BOLD, 16f);
+        fontPixel16Plain = baseFont.deriveFont(Font.PLAIN, 16f);
+        fontPixel18Plain = baseFont.deriveFont(Font.PLAIN, 18f);
+        fontPixel18Bold = baseFont.deriveFont(Font.BOLD, 18f);
+        fontPixel19Plain = baseFont.deriveFont(Font.PLAIN, 19f);
+        fontPixel20Bold = baseFont.deriveFont(Font.BOLD, 20f);
+        fontPixel22Bold = baseFont.deriveFont(Font.BOLD, 22f);
+        fontPixel24Bold = baseFont.deriveFont(Font.BOLD, 24f);
+        fontPixel28Bold = baseFont.deriveFont(Font.BOLD, 28f);
+        fontPixel32Bold = baseFont.deriveFont(Font.BOLD, 32f);
+        fontPixel40Bold = baseFont.deriveFont(Font.BOLD, 40f);
+        fontPixel50Bold = baseFont.deriveFont(Font.BOLD, 50f);
+        fontPixel54Bold = baseFont.deriveFont(Font.BOLD, 54f);
+        fontPixel80Bold = baseFont.deriveFont(Font.BOLD, 80f);
+        fontPixel110Bold = baseFont.deriveFont(Font.BOLD, 110f);
         
         // Create HUD Object
         Entity heart = new OBJ_Heart(gp);
@@ -62,7 +138,6 @@ public class UI {
         
         Entity bronzeCoin = new OBJ_Coin_Bronze(gp);
         coin = bronzeCoin.down1;
-        
     }
 
     private Font loadFont(String path, float defaultSize) {
@@ -232,10 +307,10 @@ public class UI {
     			    double oneScale = (double)gp.tileSize/monster.maxLife;
     			    double hpBarValue = oneScale * Math.max(0, monster.life);
 
-    			    g2.setColor(new Color(35,35,35));
+    			    g2.setColor(COLOR_HP_BG);
     			    g2.fillRect(monster.getScreenX()-1, monster.getScreenY()-16, gp.tileSize+2, 12);
 
-    			    g2.setColor(new Color(255,0,30));
+    			    g2.setColor(COLOR_HP_RED);
     			    g2.fillRect(monster.getScreenX(), monster.getScreenY() - 15, (int)hpBarValue, 10);
 
     			    monster.hpBarCounter++;
@@ -257,21 +332,21 @@ public class UI {
     			    int x = gp.screenWidth/2 - gp.tileSize * 4;
     			    int y = gp.screenHeight - (gp.tileSize * 2);
 
-    			    g2.setColor(new Color(35,35,35));
+    			    g2.setColor(COLOR_HP_BG);
     			    g2.fillRect(x-1, y-1, gp.tileSize * 8 + 2, 16);
 
     			    if(monster.rage) {
-    			        g2.setColor(new Color(255, 60, 0)); // Oranye merah membara saat fase 2 murka
+    			        g2.setColor(COLOR_HP_BOSS_RAGE); // Oranye merah membara saat fase 2 murka
     			    } else {
-    			        g2.setColor(new Color(220, 20, 30));
+    			        g2.setColor(COLOR_HP_BOSS_RED);
     			    }
     			    g2.fillRect(x, y, (int)hpBarValue, 14);
     			    
-    			    g2.setFont(g2.getFont().deriveFont(Font.BOLD, 20f));
+    			    g2.setFont(fontPixel20Bold);
     			    String title = monster.name;
     			    if(monster.rage) {
     			        title += " [FASE 2: MURKA]";
-    			        g2.setColor(new Color(255, 120, 120));
+    			        g2.setColor(COLOR_BOSS_RAGE_TEXT);
     			    } else {
     			        g2.setColor(Color.white);
     			    }
@@ -279,7 +354,7 @@ public class UI {
 
     			    // Tampilkan rasio angka HP di sisi kanan (clamped ke 0)
     			    String hpRatio = displayLife + " / " + monster.maxLife;
-    			    int hpTextX = x + gp.tileSize * 8 - (int)g2.getFontMetrics().getStringBounds(hpRatio, g2).getWidth() - 4;
+    			    int hpTextX = x + gp.tileSize * 8 - g2.getFontMetrics().stringWidth(hpRatio) - 4;
     			    g2.setColor(Color.white);
     			    g2.drawString(hpRatio, hpTextX, y - 8);
     			}
@@ -291,8 +366,7 @@ public class UI {
         
         int messageX = 20;
         int messageY = (int)(gp.tileSize * 3.5);
-        Font msgFont = (fusionPixel != null) ? fusionPixel.deriveFont(Font.PLAIN, 18F) : g2.getFont().deriveFont(Font.PLAIN, 18F);
-        g2.setFont(msgFont);
+        g2.setFont(fontPixel18Plain);
         FontMetrics fm = g2.getFontMetrics();
 
         for(int i = 0; i < message.size(); i++) {
@@ -302,15 +376,15 @@ public class UI {
                 int textHeight = fm.getHeight();
 
                 // Sleek semi-transparent dark pill background
-                g2.setColor(new Color(15, 15, 20, 200));
+                g2.setColor(COLOR_BG_DARK_PILL);
                 g2.fillRoundRect(messageX, messageY - fm.getAscent() - 3, textWidth + 16, textHeight + 6, 8, 8);
 
                 // Elegant border accent
-                g2.setColor(new Color(230, 200, 110, 160));
+                g2.setColor(COLOR_GOLD_BORDER);
                 g2.drawRoundRect(messageX, messageY - fm.getAscent() - 3, textWidth + 16, textHeight + 6, 8, 8);
 
                 // Text shadow & text
-                g2.setColor(new Color(0, 0, 0, 220));
+                g2.setColor(COLOR_SHADOW_BLACK);
                 g2.drawString(text, messageX + 9, messageY + 1);
                 g2.setColor(Color.white);
                 g2.drawString(text, messageX + 8, messageY);
@@ -340,11 +414,11 @@ public class UI {
     
     public void drawTitleScreen() {
         
-        g2.setColor(new Color(0,102,102));
+        g2.setColor(COLOR_TITLE_BG);
         g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
         
         // Title Name
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 80F));
+        g2.setFont(fontPixel80Bold);
         String text = "Lumina's Regret";
         int x = getXforCenteredText(text);
         int y = (int)(gp.tileSize * 2.5); // Posisi judul disesuaikan untuk layar pendek
@@ -363,7 +437,7 @@ public class UI {
         g2.drawImage(gp.player.down1, x, y, gp.tileSize * 2, gp.tileSize * 2, null);
         
         // Menu
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 40F));
+        g2.setFont(fontPixel40Bold);
         
         text = "NEW GAME";
         x = getXforCenteredText(text);
@@ -392,15 +466,10 @@ public class UI {
     }
     
     public void drawPauseScreen() {
-        
         String text = "PAUSED";
-        
-        Font originalFont = g2.getFont();
-        Font largeFont = originalFont.deriveFont(Font.PLAIN, 48f);
-        g2.setFont(largeFont);
+        g2.setFont(fontPixel50Bold);
         int x = getXforCenteredText(text);
         int y = gp.screenHeight/2;
-        
         g2.drawString(text, x, y);
     }
     
@@ -428,25 +497,24 @@ public class UI {
 
         // Speaker Name Tag Badge
         if (currentSpeakerName != null && !currentSpeakerName.trim().isEmpty()) {
-            g2.setFont(fusionPixel != null ? fusionPixel.deriveFont(Font.BOLD, 15f) : g2.getFont().deriveFont(Font.BOLD, 15f));
-            int badgeW = (int) g2.getFontMetrics().getStringBounds(currentSpeakerName, g2).getWidth() + 32;
+            g2.setFont(fontPixel15Bold);
+            int badgeW = g2.getFontMetrics().stringWidth(currentSpeakerName) + 32;
             int badgeH = 28;
             int badgeX = x + 20;
             int badgeY = y - 14;
 
-            g2.setColor(new Color(15, 18, 30, 245));
+            g2.setColor(COLOR_BADGE_BG);
             g2.fillRoundRect(badgeX, badgeY, badgeW, badgeH, 12, 12);
 
-            g2.setColor(new Color(255, 215, 0));
-            g2.setStroke(new BasicStroke(2));
+            g2.setColor(COLOR_BANNER_GOLD);
+            g2.setStroke(STROKE_2);
             g2.drawRoundRect(badgeX, badgeY, badgeW, badgeH, 12, 12);
 
             g2.drawString(currentSpeakerName, badgeX + 16, badgeY + 19);
         }
         
         // Font dialog: 19F agar rapi, proporsional, dan tidak meluap
-        Font dialogueFont = (fusionPixel != null) ? fusionPixel.deriveFont(Font.PLAIN, 19F) : g2.getFont().deriveFont(Font.PLAIN, 19F);
-        g2.setFont(dialogueFont);
+        g2.setFont(fontPixel19Plain);
         g2.setColor(Color.WHITE);
 
         FontMetrics fm = g2.getFontMetrics();
@@ -466,14 +534,12 @@ public class UI {
         }
 
         // Hint tombol lanjut di pojok kanan bawah
-        g2.setFont(dialogueFont.deriveFont(Font.BOLD, 13f));
+        g2.setFont(fontPixel13Bold);
         String promptHint = "[E / ENTER / Klik] Lanjut ▶";
-        int hintW = (int) g2.getFontMetrics().getStringBounds(promptHint, g2).getWidth();
+        int hintW = g2.getFontMetrics().stringWidth(promptHint);
         int hintX = x + width - hintW - 24;
         int hintY = y + height - 16;
-        int alphaMod = (int) (Math.sin(System.currentTimeMillis() * 0.005) * 45 + 210);
-        alphaMod = Math.min(255, Math.max(80, alphaMod));
-        g2.setColor(new Color(255, 215, 0, alphaMod));
+        g2.setColor(COLOR_BANNER_GOLD);
         g2.drawString(promptHint, hintX, hintY);
     }
 
@@ -543,7 +609,7 @@ public class UI {
     }
 
     public void drawInteractionPrompt() {
-        Entity target = gp.player.getNearbyInteractable();
+        Entity target = gp.player.nearbyInteractable;
         if (target == null) return;
 
         int screenX = target.worldX - gp.player.worldX + gp.player.screenX;
@@ -565,8 +631,8 @@ public class UI {
             actionText = "[E / Klik] Interaksi";
         }
 
-        g2.setFont(fusionPixel != null ? fusionPixel.deriveFont(Font.BOLD, 13f) : g2.getFont().deriveFont(Font.BOLD, 13f));
-        int textWidth = (int) g2.getFontMetrics().getStringBounds(actionText, g2).getWidth();
+        g2.setFont(fontPixel13Bold);
+        int textWidth = g2.getFontMetrics().stringWidth(actionText);
         int boxW = textWidth + 16;
         int boxH = 22;
 
@@ -576,12 +642,12 @@ public class UI {
         int boxY = (int) (screenY - 14 + bobOffset);
 
         // Draw shadow & background
-        g2.setColor(new Color(15, 20, 35, 220));
+        g2.setColor(COLOR_PROMPT_BG);
         g2.fillRoundRect(boxX, boxY, boxW, boxH, 10, 10);
 
         // Border glow
-        g2.setColor(new Color(255, 215, 0, 230));
-        g2.setStroke(new BasicStroke(1.5f));
+        g2.setColor(COLOR_PROMPT_BORDER);
+        g2.setStroke(STROKE_1_5);
         g2.drawRoundRect(boxX, boxY, boxW, boxH, 10, 10);
 
         // Text
@@ -601,7 +667,7 @@ public class UI {
         
         // Text
         g2.setColor(Color.white);
-        g2.setFont(g2.getFont().deriveFont(28F));
+        g2.setFont(fontPixel28Bold);
 
         int textX = frameX + 20;
         int textY = frameY + 38;
@@ -729,7 +795,7 @@ public class UI {
                     entity.inventory.get(i) == entity.currentShield || 
                     entity.inventory.get(i) == entity.currentLight) {
             	
-                g2.setColor(new Color(240,190,90));
+                g2.setColor(COLOR_EQUIP_CURSOR);
                 g2.fillRoundRect(slotX,slotY, gp.tileSize, gp.tileSize,10,10 );
             }
 
@@ -754,7 +820,7 @@ public class UI {
 
             //DRAW CURSOR
             g2.setColor(Color.white);
-            g2.setStroke(new BasicStroke(3));
+            g2.setStroke(STROKE_3);
             g2.drawRoundRect(cursorX,cursorY,cursorWidth,cursorHeight,10,10);
 
             //DESCRIPTION FRAME
@@ -772,8 +838,7 @@ public class UI {
             if(itemIndex < entity.inventory.size()) {
                 drawSubWindow(dFrameX, dFrameY, dFrameWidth, dFrameHeight);
 
-                Font descFont = (fusionPixel != null) ? fusionPixel.deriveFont(Font.PLAIN, 16F) : g2.getFont().deriveFont(Font.PLAIN, 16F);
-                g2.setFont(descFont);
+                g2.setFont(fontPixel16Plain);
                 g2.setColor(Color.WHITE);
 
                 FontMetrics fm = g2.getFontMetrics();
@@ -795,13 +860,13 @@ public class UI {
     }
     
     public void drawGameOverScreen() {
-        g2.setColor(new Color(0,0,0,150)); //Half-black
+        g2.setColor(COLOR_HALF_BLACK); //Half-black
         g2.fillRect(0,0,gp.screenWidth,gp.screenHeight);
 
         int x;
         int y;
         String text;
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD,110f));
+        g2.setFont(fontPixel110Bold);
         text = "Game Over";
 
         //Shadow
@@ -814,7 +879,7 @@ public class UI {
         g2.drawString(text,x-4,y-4);
 
         //RETRY
-        g2.setFont(g2.getFont().deriveFont(50f));
+        g2.setFont(fontPixel50Bold);
         text = "Retry";
         x = getXforCenteredText(text);
         y += gp.tileSize * 4;
@@ -837,7 +902,7 @@ public class UI {
     public void drawOptionsScreen() {
         
         g2.setColor(Color.white);
-        g2.setFont(g2.getFont().deriveFont(32F));
+        g2.setFont(fontPixel32Bold);
 
         int frameWidth = gp.tileSize * 8;
         int frameHeight = gp.tileSize * 8;
@@ -1250,29 +1315,23 @@ public class UI {
     }
     
     public void drawSubWindow(int x, int y, int width, int height) {
-        
-        Color c = new Color(0, 0, 0, 200);
-        g2.setColor(c);
+        g2.setColor(COLOR_SUBWINDOW_BG);
         g2.fillRoundRect(x, y, width, height, 35, 35);
         
-        c = new Color(255, 255, 255);
-        g2.setColor(c);
-        g2.setStroke(new BasicStroke(5));
+        g2.setColor(Color.WHITE);
+        g2.setStroke(STROKE_5);
         g2.drawRoundRect(x+5, y+5, width-10, height-10, 25, 25);
-        
     }
     
     public int getXforCenteredText(String text) {
-        
-        int lenght = (int)g2.getFontMetrics().getStringBounds(text, g2).getWidth();
-        int x = gp.screenWidth/2 - lenght/2;
+        int length = g2.getFontMetrics().stringWidth(text);
+        int x = gp.screenWidth/2 - length/2;
         return x;
     }
     
     public int getXforAlignToRightText(String text, int tailX) {
-        
-        int lenght = (int)g2.getFontMetrics().getStringBounds(text, g2).getWidth();
-        int x = tailX - lenght;
+        int length = g2.getFontMetrics().stringWidth(text);
+        int x = tailX - length;
         return x;
     }
 
@@ -1285,27 +1344,27 @@ public class UI {
         int y = 14;
 
         // Background box transparan elegan
-        g2.setColor(new Color(0, 0, 0, 185));
+        g2.setColor(COLOR_QUEST_BG);
         g2.fillRoundRect(x, y, width, height, 18, 18);
 
         // Border aksen emas
-        g2.setColor(new Color(255, 215, 0, 210));
-        g2.setStroke(new BasicStroke(2));
+        g2.setColor(COLOR_QUEST_BORDER);
+        g2.setStroke(STROKE_2);
         g2.drawRoundRect(x, y, width, height, 18, 18);
 
         // Header
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 13f));
-        g2.setColor(new Color(255, 215, 0));
+        g2.setFont(fontPixel13Bold);
+        g2.setColor(COLOR_QUEST_HEADER);
         g2.drawString("MISI AKTIF", x + 14, y + 20);
 
         // Judul Quest
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 16f));
+        g2.setFont(fontPixel16Bold);
         g2.setColor(Color.WHITE);
         g2.drawString(gp.qManager.getCurrentQuest().getTitle(), x + 14, y + 42);
 
         // Deskripsi ringkas
-        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 11f));
-        g2.setColor(new Color(210, 210, 210));
+        g2.setFont(fontPixel11Plain);
+        g2.setColor(COLOR_QUEST_DESC);
         String desc = gp.qManager.getCurrentQuest().getDescription();
         if(desc.length() > 42) {
             desc = desc.substring(0, 39) + "...";
@@ -1329,21 +1388,21 @@ public class UI {
         int bY = gp.tileSize * 2;
 
         // Banner box
-        g2.setColor(new Color(15, 15, 25, 235));
+        g2.setColor(COLOR_BANNER_BG);
         g2.fillRoundRect(bX, bY, bWidth, bHeight, 20, 20);
 
-        g2.setColor(new Color(255, 215, 0));
-        g2.setStroke(new BasicStroke(3));
+        g2.setColor(COLOR_BANNER_GOLD);
+        g2.setStroke(STROKE_3);
         g2.drawRoundRect(bX, bY, bWidth, bHeight, 20, 20);
 
         // Header
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 18f));
-        g2.setColor(new Color(255, 215, 0));
+        g2.setFont(fontPixel18Bold);
+        g2.setColor(COLOR_BANNER_GOLD);
         int headerX = getXforCenteredText(gp.qManager.getBannerHeader());
         g2.drawString(gp.qManager.getBannerHeader(), headerX, bY + 28);
 
         // Subtext
-        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 14f));
+        g2.setFont(fontPixel14Plain);
         g2.setColor(Color.WHITE);
         int textX = getXforCenteredText(gp.qManager.getBannerText());
         g2.drawString(gp.qManager.getBannerText(), textX, bY + 50);
@@ -1352,30 +1411,30 @@ public class UI {
     }
 
     public void drawGameClearScreen() {
-        g2.setColor(new Color(0, 0, 0, 225));
+        g2.setColor(COLOR_CLEAR_OVERLAY);
         g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
 
         int textY = gp.tileSize * 2;
 
         // Title
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 54f));
+        g2.setFont(fontPixel54Bold);
         String title = "LUMINA'S REGRET";
-        g2.setColor(new Color(130, 95, 0));
+        g2.setColor(COLOR_CLEAR_TITLE_SHADOW);
         g2.drawString(title, getXforCenteredText(title) + 3, textY + 3);
-        g2.setColor(new Color(255, 215, 0));
+        g2.setColor(COLOR_BANNER_GOLD);
         g2.drawString(title, getXforCenteredText(title), textY);
 
         // Subtitle
         textY += 45;
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 22f));
+        g2.setFont(fontPixel22Bold);
         g2.setColor(Color.WHITE);
         String sub = "- KUTUKAN TELAH TERANGKAT -";
         g2.drawString(sub, getXforCenteredText(sub), textY);
 
         // Narrative
         textY += 40;
-        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 15f));
-        g2.setColor(new Color(215, 215, 215));
+        g2.setFont(fontPixel15Plain);
+        g2.setColor(COLOR_CLEAR_SUBTEXT);
         String line1 = "Dengan kembalinya Relik Suci, kedamaian menyelimuti tanah Lumina.";
         String line2 = "Goblin King telah ditaklukkan dan kegelapan sirna untuk selamanya.";
         g2.drawString(line1, getXforCenteredText(line1), textY);
@@ -1389,18 +1448,18 @@ public class UI {
         int boxY = textY + 20;
         drawSubWindow(boxX, boxY, boxW, boxH);
 
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 15f));
-        g2.setColor(new Color(255, 215, 0));
+        g2.setFont(fontPixel15Bold);
+        g2.setColor(COLOR_BANNER_GOLD);
         g2.drawString("Statistik Petualang:", boxX + 24, boxY + 30);
 
-        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 14f));
+        g2.setFont(fontPixel14Plain);
         g2.setColor(Color.WHITE);
         g2.drawString("Level Akhir: " + gp.player.level + "   |   Koin: " + gp.player.coin, boxX + 24, boxY + 56);
         g2.drawString("HP Maksimal: " + gp.player.maxLife + "   |   Mana: " + gp.player.maxMana, boxX + 24, boxY + 80);
 
         // Options
         int optY = boxY + boxH + 40;
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 24f));
+        g2.setFont(fontPixel24Bold);
 
         String opt1 = "Main Lagi (Restart)";
         int opt1X = getXforCenteredText(opt1);
