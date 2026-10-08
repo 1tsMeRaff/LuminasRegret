@@ -150,20 +150,72 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, { passive: false });
 
-    // 4. Fullscreen Button Support
-    btnFullscreen.addEventListener('click', () => {
+    // 4. Fullscreen & Keyboard Lock Support (Locks ESC to in-game menu while Fullscreen)
+    const btnFsExit = document.getElementById('btn-fs-exit');
+    let isExitingFullscreen = false;
+
+    async function toggleFullscreen() {
         if (!document.fullscreenElement) {
-            if (screenContainer.requestFullscreen) {
-                screenContainer.requestFullscreen();
-            } else if (screenContainer.webkitRequestFullscreen) {
-                screenContainer.webkitRequestFullscreen();
+            try {
+                if (screenContainer.requestFullscreen) {
+                    await screenContainer.requestFullscreen();
+                } else if (screenContainer.webkitRequestFullscreen) {
+                    await screenContainer.webkitRequestFullscreen();
+                }
+                // Lock Escape key so pressing ESC in fullscreen ONLY operates in-game pause/menu and DOES NOT exit/shrink the web screen
+                if (navigator.keyboard && navigator.keyboard.lock) {
+                    await navigator.keyboard.lock(['Escape']);
+                }
+            } catch (err) {
+                console.warn('Fullscreen request failed:', err);
             }
         } else {
-            if (document.exitFullscreen) {
+            try {
+                if (document.exitFullscreen) {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {
+                console.warn('Exit fullscreen failed:', err);
+            }
+        }
+    }
+
+    btnFullscreen.addEventListener('click', toggleFullscreen);
+    if (btnFsExit) {
+        btnFsExit.addEventListener('click', () => {
+            if (document.fullscreenElement && document.exitFullscreen) {
                 document.exitFullscreen();
+            }
+        });
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+        const isFs = !!document.fullscreenElement;
+        const btnSpan = btnFullscreen.querySelector('span');
+        if (isFs) {
+            if (btnSpan) btnSpan.textContent = 'Exit Fullscreen';
+            btnFullscreen.setAttribute('title', 'Keluar Layar Penuh');
+            if (navigator.keyboard && navigator.keyboard.lock) {
+                navigator.keyboard.lock(['Escape']).catch(() => {});
+            }
+        } else {
+            isExitingFullscreen = true;
+            setTimeout(() => { isExitingFullscreen = false; }, 350);
+            if (btnSpan) btnSpan.textContent = 'Fullscreen';
+            btnFullscreen.setAttribute('title', 'Mode Layar Penuh');
+            if (navigator.keyboard && navigator.keyboard.unlock) {
+                navigator.keyboard.unlock();
             }
         }
     });
+
+    // Prevent emergency hold-Esc or browser fullscreen exit from simultaneously toggling in-game menu
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'Escape' && isExitingFullscreen) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+        }
+    }, true);
 
     // 5. Capture Input Button
     btnCaptureInput.addEventListener('click', () => {

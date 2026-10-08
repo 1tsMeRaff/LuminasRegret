@@ -140,43 +140,34 @@ public class Player extends Entity {
         right1 = setup("/player/right1", gp.tileSize, gp.tileSize);
         right2 = setup("/player/right2", gp.tileSize, gp.tileSize);
     }
+    private int lastLoadedWeaponType = -1;
+
     public void getPlayerAttackImage() {
-    	
-    	if(currentWeapon.type == type_sword) {
-    		attackUp1 = setup("/player/attup1", gp.tileSize, gp.tileSize);
-        	attackUp2 = setup("/player/attup2", gp.tileSize, gp.tileSize);
-        	attackUp3 = setup("/player/attup3", gp.tileSize, gp.tileSize);
-        	
-        	attackDown1 = setup("/player/attdown1", gp.tileSize, gp.tileSize);
-        	attackDown2 = setup("/player/attdown2", gp.tileSize, gp.tileSize);
-        	attackDown3 = setup("/player/attdown3", gp.tileSize, gp.tileSize);
-        	
-        	attackLeft1 = setup("/player/attleft1", gp.tileSize, gp.tileSize);
-        	attackLeft2 = setup("/player/attleft2", gp.tileSize, gp.tileSize);
-        	attackLeft3 = setup("/player/attleft3", gp.tileSize, gp.tileSize);
-        	
-        	attackRight1 = setup("/player/attright1", gp.tileSize, gp.tileSize);
-        	attackRight2 = setup("/player/attright2", gp.tileSize, gp.tileSize);
-        	attackRight3 = setup("/player/attright3", gp.tileSize, gp.tileSize);
-    	}
-    	
-    	if(currentWeapon.type == type_axe	) {
-    		attackUp1 = setup("/player/attup1", gp.tileSize, gp.tileSize);
-        	attackUp2 = setup("/player/attup2", gp.tileSize, gp.tileSize);
-        	attackUp3 = setup("/player/attup3", gp.tileSize, gp.tileSize);
-        	
-        	attackDown1 = setup("/player/attdown1", gp.tileSize, gp.tileSize);
-        	attackDown2 = setup("/player/attdown2", gp.tileSize, gp.tileSize);
-        	attackDown3 = setup("/player/attdown3", gp.tileSize, gp.tileSize);
-        	
-        	attackLeft1 = setup("/player/attleft1", gp.tileSize, gp.tileSize);
-        	attackLeft2 = setup("/player/attleft2", gp.tileSize, gp.tileSize);
-        	attackLeft3 = setup("/player/attleft3", gp.tileSize, gp.tileSize);
-        	
-        	attackRight1 = setup("/player/attright1", gp.tileSize, gp.tileSize);
-        	attackRight2 = setup("/player/attright2", gp.tileSize, gp.tileSize);
-        	attackRight3 = setup("/player/attright3", gp.tileSize, gp.tileSize);
-    	}
+        if (currentWeapon == null) {
+            return;
+        }
+        if (currentWeapon.type == lastLoadedWeaponType && attackUp1 != null) {
+            return;
+        }
+        lastLoadedWeaponType = currentWeapon.type;
+        
+        if (currentWeapon.type == type_sword || currentWeapon.type == type_axe) {
+            attackUp1 = setup("/player/attup1", gp.tileSize, gp.tileSize);
+            attackUp2 = setup("/player/attup2", gp.tileSize, gp.tileSize);
+            attackUp3 = setup("/player/attup3", gp.tileSize, gp.tileSize);
+            
+            attackDown1 = setup("/player/attdown1", gp.tileSize, gp.tileSize);
+            attackDown2 = setup("/player/attdown2", gp.tileSize, gp.tileSize);
+            attackDown3 = setup("/player/attdown3", gp.tileSize, gp.tileSize);
+            
+            attackLeft1 = setup("/player/attleft1", gp.tileSize, gp.tileSize);
+            attackLeft2 = setup("/player/attleft2", gp.tileSize, gp.tileSize);
+            attackLeft3 = setup("/player/attleft3", gp.tileSize, gp.tileSize);
+            
+            attackRight1 = setup("/player/attright1", gp.tileSize, gp.tileSize);
+            attackRight2 = setup("/player/attright2", gp.tileSize, gp.tileSize);
+            attackRight3 = setup("/player/attright3", gp.tileSize, gp.tileSize);
+        }
     }
     
     public void update() {
@@ -829,18 +820,17 @@ public class Player extends Entity {
     		Entity selectedItem = inventory.get(itemIndex);
     		
     		if(selectedItem.type == type_sword || selectedItem.type == type_axe) {
-    			
     			currentWeapon = selectedItem;
     			attack = getAttack();
     			getPlayerAttackImage();
+    			gp.playSE(9);
     		}
     		if(selectedItem.type == type_shield) {
-    			
     			currentShield = selectedItem;
     			defense = getDefense();
+    			gp.playSE(9);
     		}
     		if(selectedItem.type == type_light) {
-    			
     			if(currentLight == selectedItem) {
     				currentLight = null;
     			}
@@ -848,9 +838,9 @@ public class Player extends Entity {
     				currentLight = selectedItem;
     			}
     			lightUpdated = true;
+    			gp.playSE(9);
     		}
     		if(selectedItem.type == type_consumable) {
-    			
     			selectedItem.use(this);
     			inventory.remove(itemIndex);
     		}

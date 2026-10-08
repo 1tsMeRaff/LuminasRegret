@@ -565,7 +565,15 @@ public class Entity implements object.Item {
 		
 		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alphaValue));
 	}
+	private static final java.util.Map<String, BufferedImage> IMAGE_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+
 	public static BufferedImage setup(String imagePath, int widht, int height) {
+	    String cacheKey = imagePath + "_" + widht + "x" + height;
+	    BufferedImage cached = IMAGE_CACHE.get(cacheKey);
+	    if (cached != null) {
+	        return cached;
+	    }
+
 	    BufferedImage image = null;
 	    try (java.io.InputStream is = Entity.class.getResourceAsStream(imagePath + ".png")) {
 	        if (is != null) {
@@ -589,6 +597,7 @@ public class Entity implements object.Item {
 	    if (image != null) {
 	        UtilityTool uTool = new UtilityTool();
 	        image = uTool.scaleImage(image, widht, height);
+	        IMAGE_CACHE.put(cacheKey, image);
 	    } else {
 	        System.err.println("Resource image not found: " + imagePath + ".png");
 	    }

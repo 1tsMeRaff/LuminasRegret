@@ -318,6 +318,43 @@ body {
     image-rendering: crisp-edges;
 }
 
+/* Floating Fullscreen Exit Button */
+.fs-exit-overlay {
+    display: none;
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 50;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(15, 12, 28, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(78, 240, 208, 0.4);
+    border-radius: 999px;
+    color: var(--lumina-cyan);
+    font-family: var(--font-retro);
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    transition: opacity 0.3s ease, transform 0.2s ease, background 0.2s ease;
+    opacity: 0.85;
+}
+
+.fs-exit-overlay:hover {
+    opacity: 1;
+    transform: scale(1.05);
+    background: rgba(25, 20, 45, 0.95);
+    border-color: var(--lumina-cyan);
+    box-shadow: 0 0 15px var(--lumina-cyan-glow);
+}
+
+:fullscreen .fs-exit-overlay,
+:-webkit-full-screen .fs-exit-overlay {
+    display: flex;
+}
+
 /* Splash & Loading Overlay */
 .splash-overlay {
     position: absolute;
