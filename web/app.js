@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Execute main class (cheerpjRunMain is non-blocking and executes entry point)
             console.log('Starting CheerpJ main entry at:', cheerpjJarPath);
-            cheerpjRunMain("main.Main", cheerpjJarPath).catch(async (err) => {
+            cheerpjRunMain("com.luminasregret.engine.core.Main", cheerpjJarPath).catch(async (err) => {
                 console.warn('cheerpjRunMain fallback to cheerpjRunJar:', err);
                 try {
                     await cheerpjRunJar(cheerpjJarPath);

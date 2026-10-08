@@ -17,8 +17,8 @@ if (Test-Path "bin") {
 
 # Compile source files with strict Xlint targeting Java 8 bytecode (supported everywhere & CheerpJ)
 Write-Host "Compiling Java SE sources (targeting bytecode Java 8)..." -ForegroundColor Yellow
-$javaFiles = Get-ChildItem -Path "src" -Filter "*.java" -Recurse | ForEach-Object { $_.FullName }
-javac --release 8 -Xlint:all,-options -Werror -encoding UTF-8 -cp "res" -d "bin" $javaFiles
+$javaFiles = @(Get-ChildItem -Path "src" -Filter "*.java" -Recurse | ForEach-Object { $_.FullName })
+& javac --release 8 -Xlint:all,-options -Werror -encoding UTF-8 -cp "res" -d "bin" $javaFiles
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Compilation failed!"
@@ -35,7 +35,7 @@ if ($targetDir -and !(Test-Path $targetDir)) {
 # Package production JAR
 Write-Host "Packaging executable JAR -> $OutputPath..." -ForegroundColor Yellow
 
-$gamePackages = @("ai", "entity", "environtment", "main", "monster", "object", "quest", "tile", "tile_interactive")
+$gamePackages = @("com")
 $packageArgs = @()
 foreach ($pkg in $gamePackages) {
     if (Test-Path "bin\$pkg") {
@@ -51,7 +51,7 @@ foreach ($resDir in $resDirs) {
     }
 }
 
-jar --create --file $OutputPath --main-class main.Main @packageArgs
+& jar --create --file $OutputPath --main-class com.luminasregret.engine.core.Main @packageArgs
 
 if (Test-Path $OutputPath) {
     $size = (Get-Item $OutputPath).Length / 1MB

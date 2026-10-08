@@ -52,10 +52,10 @@ Run the game from the repository root by including both the compiled binaries (`
 
 ```powershell
 # Windows
-java -cp "bin;res" main.Main
+java -cp "bin;res" com.luminasregret.engine.core.Main
 
 # Linux / macOS
-java -cp "bin:res" main.Main
+java -cp "bin:res" com.luminasregret.engine.core.Main
 ```
 
 ### 3.2 High-DPI & Scaling Tuning
@@ -63,20 +63,20 @@ On modern 4K or high-DPI displays, the Java 2D rasterizer may apply automatic de
 
 ```powershell
 # Force crisp 1:1 pixel scaling (disables blurry OS scaling)
-java -Dsun.java2d.uiScale=1.0 -cp "bin;res" main.Main
+java -Dsun.java2d.uiScale=1.0 -cp "bin;res" com.luminasregret.engine.core.Main
 
 # Force hardware acceleration pipeline (DirectX on Windows)
-java -Dsun.java2d.d3d=true -cp "bin;res" main.Main
+java -Dsun.java2d.d3d=true -cp "bin;res" com.luminasregret.engine.core.Main
 
 # Force OpenGL acceleration pipeline (Linux / macOS)
-java -Dsun.java2d.opengl=true -cp "bin;res" main.Main
+java -Dsun.java2d.opengl=true -cp "bin;res" com.luminasregret.engine.core.Main
 ```
 
 ### 3.3 JVM Garbage Collection Tuning
 For optimal frame pacing without GC spikes, allocate sufficient heap and specify G1GC:
 
 ```powershell
-java -Xms128m -Xmx256m -XX:+UseG1GC -cp "bin;res" main.Main
+java -Xms128m -Xmx256m -XX:+UseG1GC -cp "bin;res" com.luminasregret.engine.core.Main
 ```
 
 ---
@@ -86,14 +86,15 @@ java -Xms128m -Xmx256m -XX:+UseG1GC -cp "bin;res" main.Main
 You can package the entire game into a single, zero-dependency runnable `.jar` file for distribution:
 
 ```powershell
-# 1. Ensure bin/ is compiled
-javac -Xlint:all -encoding UTF-8 -cp "res" -d bin (Get-ChildItem -Path src -Filter *.java -Recurse | ForEach-Object { $_.FullName })
+# 1. Use the official packaging script (targets Java 8 bytecode for universal compatibility)
+powershell -ExecutionPolicy Bypass -File scripts/build-jar.ps1
 
-# 2. Package bin and res into a single executable JAR
-jar --create --file LuminasRegret.jar --main-class main.Main -C bin . -C res .
+# 2. Or manual command:
+# Package bin and res into a single executable JAR
+jar --create --file web/LuminasRegret.jar --main-class com.luminasregret.engine.core.Main -C bin com -C res .
 
 # 3. Execute the packaged JAR directly
-java -jar LuminasRegret.jar
+java -jar web/LuminasRegret.jar
 ```
 
 ---

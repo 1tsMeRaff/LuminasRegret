@@ -1,0 +1,35 @@
+package com.luminasregret.game.object;
+
+import com.luminasregret.game.entity.Entity;
+import com.luminasregret.engine.core.GamePanel;
+
+public class OBJ_PlayerMana extends Entity {
+
+	GamePanel gp;
+	
+	public OBJ_PlayerMana(GamePanel gp) {
+		super(gp);
+		this.gp = gp;
+		
+		
+		type = type_pickupOnly;
+		value = 1;
+		name = "PlayerMana";
+		down1 = setup("/objects/mana_collect", gp.tileSize, gp.tileSize);
+	}
+	public void use(Entity entity) {
+		
+		gp.playSE(1);
+		gp.ui.addMessage("Mana +" + value);
+		if(entity.mana == entity.maxMana) {
+			entity.mana = entity.maxMana;
+		}
+		else if(entity.mana + 1 == entity.maxMana) {
+			entity.mana += 1;
+		}
+		else {
+			entity.mana += value;
+		}
+	}
+
+}
