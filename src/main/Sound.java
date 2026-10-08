@@ -13,9 +13,11 @@ import javax.sound.sampled.FloatControl;
 
 public class Sound implements AutoCloseable {
     
-    // Dedicated BGM stream / active clip
+    // Dedicated BGM streams and SFX asset mappings
     Clip clip;
-    URL soundURL[] = new URL[30];
+    final URL musicURL[] = new URL[10];
+    final URL seURL[] = new URL[30];
+    URL soundURL[] = seURL;
     FloatControl fc;
     public int volumeScale = 3;
     public float volume;
@@ -28,21 +30,31 @@ public class Sound implements AutoCloseable {
     private int currentFileIndex = -1;
     
     public Sound() {
-        soundURL[0] = loadSoundURL("/sound/overworld.wav");
-        soundURL[1] = loadSoundURL("/sound/Coin.wav");
-        soundURL[2] = loadSoundURL("/sound/dungeon.wav");
-        soundURL[3] = loadSoundURL("/sound/boss.wav");
-        soundURL[4] = loadSoundURL("/sound/title.wav");
-        soundURL[5] = loadSoundURL("/sound/bonk.wav");
-        soundURL[6] = loadSoundURL("/sound/receivedamage.wav");
-        soundURL[7] = loadSoundURL("/sound/swingweapon.wav");
-        soundURL[8] = loadSoundURL("/sound/levelup.wav");
-        soundURL[9] = loadSoundURL("/sound/swipe.wav");
-        soundURL[10] = loadSoundURL("/sound/windows.wav");
-        soundURL[11] = loadSoundURL("/sound/stairs.wav");
-        soundURL[12] = loadSoundURL("/sound/swipe.wav");
-        soundURL[13] = loadSoundURL("/sound/swipe.wav");
-        soundURL[14] = loadSoundURL("/sound/swipe.wav");
+        // 1. Curated BGM Tracks (Only played via gp.playMusic / playAreaMusic)
+        musicURL[0] = loadSoundURL("/sound/overworld.wav"); // Overworld / Village
+        musicURL[1] = loadSoundURL("/sound/dungeon.wav");   // Dungeon exploration
+        musicURL[2] = loadSoundURL("/sound/dungeon.wav");   // Dungeon (ID 2 compatibility)
+        musicURL[3] = loadSoundURL("/sound/boss.wav");      // Goblin King Boss fight
+        musicURL[4] = loadSoundURL("/sound/title.wav");     // Main Title Screen & Menu
+
+        // 2. Curated Sound Effects (Only played via gp.playSE)
+        seURL[0] = loadSoundURL("/sound/swipe.wav");
+        seURL[1] = loadSoundURL("/sound/Coin.wav");           // Coin pickup / prompt chime
+        seURL[2] = loadSoundURL("/sound/levelup.wav");        // Quest complete / Fanfare / Heal reward!
+        seURL[3] = loadSoundURL("/sound/enter.wav");          // Door enter / Confirm
+        seURL[4] = loadSoundURL("/sound/openinven.wav");      // Open bag / Inventory
+        seURL[5] = loadSoundURL("/sound/bonk.wav");           // Attack hit on monster
+        seURL[6] = loadSoundURL("/sound/receivedamage.wav");   // Player received damage
+        seURL[7] = loadSoundURL("/sound/swingweapon.wav");    // Weapon swing / slash
+        seURL[8] = loadSoundURL("/sound/levelup.wav");        // Level up / Consume bread / Magic
+        seURL[9] = loadSoundURL("/sound/swipe.wav");          // Menu cursor / dialogue
+        seURL[10] = loadSoundURL("/sound/windows.wav");       // Subwindow open / prompt
+        seURL[11] = loadSoundURL("/sound/stairs.wav");        // Dry tree chop / stairs
+        seURL[12] = loadSoundURL("/sound/swipe.wav");         // Trade item buy/sell
+        seURL[13] = loadSoundURL("/sound/stairs.wav");        // Map transition teleport
+
+        // Backward compatibility
+        this.soundURL = seURL;
 
         // Asynchronous daemon dispatcher to guarantee zero frame stalls on the game thread
         this.soundExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
@@ -73,7 +85,7 @@ public class Sound implements AutoCloseable {
      * Preloads and decodes SFX into memory so playback is instant (<0.01ms) during gameplay.
      */
     public void initSoundPool() {
-        int[] sfxIds = {1, 5, 6, 7, 8, 9, 10, 11, 12};
+        int[] sfxIds = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
         for (int id : sfxIds) {
             loadSEClip(id);
         }
@@ -81,17 +93,17 @@ public class Sound implements AutoCloseable {
     }
 
     private void loadSEClip(int id) {
-        if (id < 0 || id >= soundURL.length || soundURL[id] == null) {
+        if (id < 0 || id >= seURL.length || seURL[id] == null) {
             return;
         }
-        // Dual-voice polyphony for high-frequency combat sounds (swing, hit, damage, interact)
-        int voiceCount = (id == 1 || id == 5 || id == 6 || id == 7 || id == 9) ? 2 : 1;
+        // Dual-voice polyphony for high-frequency combat and event sounds
+        int voiceCount = (id == 1 || id == 2 || id == 5 || id == 6 || id == 7 || id == 9) ? 2 : 1;
         sePool[id] = new Clip[voiceCount];
         fcPool[id] = new FloatControl[voiceCount];
 
         for (int v = 0; v < voiceCount; v++) {
             try {
-                AudioInputStream ais = AudioSystem.getAudioInputStream(soundURL[id]);
+                AudioInputStream ais = AudioSystem.getAudioInputStream(seURL[id]);
                 Clip c = AudioSystem.getClip();
                 c.open(ais);
                 sePool[id][v] = c;
@@ -116,13 +128,13 @@ public class Sound implements AutoCloseable {
     }
 
     public void setFile(int i) {
-        if (i < 0 || i >= soundURL.length || soundURL[i] == null) {
+        if (i < 0 || i >= musicURL.length || musicURL[i] == null) {
             return;
         }
         currentFileIndex = i;
         closeCurrentClip();
         try {
-            AudioInputStream ais = AudioSystem.getAudioInputStream(soundURL[i]);
+            AudioInputStream ais = AudioSystem.getAudioInputStream(musicURL[i]);
             clip = AudioSystem.getClip();
             clip.open(ais);
             
@@ -159,7 +171,7 @@ public class Sound implements AutoCloseable {
      * Non-blocking fire-and-forget SFX playback with dual-voice polyphony.
      */
     public void playSE(final int i) {
-        if (i < 0 || i >= soundURL.length || soundURL[i] == null) {
+        if (i < 0 || i >= seURL.length || seURL[i] == null) {
             return;
         }
         soundExecutor.execute(new Runnable() {
@@ -171,7 +183,7 @@ public class Sound implements AutoCloseable {
     }
 
     public void playSEDirect(int i) {
-        if (i < 0 || i >= soundURL.length || soundURL[i] == null) {
+        if (i < 0 || i >= seURL.length || seURL[i] == null) {
             return;
         }
         Clip[] voices = sePool[i];

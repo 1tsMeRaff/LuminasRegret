@@ -83,6 +83,12 @@
                         <div class="crt-scanlines"></div>
                         <div class="crt-vignette"></div>
 
+                        <!-- Fullscreen Exit Floating Overlay Button -->
+                        <button id="btn-fs-exit" class="fs-exit-overlay" title="Keluar Mode Layar Penuh">
+                            <span class="fs-exit-icon">✕</span>
+                            <span>Exit Fullscreen</span>
+                        </button>
+
                         <!-- CheerpJ Canvas Container (Target for Web JVM) -->
                         <div id="cheerpj-display" class="cheerpj-canvas-wrapper"></div>
 
@@ -109,7 +115,7 @@
                                     <div class="pixel-progress-fill" id="pixel-progress-fill"></div>
                                 </div>
                                 <div class="loading-percentage" id="loading-percentage">0%</div>
-                                <div class="loading-subtext">Mengunduh LuminasRegret.jar (46.8 MB) ke memori browser...</div>
+                                <div class="loading-subtext">Mengunduh LuminasRegret.jar (~47 MB) ke memori browser...</div>
                             </div>
                         </div>
                     </div>
@@ -119,7 +125,9 @@
                         <div class="toolbar-left">
                             <span class="key-hint"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Gerak</span>
                             <span class="key-hint"><kbd>E</kbd> / <kbd>ENTER</kbd> Interaksi</span>
-                            <span class="key-hint"><kbd>J</kbd> Serang</span>
+                            <span class="key-hint"><kbd>J</kbd> / <kbd>Klik</kbd> Serang</span>
+                            <span class="key-hint"><kbd>P</kbd> Pause</span>
+                            <span class="key-hint"><kbd>ESC</kbd> Menu Opsi</span>
                         </div>
                         <div class="toolbar-right">
                             <button id="btn-fullscreen" class="tool-btn" title="Mode Layar Penuh">
