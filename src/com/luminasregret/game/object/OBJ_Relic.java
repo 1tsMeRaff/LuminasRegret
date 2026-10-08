@@ -4,7 +4,7 @@ import com.luminasregret.game.entity.Entity;
 import com.luminasregret.engine.core.GamePanel;
 import com.luminasregret.game.quest.QuestType;
 
-public class OBJ_Relic extends Entity {
+public class OBJ_Relic extends WorldObject {
 
     private final GamePanel gp;
 

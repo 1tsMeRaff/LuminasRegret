@@ -4,9 +4,10 @@ import java.awt.Rectangle;
 import java.util.Random;
 
 import com.luminasregret.engine.core.GamePanel;
+import com.luminasregret.game.entity.contracts.Interactable;
 import com.luminasregret.game.quest.QuestType;
 
-public class NPC_Guide extends Entity {
+public class NPC_Guide extends Actor implements Interactable {
     
     public NPC_Guide(GamePanel gp) {
         super(gp);
@@ -177,5 +178,15 @@ public class NPC_Guide extends Entity {
                 dialogueIndex = 0;
             }
         }
+    }
+
+    @Override
+    public void interact(Player player) {
+        speak();
+    }
+
+    @Override
+    public String getInteractionPrompt() {
+        return name != null ? name : "Sylvia - Penjaga Roh Lumina";
     }
 }

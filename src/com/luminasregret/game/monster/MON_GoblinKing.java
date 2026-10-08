@@ -5,13 +5,14 @@ import java.awt.image.BufferedImage;
 
 import com.luminasregret.engine.core.GamePanel;
 import com.luminasregret.engine.physics.CollisionMath;
+import com.luminasregret.game.entity.Actor;
 import com.luminasregret.game.entity.Entity;
 import com.luminasregret.game.object.OBJ_Coin_Bronze;
 import com.luminasregret.game.object.OBJ_GreenProjectile;
 import com.luminasregret.game.object.OBJ_Heart;
 import com.luminasregret.game.object.OBJ_Relic;
 
-public class MON_GoblinKing extends Entity {
+public class MON_GoblinKing extends Actor {
 	
 	public static final String monName = "Goblin King"; 
 	public int shootCounter = 0;

@@ -5,7 +5,7 @@ import com.luminasregret.game.entity.Entity;
 //Import GamePanel untuk akses player, UI, dan sound
 import com.luminasregret.engine.core.GamePanel;
 
-public class OBJ_Chest extends Entity {
+public class OBJ_Chest extends WorldObject {
 	
 	// Referensi ke GamePanel
 	GamePanel gp;

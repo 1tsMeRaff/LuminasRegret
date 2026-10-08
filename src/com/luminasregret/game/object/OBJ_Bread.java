@@ -3,7 +3,7 @@ package com.luminasregret.game.object;
 import com.luminasregret.game.entity.Entity;
 import com.luminasregret.engine.core.GamePanel;
 
-public class OBJ_Bread extends Entity {
+public class OBJ_Bread extends WorldObject {
 
 	GamePanel gp;
 

@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -213,43 +214,48 @@ public final class GamePanel extends JPanel implements Runnable {
     @Override
     public void run() {
         
-        double drawInterval = 1000000000.0 / FPS;  // 16.666 ms per tick (60 ticks/sec)
+        final double drawInterval = 1000000000.0 / FPS;  // 16.666 ms per tick (60 ticks/sec)
         double delta = 0;
         long lastTime = System.nanoTime();
         final int MAX_UPDATES_PER_FRAME = 6; // Catch up physics to maintain 100% real-time speed
 
         while (gameThread != null) {
-            long currentTime = System.nanoTime();  
-            delta += (currentTime - lastTime) / drawInterval;
-            lastTime = currentTime;
+            try {
+                long currentTime = System.nanoTime();  
+                delta += (currentTime - lastTime) / drawInterval;
+                lastTime = currentTime;
 
-            // Cap delta to prevent freeze if tab was backgrounded for long periods
-            if (delta > MAX_UPDATES_PER_FRAME) {
-                delta = MAX_UPDATES_PER_FRAME;
-            }
+                // Cap delta to prevent freeze if tab was backgrounded for long periods
+                if (delta > MAX_UPDATES_PER_FRAME) {
+                    delta = MAX_UPDATES_PER_FRAME;
+                }
 
-            // Catch-up physics simulation so character and game speed never slow down
-            int updateCount = 0;
-            while (delta >= 1 && updateCount < MAX_UPDATES_PER_FRAME) {
-                update();
-                delta--;
-                updateCount++;
-            }
+                // Catch-up physics simulation so character and game speed never slow down
+                int updateCount = 0;
+                while (delta >= 1 && updateCount < MAX_UPDATES_PER_FRAME) {
+                    update();
+                    delta--;
+                    updateCount++;
+                }
 
-            drawToTempScreen();
-            drawToScreen();
+                drawToTempScreen();
+                drawToScreen();
 
-            // Calculate remaining frame budget
-            long frameTime = System.nanoTime() - currentTime;
-            long remainingTime = ((long)drawInterval - frameTime) / 1000000;
+                // High-precision hybrid frame pacing (sleep if margin > 2ms, spin for sub-ms precision)
+                long targetTime = currentTime + (long)drawInterval;
+                long remainingNs = targetTime - System.nanoTime();
+                long sleepMs = remainingNs / 1000000;
 
-            if (remainingTime > 3) {
-                try {
-                    Thread.sleep(remainingTime - 1);
-                } catch (InterruptedException ignored) {}
-            } else {
-                // Yield to browser event loop cooperatively without forcing 15ms setTimeout penalty
-                Thread.yield();
+                if (sleepMs > 2) {
+                    Thread.sleep(sleepMs - 1);
+                }
+                while (System.nanoTime() < targetTime) {
+                    // Precision spin-wait for exact 60.0 FPS boundary
+                }
+            } catch (InterruptedException ignored) {
+            } catch (Throwable t) {
+                System.err.println("[CRITICAL] Uncaught exception in game loop: " + t.getMessage());
+                t.printStackTrace();
             }
         }
     }
@@ -467,6 +473,7 @@ public final class GamePanel extends JPanel implements Runnable {
         } else {
             repaint();
         }
+        Toolkit.getDefaultToolkit().sync();
     }
     
     public int currentMusicId = -1;

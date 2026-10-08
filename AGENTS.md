@@ -47,16 +47,18 @@ LuminasRegret/
 │   │   ├── input/      # Unified I/O handling (KeyHandler.java, MouseHandler.java)
 │   │   └── physics/    # Zero-GC AABB collision (CollisionChecker.java, CollisionMath.java)
 │   ├── game/           # Game domain & gameplay mechanics
-│   │   ├── entity/     # Dynamic actors (Entity.java, Player.java, NPCs, PlayerDummy)
+│   │   ├── entity/     # Dynamic actors (Actor.java, Entity.java, Player.java, NPCs, PlayerDummy)
+│   │   │   └── contracts/ # Pure SOLID interfaces (Updatable, Renderable, Collidable, Interactable, Damageable)
 │   │   ├── environment/# Day/night lighting cycle (EnvironmentManager.java, Lighting.java)
 │   │   ├── monster/    # AI combat actors (MON_GoblinKing, MON_GreenSlime, MON_Zombie)
-│   │   ├── object/     # Items & world props (Item.java interface, OBJ_* classes)
+│   │   ├── object/     # Items & world props (WorldObject.java, Item.java interface, OBJ_* classes)
 │   │   ├── quest/      # State-machine quest engine (QuestType.java, QuestManager.java)
 │   │   ├── tile/       # Tile map rendering & collision (Tile.java, TileManager.java)
 │   │   │   └── interactive/ # Destructible props (InteractiveTile.java, IT_DryTree.java, IT_Trunk.java)
 │   │   └── world/      # World spawners & events (AssetSetter.java)
 │   │       └── event/  # Event bus & cinematics (EventHandler.java, EventRect.java, CutsceneManager.java)
-│   └── ui/             # Dynamic HUD & typography presentation (UI.java)
+│   └── ui/             # Dynamic HUD & typography presentation (UI.java Facade)
+│       └── renderer/   # Specialized UI sub-renderers (HudRenderer, BossHudRenderer, DialogueRenderer, MenuRenderer, InventoryRenderer)
 ├── docs/               # Technical architecture & engineering specifications
 │   ├── Architecture.md # Core loop, rendering layers, AABB math
 │   ├── Patterns.md     # Idiomatic patterns & Effective Java compliance

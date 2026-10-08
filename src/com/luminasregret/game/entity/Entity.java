@@ -1,6 +1,10 @@
 package com.luminasregret.game.entity;
 
 import com.luminasregret.game.object.Item;
+import com.luminasregret.game.entity.contracts.Updatable;
+import com.luminasregret.game.entity.contracts.Renderable;
+import com.luminasregret.game.entity.contracts.Collidable;
+import com.luminasregret.game.entity.contracts.Damageable;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -17,7 +21,7 @@ import com.luminasregret.engine.ai.Node;
 import com.luminasregret.engine.core.GamePanel;
 import com.luminasregret.engine.gfx.UtilityTool;
 
-public class Entity implements Item {
+public class Entity implements Item, Updatable, Renderable, Collidable, Damageable {
 	
 	protected GamePanel gp;
 	public BufferedImage up1, up2, down1, down2, left1, left2, right1, right2;
@@ -102,17 +106,17 @@ public class Entity implements Item {
 	
 	// Tipe Equipment
 	public int type; // 0 = player, 1 = npc, 2 = monster
-	public final int type_player = 0;
-	public final int type_npc = 1;
-	public final int type_monster = 2;
-	public final int type_monster_boss = 10;
-	public final int type_sword = 3;
-	public final int type_axe = 4;
-	public final int type_shield = 5;
-	public final int type_consumable = 6;
-	public final int type_pickupOnly = 7;
-	public final int type_obstacle = 8;
-	public final int type_light = 9;
+	public static final int type_player = 0;
+	public static final int type_npc = 1;
+	public static final int type_monster = 2;
+	public static final int type_monster_boss = 10;
+	public static final int type_sword = 3;
+	public static final int type_axe = 4;
+	public static final int type_shield = 5;
+	public static final int type_consumable = 6;
+	public static final int type_pickupOnly = 7;
+	public static final int type_obstacle = 8;
+	public static final int type_light = 9;
 	public Entity currentLight;
 	
 	// Path Finder
@@ -994,4 +998,26 @@ public class Entity implements Item {
     public int getKnockBackPower() { return knockBackPower; }
     @Override
     public int getLightRadius() { return lightRadius; }
+
+    // Implementasi Kontrak Collidable, Renderable, dan Damageable
+    @Override
+    public Rectangle getSolidArea() { return solidArea; }
+    @Override
+    public int getWorldX() { return worldX; }
+    @Override
+    public int getWorldY() { return worldY; }
+    @Override
+    public boolean isSolid() { return collision; }
+    @Override
+    public void takeDamage(int damage, Entity attacker) {
+        this.attacker = attacker;
+        this.life = Math.max(0, this.life - damage);
+        damageReaction();
+    }
+    @Override
+    public int getLife() { return life; }
+    @Override
+    public int getMaxLife() { return maxLife; }
+    @Override
+    public boolean isAlive() { return alive; }
 }
