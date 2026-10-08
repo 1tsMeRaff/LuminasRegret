@@ -2,15 +2,14 @@ package com.luminasregret.game.monster;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.Random;
 
-import com.luminasregret.game.entity.Entity;
 import com.luminasregret.engine.core.GamePanel;
-import com.luminasregret.game.object.*;
+import com.luminasregret.engine.physics.CollisionMath;
+import com.luminasregret.game.entity.Entity;
 import com.luminasregret.game.object.OBJ_Coin_Bronze;
 import com.luminasregret.game.object.OBJ_GreenProjectile;
 import com.luminasregret.game.object.OBJ_Heart;
-import com.luminasregret.game.object.OBJ_PlayerMana;
+import com.luminasregret.game.object.OBJ_Relic;
 
 public class MON_GoblinKing extends Entity {
 	
@@ -32,11 +31,11 @@ public class MON_GoblinKing extends Entity {
 		speed = defaultSpeed;
 		maxLife = 50;
 		life = maxLife;
-		attack = 2;
+		attack = 5;
 		defense = 2;
 		exp = 50;
 		knockBackPower = 5;
-//		sleep = true;
+		sleep = true;
 		
 		int area = gp.tileSize * 5;
 		solidArea.x = 48;
@@ -161,7 +160,7 @@ public class MON_GoblinKing extends Entity {
 				g2.setComposite(origComp);
 			}
 
-			if(attacking) {
+			if(attacking && gp.bossBattleOn && !sleep) {
 				drawAttackArea(g2);
 				g2.drawImage(image, screenX, screenY, null);
 			}
@@ -179,14 +178,31 @@ public class MON_GoblinKing extends Entity {
 	}
 
 	@Override
+	public void update() {
+		if (!gp.bossBattleOn) {
+			sleep = true;
+			attacking = false;
+			return;
+		}
+		super.update();
+	}
+
+	@Override
 	public void setAction() {
+		// Jika belum dalam pertempuran bos atau masih tidur, tetap diam di posisi awal
+		if (!gp.bossBattleOn || sleep) {
+			direction = "down";
+			attacking = false;
+			return;
+		}
+
 		// Deteksi Transisi Fase 2 (Enrage Mode) saat HP <= 50%
 		if (!phase2Triggered && life <= maxLife / 2) {
 			phase2Triggered = true;
 			rage = true;
 			defaultSpeed = 2;
 			speed = defaultSpeed;
-			attack = 3;
+			attack = 7;
 
 			gp.playSE(6);
 			gp.ui.addMessage("GOBLIN KING MURKA! FASE 2 DIMULAI!");
@@ -242,6 +258,7 @@ public class MON_GoblinKing extends Entity {
 		}
 
 		OBJ_GreenProjectile p = new OBJ_GreenProjectile(gp);
+		p.attack = 4;
 		int spawnX = worldX + (gp.tileSize * 5 / 2);
 		int spawnY = worldY + (gp.tileSize * 5 / 2);
 		p.set(spawnX, spawnY, shootDir, true, this);
@@ -323,11 +340,12 @@ public class MON_GoblinKing extends Entity {
 	    }
 	}
 	
+	@Override
 	public void damageReaction() {
-		
 		actionLockCounter = 0;
 //		direction = gp.player.direction;
 		onPath = true;
+		sleep = false;
 	}
 	public void checkDrop() {
 		// Akhiri pertarungan boss & buka pintu arena yang terkunci
@@ -347,7 +365,69 @@ public class MON_GoblinKing extends Entity {
 		gp.playSE(2);
 	}
 	
+	@Override
+	public void attacking() {
+		spriteCounter++;
+
+		if (spriteCounter <= motion1_duration) {
+			spriteNum = 1;
+		}
+		if (spriteCounter > motion1_duration && spriteCounter <= motion2_duration) {
+			spriteNum = 2;
+
+			// Ukuran tubuh monster (5 tiles)
+			int monsterSize = gp.tileSize * 5;
+			int atkX = worldX;
+			int atkY = worldY;
+			int atkW = attackArea.width;
+			int atkH = attackArea.height;
+
+			// Hitung posisi hitbox serangan tepat di depan monster identik dengan drawAttackArea
+			switch (direction) {
+				case "up":
+					atkX = worldX + (monsterSize / 2) - (atkW / 2);
+					atkY = worldY - atkH;
+					break;
+				case "down":
+					atkX = worldX + (monsterSize / 2) - (atkW / 2);
+					atkY = worldY + monsterSize;
+					break;
+				case "left":
+					atkX = worldX - atkW;
+					atkY = worldY + (monsterSize / 2) - (atkH / 2);
+					break;
+				case "right":
+					atkX = worldX + monsterSize;
+					atkY = worldY + (monsterSize / 2) - (atkH / 2);
+					break;
+			}
+
+			// Terapkan damage ke player tepat pada impact frame
+			if (!hasHitThisSwing && gp.player != null) {
+				int playerX = gp.player.worldX + gp.player.solidArea.x;
+				int playerY = gp.player.worldY + gp.player.solidArea.y;
+				int playerW = gp.player.solidArea.width;
+				int playerH = gp.player.solidArea.height;
+
+				if (CollisionMath.intersects(atkX, atkY, atkW, atkH, playerX, playerY, playerW, playerH)) {
+					damagePlayer(attack);
+					hasHitThisSwing = true;
+				}
+			}
+		}
+
+		if (spriteCounter > motion2_duration) {
+			spriteNum = 1;
+			spriteCounter = 0;
+			attacking = false;
+			hasHitThisSwing = false;
+		}
+	}
+
 	public void drawAttackArea(Graphics2D g2) {
+		if (!gp.bossBattleOn || sleep || !attacking) {
+			return;
+		}
 	    
 	    // Posisi layar berdasarkan world coordinates
 	    int screenX = worldX - gp.player.worldX + gp.player.screenX;
@@ -364,7 +444,6 @@ public class MON_GoblinKing extends Entity {
 	    switch(direction) {
 	        case "up": 
 	            areaY -= attackArea.height; 
-	            // Opsional: geser ke tengah tubuh
 	            areaX += (monsterSize / 2) - (attackArea.width / 2);
 	            break;
 	        case "down": 

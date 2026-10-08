@@ -266,13 +266,7 @@ public class Entity implements Item {
 		boolean contactPlayer = gp.cChecker.checkPlayer(this);
 
 		if(this.type == type_monster && contactPlayer == true) {
-		    
-		    // MODIFIKASI: Hanya berikan damage kontak jika monster BUKAN boss
-		    if(this.boss == false) {
-		        damagePlayer(attack);
-		    }
-		    // Jika boss == true, kode damage di atas akan dilewati.
-		    // Boss hanya akan memberikan damage melalui method attacking() Anda.
+			damagePlayer(attack);
 		}
 
     }
@@ -449,8 +443,8 @@ public class Entity implements Item {
 			gp.playSE(6);
 			
 			int damage = attack - gp.player.defense;
-			if(damage < 0) {
-				damage = 0;
+			if(damage <= 0) {
+				damage = 1;
 			}
 			gp.player.life -= damage;
 			gp.player.invincible = true;

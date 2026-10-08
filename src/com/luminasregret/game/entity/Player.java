@@ -722,9 +722,9 @@ public final class Player extends Entity {
     		if(invincible == false && gp.monster[gp.currentMap][i].dying == false) { //FIXED
     			gp.playSE(6);
     			
-    			int damage = gp.monster[gp.currentMap][i].attack - defense; //FIXED
-    			if(damage < 0) {
-    				damage = 0;
+    			int damage = gp.monster[gp.currentMap][i].attack - defense;
+    			if(damage <= 0) {
+    				damage = 1;
     			}
     			life -= damage;
     			invincible = true;
