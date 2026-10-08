@@ -22,6 +22,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Audio Policy Unlock & Start Game
     btnStartGame.addEventListener('click', async () => {
         if (gameStarted) return;
+
+        // Check if opened directly via local file:// protocol
+        if (window.location.protocol === 'file:') {
+            alert(
+                "PERHATIAN:\n\n" +
+                "Game WebAssembly di browser tidak dapat dijalankan melalui double-click file lokal (file://) karena kebijakan keamanan browser memblokir pembacaan file virtual.\n\n" +
+                "Cara menjalankan game:\n" +
+                "1. Buka secara online via GitHub Pages: https://1tsMeRaff.github.io/LuminasRegret/\n" +
+                "2. Atau jalankan web server lokal (klik script 'start-web-portal.bat' di folder project)\n" +
+                "3. Atau mainkan secara native desktop dengan mengklik tombol 'Unduh JAR'."
+            );
+            return;
+        }
+
         gameStarted = true;
 
         // Unlock browser Web Audio Context
@@ -45,42 +59,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Start CheerpJ WebAssembly Engine
     async function startCheerpJEngine() {
         try {
-            updateProgress(15, 'Mengunduh WebAssembly Java Runtime...');
+            updateProgress(20, 'Mengunduh WebAssembly Java Runtime...');
 
             // Verify if cheerpj loader is ready
             if (typeof cheerpjInit !== 'function') {
                 throw new Error('CheerpJ loader script belum siap atau diblokir.');
             }
 
-            updateProgress(35, 'Menginisialisasi Virtual JVM...');
-            await cheerpjInit();
+            updateProgress(45, 'Menginisialisasi Virtual JVM...');
+            await cheerpjInit({
+                version: 8,
+                status: "none"
+            });
 
-            updateProgress(55, 'Menyiapkan Display Canvas 768x432...');
+            updateProgress(65, 'Menyiapkan Display Canvas 768x432...');
             const displayEl = document.getElementById('cheerpj-display');
             cheerpjCreateDisplay(768, 432, displayEl);
 
-            updateProgress(75, 'Memuat Bytecode LuminasRegret.jar...');
-            systemStatusText.textContent = 'LOADING GAME JAR...';
+            updateProgress(85, 'Memuat Bytecode LuminasRegret.jar...');
+            systemStatusText.textContent = 'LOADING GAME...';
 
             // Resolve JAR location relative to current page
-            // CheerpJ uses /app/ prefix to mount web root files
-            const jarPath = (window.location.pathname.endsWith('/') 
-                ? window.location.pathname 
-                : window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)) 
-                + 'LuminasRegret.jar';
-            
-            // Map file path or fallback to /app/
-            const cheerpjJarPath = `/app${jarPath}`;
-
-            updateProgress(90, 'Menjalankan Game Loop (main.Main)...');
-            
-            // Run the JAR
-            try {
-                await cheerpjRunJar(cheerpjJarPath);
-            } catch (err) {
-                console.warn('Attempting relative JAR fallback:', err);
-                await cheerpjRunJar('/app/LuminasRegret.jar');
+            let basePath = window.location.pathname;
+            if (!basePath.endsWith('/')) {
+                basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
             }
+            const cheerpjJarPath = `/app${basePath}LuminasRegret.jar`;
 
             updateProgress(100, 'Memulai Petualangan!');
             systemStatusText.textContent = 'GAME RUNNING (60 FPS)';
@@ -91,14 +95,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     splashOverlay.style.display = 'none';
                 }, 500);
-            }, 800);
+            }, 600);
+
+            // Execute main class (cheerpjRunMain is non-blocking and executes entry point)
+            console.log('Starting CheerpJ main entry at:', cheerpjJarPath);
+            cheerpjRunMain("main.Main", cheerpjJarPath).catch(async (err) => {
+                console.warn('cheerpjRunMain fallback to cheerpjRunJar:', err);
+                try {
+                    await cheerpjRunJar(cheerpjJarPath);
+                } catch (jarErr) {
+                    console.error('CheerpJ execution failed:', jarErr);
+                    showBootError(jarErr);
+                }
+            });
 
         } catch (error) {
             console.error('CheerpJ Engine Error:', error);
-            systemStatusText.textContent = 'BOOT ERROR';
-            loadingMessage.textContent = 'Gagal memuat Web JVM: ' + (error.message || error);
-            loadingMessage.style.color = '#ef4444';
+            showBootError(error);
         }
+    }
+
+    function showBootError(error) {
+        systemStatusText.textContent = 'BOOT ERROR';
+        loadingState.classList.remove('hidden');
+        splashOverlay.classList.remove('fade-out');
+        splashOverlay.style.display = 'flex';
+        loadingMessage.textContent = 'Gagal memuat Web JVM: ' + (error.message || error);
+        loadingMessage.style.color = '#ef4444';
     }
 
     function updateProgress(percent, message) {

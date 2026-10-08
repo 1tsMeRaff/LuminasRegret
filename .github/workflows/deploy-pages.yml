@@ -26,7 +26,7 @@ jobs:
       - name: Verify Clean Compilation (0 Warnings, 0 Errors)
         run: |
           mkdir -p bin
-          javac -Xlint:all -Werror -encoding UTF-8 -cp "res" -d bin $(find src -name "*.java")
+          javac --release 8 -Xlint:all,-options -Werror -encoding UTF-8 -cp "res" -d bin $(find src -name "*.java")
 
       - name: Package Standalone Production JAR
         run: |

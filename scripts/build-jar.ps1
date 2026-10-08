@@ -15,10 +15,10 @@ if (Test-Path "bin") {
     New-Item -ItemType Directory -Path "bin" | Out-Null
 }
 
-# Compile source files with strict Xlint
-Write-Host "Compiling Java SE 21 sources..." -ForegroundColor Yellow
+# Compile source files with strict Xlint targeting Java 8 bytecode (supported everywhere & CheerpJ)
+Write-Host "Compiling Java SE sources (targeting bytecode Java 8)..." -ForegroundColor Yellow
 $javaFiles = Get-ChildItem -Path "src" -Filter "*.java" -Recurse | ForEach-Object { $_.FullName }
-javac -Xlint:all -encoding UTF-8 -cp "res" -d "bin" $javaFiles
+javac --release 8 -Xlint:all,-options -Werror -encoding UTF-8 -cp "res" -d "bin" $javaFiles
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Compilation failed!"
