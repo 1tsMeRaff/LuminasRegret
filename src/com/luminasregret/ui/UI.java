@@ -195,6 +195,7 @@ public class UI {
         if(gp.gameState == gp.playState) {
             drawPlayerLife();
             drawMonsterLife();
+            drawBossLife();
             drawMessage();
             drawQuestWidget();
             drawQuestBanner();
@@ -306,7 +307,7 @@ public class UI {
     		
     		if(monster != null && monster.inCamera()) {
     			
-    			//Monster Hp Bar
+    			// Monster Hp Bar (Regular monster overhead indicator)
     			if(monster.hpBarOn && !monster.boss) {
 
     			    double oneScale = (double)gp.tileSize/monster.maxLife;
@@ -325,46 +326,54 @@ public class UI {
     			    	monster.hpBarOn = false;
     			    }
     			}
-    			else if(monster.boss && gp.bossBattleOn) {
-    				
-    				int displayLife = Math.max(0, monster.life);
-    				double oneScale = (double)gp.tileSize * 8/monster.maxLife;
-    			    double hpBarValue = oneScale * displayLife;
-    			    if (hpBarValue < 0) {
-    			        hpBarValue = 0;
-    			    }
-    			    
-    			    int x = gp.screenWidth/2 - gp.tileSize * 4;
-    			    int y = gp.screenHeight - (gp.tileSize * 2);
-
-    			    g2.setColor(COLOR_HP_BG);
-    			    g2.fillRect(x-1, y-1, gp.tileSize * 8 + 2, 16);
-
-    			    if(monster.rage) {
-    			        g2.setColor(COLOR_HP_BOSS_RAGE); // Oranye merah membara saat fase 2 murka
-    			    } else {
-    			        g2.setColor(COLOR_HP_BOSS_RED);
-    			    }
-    			    g2.fillRect(x, y, (int)hpBarValue, 14);
-    			    
-    			    g2.setFont(fontPixel20Bold);
-    			    String title = monster.name;
-    			    if(monster.rage) {
-    			        title += " [FASE 2: MURKA]";
-    			        g2.setColor(COLOR_BOSS_RAGE_TEXT);
-    			    } else {
-    			        g2.setColor(Color.white);
-    			    }
-    			    g2.drawString(title, x + 4, y - 8);
-
-    			    // Tampilkan rasio angka HP di sisi kanan (clamped ke 0)
-    			    String hpRatio = displayLife + " / " + monster.maxLife;
-    			    int hpTextX = x + gp.tileSize * 8 - g2.getFontMetrics().stringWidth(hpRatio) - 4;
-    			    g2.setColor(Color.white);
-    			    g2.drawString(hpRatio, hpTextX, y - 8);
-    			}
     		}
     	}
+    }
+
+    public void drawBossLife() {
+        if (!gp.bossBattleOn) return;
+
+        for(int i = 0; i < gp.monster[gp.currentMap].length; i++) {
+            Entity monster = gp.monster[gp.currentMap][i];
+            if(monster != null && monster.boss && monster.alive) {
+                int displayLife = Math.max(0, monster.life);
+                double oneScale = (double)gp.tileSize * 8 / monster.maxLife;
+                double hpBarValue = oneScale * displayLife;
+                if (hpBarValue < 0) {
+                    hpBarValue = 0;
+                }
+
+                int x = gp.screenWidth / 2 - gp.tileSize * 4;
+                int y = gp.screenHeight - (gp.tileSize * 2);
+
+                g2.setColor(COLOR_HP_BG);
+                g2.fillRect(x - 1, y - 1, gp.tileSize * 8 + 2, 16);
+
+                if(monster.rage) {
+                    g2.setColor(COLOR_HP_BOSS_RAGE); // Oranye merah membara saat fase 2 murka
+                } else {
+                    g2.setColor(COLOR_HP_BOSS_RED);
+                }
+                g2.fillRect(x, y, (int)hpBarValue, 14);
+
+                g2.setFont(fontPixel20Bold);
+                String title = monster.name;
+                if(monster.rage) {
+                    title += " [FASE 2: MURKA]";
+                    g2.setColor(COLOR_BOSS_RAGE_TEXT);
+                } else {
+                    g2.setColor(Color.white);
+                }
+                g2.drawString(title, x + 4, y - 8);
+
+                // Tampilkan rasio angka HP di sisi kanan (clamped ke 0)
+                String hpRatio = displayLife + " / " + monster.maxLife;
+                int hpTextX = x + gp.tileSize * 8 - g2.getFontMetrics().stringWidth(hpRatio) - 4;
+                g2.setColor(Color.white);
+                g2.drawString(hpRatio, hpTextX, y - 8);
+                break;
+            }
+        }
     }
     
     public void drawMessage(){

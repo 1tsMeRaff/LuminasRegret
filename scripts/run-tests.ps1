@@ -12,7 +12,8 @@ $testList = @(
     "QuestProgressionTest.java",
     "InteractionSystemSanityTest.java",
     "InventoryAndAudioFixSanityTest.java",
-    "AudioPerformanceAndPoolSanityTest.java"
+    "AudioPerformanceAndPoolSanityTest.java",
+    "BossBattleMechanicsSanityTest.java"
 )
 
 foreach ($t in $testList) {
@@ -46,5 +47,8 @@ Write-Host "`n--- Running InventoryAndAudioFixSanityTest (Headless) ---" -Foregr
 
 Write-Host "`n--- Running InteractionSystemSanityTest (Headless) ---" -ForegroundColor Yellow
 & java "-Djava.awt.headless=true" -cp "bin;res" scratch.InteractionSystemSanityTest
+
+Write-Host "`n--- Running BossBattleMechanicsSanityTest (Headless) ---" -ForegroundColor Yellow
+& java "-Djava.awt.headless=true" -cp "bin;res" scratch.BossBattleMechanicsSanityTest
 
 Write-Host "`n=== ALL TESTS PASSED SUCCESSFULLY! ===" -ForegroundColor Green

@@ -126,10 +126,11 @@ public class CutsceneManager {
                     }
                 }
                 
-                // Reset boss HP bar untuk memastikan muncul
+                // Reset boss HP bar dan bangunkan boss untuk bertarung
                 for(int i = 0; i < gp.monster[gp.currentMap].length; i++) {
                     if(gp.monster[gp.currentMap][i] != null && 
                        gp.monster[gp.currentMap][i].name.equals("Goblin King")) {
+                        gp.monster[gp.currentMap][i].sleep = false;
                         gp.monster[gp.currentMap][i].hpBarOn = true;
                         gp.monster[gp.currentMap][i].hpBarCounter = 0;
                     }
