@@ -263,36 +263,24 @@ public class TileManager {
     }
     
     public void draw(Graphics2D g2) {
-        
-        int worldCol = 0;
-        int worldRow = 0;
-        
-        while (worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
-            
-            int tileNum = mapTileNum[gp.currentMap][worldCol][worldRow];
-            
-            int worldX = worldCol * gp.tileSize;
-            int worldY = worldRow * gp.tileSize;
-            int screenX = worldX - gp.player.worldX + gp.player.screenX;
-            int screenY = worldY - gp.player.worldY + gp.player.screenY;
-            
-            if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
-                worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
-                worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
-                worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
-                
+        // Direct visible screen bounds culling (reduces loop iterations from 2500 to ~198 per frame)
+        int startCol = Math.max(0, (gp.player.worldX - gp.player.screenX) / gp.tileSize - 1);
+        int endCol = Math.min(gp.maxWorldCol - 1, (gp.player.worldX - gp.player.screenX + gp.screenWidth) / gp.tileSize + 1);
+        int startRow = Math.max(0, (gp.player.worldY - gp.player.screenY) / gp.tileSize - 1);
+        int endRow = Math.min(gp.maxWorldRow - 1, (gp.player.worldY - gp.player.screenY + gp.screenHeight) / gp.tileSize + 1);
+
+        for (int worldRow = startRow; worldRow <= endRow; worldRow++) {
+            for (int worldCol = startCol; worldCol <= endCol; worldCol++) {
+                int tileNum = mapTileNum[gp.currentMap][worldCol][worldRow];
                 if (tile[gp.currentMap][tileNum] != null && tile[gp.currentMap][tileNum].image != null) {
+                    int worldX = worldCol * gp.tileSize;
+                    int worldY = worldRow * gp.tileSize;
+                    int screenX = worldX - gp.player.worldX + gp.player.screenX;
+                    int screenY = worldY - gp.player.worldY + gp.player.screenY;
                     g2.drawImage(tile[gp.currentMap][tileNum].image, screenX, screenY, null);
                 }
             }
-            
-            worldCol++;
-            if (worldCol == gp.maxWorldCol) {
-                worldCol = 0;
-                worldRow++;
-            }
         }
-        
     }
     
     public boolean getTileCollision(int map, int col, int row) {

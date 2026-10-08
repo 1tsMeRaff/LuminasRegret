@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +25,14 @@ import tile_interactive.InteractiveTile;
 public class GamePanel extends JPanel implements Runnable {
     
     private static final long serialVersionUID = 1L;
+    
+    // Cached entity sorter to eliminate 60 allocations/sec
+    private static final Comparator<Entity> ENTITY_SORTER = new Comparator<Entity>() {
+        @Override
+        public int compare(Entity e1, Entity e2) {
+            return Integer.compare(e1.worldY, e2.worldY);
+        }
+    };
     
     // screen settings
     final int originalTileSize = 16; //16x16 tile
@@ -118,8 +127,12 @@ public class GamePanel extends JPanel implements Runnable {
     	gameState = titleState;
     	playMusic(4);
     	
-    	tempScreen = new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_ARGB);
+    	tempScreen = new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_RGB);
     	g2 = (Graphics2D)tempScreen.getGraphics();
+    	g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+    	g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+    	g2.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
+    	g2.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_SPEED);
     	
     	if(fullScreenOn == true) {
     		setFullScreen();
@@ -186,27 +199,41 @@ public class GamePanel extends JPanel implements Runnable {
     @Override
     public void run() {
         
-        double drawInterval = 1000000000 / FPS;  // Waktu per frame dalam nanodetik
+        double drawInterval = 1000000000.0 / FPS;  // 16.666 ms per tick
         double delta = 0;
         long lastTime = System.nanoTime();
         long currentTime;
-        long timer = 0;  
-        int drawCount = 0;
 
         while (gameThread != null) {
-            
             currentTime = System.nanoTime();  
             delta += (currentTime - lastTime) / drawInterval;
-            timer += (currentTime - lastTime);
             lastTime = currentTime;
-            
 
-            if (delta >= 1) {
-                update();      // Update game logic
-                drawToTempScreen();
-                drawToScreen();
+            // Clamping delta prevents the Spiral of Death and eliminates slow motion during lags
+            if (delta > 3) {
+                delta = 1;
+            }
+
+            // Fixed-timestep simulation logic
+            while (delta >= 1) {
+                update();
                 delta--;
-                drawCount++;
+            }
+
+            drawToTempScreen();
+            drawToScreen();
+
+            // Calculate remaining frame budget and yield CPU to allow browser compositor to render
+            long nextDrawTime = currentTime + (long)drawInterval;
+            long remainingTime = (nextDrawTime - System.nanoTime()) / 1000000;
+            if (remainingTime > 1) {
+                try {
+                    Thread.sleep(remainingTime);
+                } catch (InterruptedException ignored) {}
+            } else {
+                try {
+                    Thread.sleep(1); // Cooperative yield for WebAssembly / CheerpJ runtime
+                } catch (InterruptedException ignored) {}
             }
         }
     }
@@ -356,13 +383,8 @@ public class GamePanel extends JPanel implements Runnable {
         		}
         	}
         	
-        	// Sort by Y position for correct drawing order
-        	Collections.sort(entityList, new Comparator<Entity>() {
-				@Override
-				public int compare(Entity e1, Entity e2) {
-					return Integer.compare(e1.worldY, e2.worldY);
-				}
-        	});
+        	// Sort by Y position for correct drawing order using cached comparator
+        	Collections.sort(entityList, ENTITY_SORTER);
             
             // Draw Entities
         	for(int i = 0; i < entityList.size(); i++) {
@@ -405,12 +427,22 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
     
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (tempScreen != null) {
+            g.drawImage(tempScreen, 0, 0, screenWidth2, screenHeight2, null);
+        }
+    }
+
     public void drawToScreen() {
-    	Graphics g = getGraphics();
-    	if (g != null) {
-    		g.drawImage(tempScreen, 0, 0, screenWidth2, screenHeight2, null);
-    		g.dispose();
-    	}
+        Graphics g = getGraphics();
+        if (g != null) {
+            g.drawImage(tempScreen, 0, 0, screenWidth2, screenHeight2, null);
+            g.dispose();
+        } else {
+            repaint();
+        }
     }
     
     public int currentMusicId = -1;
