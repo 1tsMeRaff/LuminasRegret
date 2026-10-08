@@ -132,41 +132,50 @@ The artificial intelligence subsystem employs an optimized **$A^*$ Search Algori
 
 ---
 
-## 6. Entity & Interaction Topology
+## 6. Entity & Interaction Topology (SOLID Contracts & Hierarchy)
+
+To eliminate god classes and adhere to the **Interface Segregation Principle (ISP)** and **Single Responsibility Principle (SRP)**, the entity layer is structured around discrete behavior contracts and specialized abstract base classes:
+
+- **Contracts (`com.luminasregret.game.entity.contracts`)**:
+  - `Updatable`: Per-frame physics and logic tick (`update()`).
+  - `Renderable`: Graphics rendering and frustum culling (`draw(Graphics2D)`).
+  - `Collidable`: Axis-aligned bounding box definition (`getHitbox()`).
+  - `Interactable`: Proximity and click interaction contract (`interact(Player)`).
+  - `Damageable`: Combat damage intake and health queries (`takeDamage(int)`).
+
+- **Hierarchy**:
+  - `Actor`: Base class for living entities (`Player`, `Monster`, `NPC`, `PlayerDummy`) holding combat stats, HP, animation states, and pathfinding.
+  - `WorldObject`: Base class for passive/interactive world items (`OBJ_Door`, `OBJ_Chest`, `OBJ_Key`, etc.) implementing `Interactable` without combat bloat.
 
 ```mermaid
 classDiagram
+    class Updatable { <<interface>> +update() }
+    class Renderable { <<interface>> +draw(Graphics2D) }
+    class Collidable { <<interface>> +getHitbox() }
+    class Damageable { <<interface>> +takeDamage(int) }
+    class Interactable { <<interface>> +interact(Player) }
+
     class Entity {
         +int worldX, worldY
         +int speed
         +String direction
         +Rectangle solidArea
-        +update()
-        +draw(Graphics2D)
-        +speak()
     }
-    class Player {
-        +int coin
-        +List inventory
-        +interactNearest()
-        +getNearbyInteractable()
+    class Actor {
+        +int maxLife, life
+        +int attack, defense
+        +boolean invincible
     }
-    class NPC_Guide {
-        +speak()
-        +followImprovedPath()
+    class WorldObject {
+        +interact(Player)
     }
-    class NPC_Merchant {
-        +speak()
-        +setItems()
-    }
-    class Monster {
-        +damageReaction()
-        +checkDrop()
-    }
-    Entity <|-- Player
-    Entity <|-- NPC_Guide
-    Entity <|-- NPC_Merchant
-    Entity <|-- Monster
+
+    Entity <|-- Actor
+    Entity <|-- WorldObject
+    Actor <|-- Player
+    Actor <|-- Monster
+    Actor <|-- NPC_Guide
+    Actor <|-- NPC_Merchant
 ```
 
 ### Proximity Interaction Architecture:
@@ -198,7 +207,15 @@ stateDiagram-v2
 
 ## 8. Presentation & Dynamic Typography Engine
 
-### 8.1 Resolution & Layering
+### 8.1 UI Facade & Specialized Sub-Renderer Pipeline
+To prevent `UI.java` from functioning as a bloated God Class, it implements the **Facade Pattern**, delegating specialized rendering tasks to dedicated renderers in `com.luminasregret.ui.renderer`:
+1. `HudRenderer`: Player life/hearts, mana crystals, active quest widget, quest notification banner, floating interaction hints.
+2. `BossHudRenderer`: Monster overhead health bars, Goblin King boss health bar (Phase 1 & Phase 2 Enrage).
+3. `DialogueRenderer`: NPC conversation windows, speaker nameplate badges, pixel-accurate dynamic word wrapping.
+4. `MenuRenderer`: Title screen, pause menu, options menu, game over screen, and game clear victory sequence.
+5. `InventoryRenderer`: Character stat sheets, 5x4 inventory slot grid, equipment descriptions, Boran merchant store interface.
+
+### 8.2 Resolution & Layering
 Rendering is executed in structured z-index passes:
 1. Ground / Base Tiles (`TileManager.draw()`)
 2. Interactive Environment Tiles (`IT_DryTree.draw()`)
@@ -207,7 +224,7 @@ Rendering is executed in structured z-index passes:
 5. Lighting & Darkness Mask (`Lighting.draw()`)
 6. UI / HUD Overlays (`UI.draw()`)
 
-### 8.2 Pixel-Accurate Dynamic Word Wrapping
+### 8.3 Pixel-Accurate Dynamic Word Wrapping
 The dialogue subwindow spans 672 px (or 504 px during trading). The `UI.wrapDialogueText()` engine utilizes `FontMetrics.stringWidth()` to compute line breaks per word dynamically:
 - Guarantees that neither English nor Indonesian narrative lines exceed the frame borders.
 - Automatically handles fallback character-splitting for unbreakable tokens.

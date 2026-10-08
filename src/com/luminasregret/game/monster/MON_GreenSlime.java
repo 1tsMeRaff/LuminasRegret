@@ -2,14 +2,14 @@ package com.luminasregret.game.monster;
 
 import java.util.Random;
 
-import com.luminasregret.game.entity.Entity;
+import com.luminasregret.game.entity.Actor;
 import com.luminasregret.engine.core.GamePanel;
 import com.luminasregret.game.object.OBJ_Coin_Bronze;
 import com.luminasregret.game.object.OBJ_GreenProjectile;
 import com.luminasregret.game.object.OBJ_Heart;
 import com.luminasregret.game.object.OBJ_PlayerMana;
 
-public class MON_GreenSlime extends Entity {
+public class MON_GreenSlime extends Actor {
 	
 	GamePanel gp;
 
@@ -52,6 +52,8 @@ public class MON_GreenSlime extends Entity {
 		right1 = setup("/monster/slimeright1", size, size);
 		right2 = setup("/monster/slimeright2", size, size);
 	}
+	private int pathSearchCounter = 15;
+
 	public void setAction() {
 		
 		int xDistance = Math.abs(worldX - gp.player.worldX);
@@ -85,8 +87,12 @@ public class MON_GreenSlime extends Entity {
 	            rangeAvailableCounter = 0;
 	        }
 
-	        // Cari jalan setiap kali player bergerak
-	        searchPath(goalCol, goalRow);
+	        // Throttling: Cari jalan setiap 15 frame (4x per detik), bukan setiap tick 60Hz
+	        pathSearchCounter++;
+	        if (pathSearchCounter >= 15) {
+	            searchPath(goalCol, goalRow);
+	            pathSearchCounter = 0;
+	        }
 		}
 		else {
 	        randomMovement();
@@ -130,6 +136,7 @@ public class MON_GreenSlime extends Entity {
 		actionLockCounter = 0;
 //		direction = gp.player.direction;
 		onPath = true;
+		pathSearchCounter = 15;
 	}
 	public void checkDrop() {
 		

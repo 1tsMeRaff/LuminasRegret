@@ -2,7 +2,7 @@ package com.luminasregret.game.entity;
 
 import com.luminasregret.engine.core.GamePanel;
 
-public class PlayerDummy extends Entity {
+public class PlayerDummy extends Actor {
 	
 	public static final String npcName = "Dummy"; 
 	

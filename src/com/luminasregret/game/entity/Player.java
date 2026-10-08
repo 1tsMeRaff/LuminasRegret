@@ -15,7 +15,7 @@ import com.luminasregret.game.quest.QuestType;
 import com.luminasregret.game.tile.interactive.InteractiveTile;
 
 @SuppressWarnings("this-escape")
-public final class Player extends Entity {
+public final class Player extends Actor {
     
     KeyHandler keyH;
     public final int screenX;
@@ -351,12 +351,6 @@ public final class Player extends Entity {
                 direction = origDirection;
             }
             
-            if(life <= 0) {
-            	gp.stopMusic();
-        		gp.playSE(10);
-            	gp.gameState = gp.gameOverState;
-            }
-            
             // Kembalikan speed ke normal untuk perhitungan frame berikutnya
             speed = defaultSpeed;
             
@@ -382,6 +376,12 @@ public final class Player extends Entity {
             rangeAvailableCounter++;
         }
         nearbyInteractable = getNearbyInteractable();
+
+        if(life <= 0) {
+            gp.stopMusic();
+            gp.playSE(10);
+            gp.gameState = gp.gameOverState;
+        }
     }
     
     public void pickUpObject(int i) {

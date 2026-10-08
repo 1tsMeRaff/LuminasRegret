@@ -15,6 +15,8 @@ public class PathFinder {
     
     // Default 0. Ubah ke 1 jika NPC sering nyangkut di pojokan tembok
     private int inflateRadius = 0; 
+    private int cachedMap = -1;
+    private boolean[][] staticSolid;
 
     public PathFinder(GamePanel gp) {
         this.gp = gp;
@@ -30,23 +32,35 @@ public class PathFinder {
         }
     }
 
+    public void updateStaticCollisionCache() {
+        cachedMap = gp.currentMap;
+        if (staticSolid == null || staticSolid.length != gp.maxWorldCol || staticSolid[0].length != gp.maxWorldRow) {
+            staticSolid = new boolean[gp.maxWorldCol][gp.maxWorldRow];
+        }
+        for (int col = 0; col < gp.maxWorldCol; col++) {
+            for (int row = 0; row < gp.maxWorldRow; row++) {
+                int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
+                staticSolid[col][row] = (gp.tileM.tile[gp.currentMap][tileNum] != null && 
+                                         gp.tileM.tile[gp.currentMap][tileNum].collision);
+            }
+        }
+    }
+
     // Panggil ini setiap kali NPC mau mencari jalan baru
     // Agar status pintu terbuka/tertutup atau tembok hancur selalu update
     public void setNodes(int startCol, int startRow, int goalCol, int goalRow) {
         
         resetNodes();
 
-        // 1. Reset Node State & CEK TILE COLLISION (Tembok, Air, Jurang)
+        // 1. Inisialisasi Cache Collision Statis (di-cache 1x per map)
+        if (cachedMap != gp.currentMap || staticSolid == null) {
+            updateStaticCollisionCache();
+        }
+
+        // Terapkan flag solid dari cache cepat
         for (int col = 0; col < gp.maxWorldCol; col++) {
             for (int row = 0; row < gp.maxWorldRow; row++) {
-                Node node = nodes[col][row];
-                node.open = false;
-                node.checked = false;
-                node.parent = null;
-
-                int tileNum = gp.tileM.mapTileNum[gp.currentMap][col][row];
-                node.solid = gp.tileM.tile[gp.currentMap][tileNum] != null && 
-                             gp.tileM.tile[gp.currentMap][tileNum].collision;
+                nodes[col][row].solid = staticSolid[col][row];
             }
         }
 
@@ -193,6 +207,10 @@ public class PathFinder {
             if (!neighbor.open) {
                 neighbor.open = true;
                 openList.add(neighbor);
+            } else {
+                // Heap update: hapus dan masukkan kembali agar min-heap property terjaga
+                openList.remove(neighbor);
+                openList.add(neighbor);
             }
         }
     }
@@ -204,9 +222,18 @@ public class PathFinder {
     private void buildPath() {
         Node current = goalNode;
         pathList.clear();
+        int maxSteps = gp.maxWorldCol * gp.maxWorldRow; // Guard mutlak anti-siklus siklik
+        int stepCount = 0;
+
         while (current != null && current != startNode) {
             pathList.add(current); 
             current = current.parent;
+            stepCount++;
+            if (stepCount > maxSteps) {
+                // Terdeteksi siklus tak berujung (broken graph) -> putus langsung untuk mencegah visual freeze
+                pathList.clear();
+                break;
+            }
         }
         Collections.reverse(pathList);
     }

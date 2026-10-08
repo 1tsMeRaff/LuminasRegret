@@ -4,13 +4,13 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
-import com.luminasregret.game.entity.Entity;
+import com.luminasregret.game.entity.Actor;
 import com.luminasregret.engine.core.GamePanel;
 import com.luminasregret.game.object.OBJ_Coin_Bronze;
 import com.luminasregret.game.object.OBJ_Heart;
 import com.luminasregret.game.object.OBJ_PlayerMana;
 
-public class MON_Zombie extends Entity {
+public class MON_Zombie extends Actor {
 
 	public MON_Zombie(GamePanel gp) {
 		super(gp);
@@ -157,14 +157,20 @@ public class MON_Zombie extends Entity {
 			}
 		}
 
+	private int pathSearchCounter = 15;
+
 	public void setAction() {
 		
 	    
 		if (onPath) {
 			checkStopChasingOrNot(gp.player, 5, 100);
 			
-			// Cari jalan setiap kali player bergerak
-	        searchPath(getGoalCol(gp.player), getGoalRow(gp.player));
+			// Throttling: Cari jalan setiap 15 frame (4x per detik), bukan setiap tick 60Hz
+			pathSearchCounter++;
+			if (pathSearchCounter >= 15) {
+				searchPath(getGoalCol(gp.player), getGoalRow(gp.player));
+				pathSearchCounter = 0;
+			}
 		}
 		else {
 			checkStartChasingOrNot(gp.player, 5, 100);
@@ -207,6 +213,7 @@ public class MON_Zombie extends Entity {
 		actionLockCounter = 0;
 //		direction = gp.player.direction;
 		onPath = true;
+		pathSearchCounter = 15;
 	}
 	public void checkDrop() {
 		

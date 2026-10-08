@@ -3,9 +3,10 @@ package com.luminasregret.game.entity;
 import java.awt.Rectangle;
 
 import com.luminasregret.engine.core.GamePanel;
+import com.luminasregret.game.entity.contracts.Interactable;
 import com.luminasregret.game.object.*;
 
-public class NPC_Merchant extends Entity{
+public class NPC_Merchant extends Actor implements Interactable {
 	
     public NPC_Merchant(GamePanel gp) {
         super(gp);
@@ -79,5 +80,15 @@ public class NPC_Merchant extends Entity{
         gp.ui.currentDialogue = dialogues[0];
         gp.gameState = gp.tradeState;
         gp.ui.npc = this;
+    }
+
+    @Override
+    public void interact(Player player) {
+        speak();
+    }
+
+    @Override
+    public String getInteractionPrompt() {
+        return name != null ? name : "Boran - Pedagang Kelana";
     }
 }

@@ -6,7 +6,7 @@ import com.luminasregret.game.entity.Entity;
 //Import GamePanel untuk akses UI dan game state
 import com.luminasregret.engine.core.GamePanel;
 
-public class OBJ_Door extends Entity {
+public class OBJ_Door extends WorldObject {
 	
 	public OBJ_Door(GamePanel gp) {
 		super(gp);
