@@ -199,41 +199,43 @@ public class GamePanel extends JPanel implements Runnable {
     @Override
     public void run() {
         
-        double drawInterval = 1000000000.0 / FPS;  // 16.666 ms per tick
+        double drawInterval = 1000000000.0 / FPS;  // 16.666 ms per tick (60 ticks/sec)
         double delta = 0;
         long lastTime = System.nanoTime();
-        long currentTime;
+        final int MAX_UPDATES_PER_FRAME = 6; // Catch up physics to maintain 100% real-time speed
 
         while (gameThread != null) {
-            currentTime = System.nanoTime();  
+            long currentTime = System.nanoTime();  
             delta += (currentTime - lastTime) / drawInterval;
             lastTime = currentTime;
 
-            // Clamping delta prevents the Spiral of Death and eliminates slow motion during lags
-            if (delta > 3) {
-                delta = 1;
+            // Cap delta to prevent freeze if tab was backgrounded for long periods
+            if (delta > MAX_UPDATES_PER_FRAME) {
+                delta = MAX_UPDATES_PER_FRAME;
             }
 
-            // Fixed-timestep simulation logic
-            while (delta >= 1) {
+            // Catch-up physics simulation so character and game speed never slow down
+            int updateCount = 0;
+            while (delta >= 1 && updateCount < MAX_UPDATES_PER_FRAME) {
                 update();
                 delta--;
+                updateCount++;
             }
 
             drawToTempScreen();
             drawToScreen();
 
-            // Calculate remaining frame budget and yield CPU to allow browser compositor to render
-            long nextDrawTime = currentTime + (long)drawInterval;
-            long remainingTime = (nextDrawTime - System.nanoTime()) / 1000000;
-            if (remainingTime > 1) {
+            // Calculate remaining frame budget
+            long frameTime = System.nanoTime() - currentTime;
+            long remainingTime = ((long)drawInterval - frameTime) / 1000000;
+
+            if (remainingTime > 2) {
                 try {
                     Thread.sleep(remainingTime);
                 } catch (InterruptedException ignored) {}
             } else {
-                try {
-                    Thread.sleep(1); // Cooperative yield for WebAssembly / CheerpJ runtime
-                } catch (InterruptedException ignored) {}
+                // Yield to browser event loop cooperatively without forcing 15ms setTimeout penalty
+                Thread.yield();
             }
         }
     }
@@ -431,14 +433,22 @@ public class GamePanel extends JPanel implements Runnable {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (tempScreen != null) {
-            g.drawImage(tempScreen, 0, 0, screenWidth2, screenHeight2, null);
+            if (screenWidth2 == screenWidth && screenHeight2 == screenHeight) {
+                g.drawImage(tempScreen, 0, 0, null);
+            } else {
+                g.drawImage(tempScreen, 0, 0, screenWidth2, screenHeight2, null);
+            }
         }
     }
 
     public void drawToScreen() {
         Graphics g = getGraphics();
         if (g != null) {
-            g.drawImage(tempScreen, 0, 0, screenWidth2, screenHeight2, null);
+            if (screenWidth2 == screenWidth && screenHeight2 == screenHeight) {
+                g.drawImage(tempScreen, 0, 0, null);
+            } else {
+                g.drawImage(tempScreen, 0, 0, screenWidth2, screenHeight2, null);
+            }
             g.dispose();
         } else {
             repaint();
