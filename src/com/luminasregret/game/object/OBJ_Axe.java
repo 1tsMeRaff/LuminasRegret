@@ -1,0 +1,24 @@
+package com.luminasregret.game.object;
+
+import com.luminasregret.game.entity.Entity;
+import com.luminasregret.engine.core.GamePanel;
+
+public class OBJ_Axe extends Entity {
+
+	public OBJ_Axe(GamePanel gp) {
+		super(gp);
+		
+		type = type_axe;
+		name = "Kapak";
+		down1 = setup("/objects/axe", gp.tileSize, gp.tileSize);
+		attackValue = 2;
+		price = 10;
+		attackArea.width = 24;
+	    attackArea.height = 24;
+	    description = "[" + name + "]\n Hanya kapak biasa.";
+	    knockBackPower = 10;
+	    motion1_duration = 20;
+	    motion2_duration = 40;
+	}
+
+}

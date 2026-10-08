@@ -38,16 +38,25 @@ LuminasRegret/
 │   ├── player/         # Player walking, attacking, and guarding sprites
 │   ├── sound/          # WAV sound effects and BGM tracks
 │   └── tiles/          # Overworld & dungeon tile textures
-├── src/                # Core Java SE source tree
-│   ├── ai/             # A* Pathfinding (Node.java, PathFinder.java)
-│   ├── entity/         # Dynamic actors (Entity, Player, NPCs, PlayerDummy)
-│   ├── environtment/   # Lighting, Day/Night AlphaComposite cycles
-│   ├── main/           # Core engine, input, audio, collision, UI, game loop
-│   ├── monster/        # Enemy AI, stats, attack behaviors, drops
-│   ├── object/         # Interactive items, equipment, consumables, doors
-│   ├── quest/          # State-machine quest engine (QuestType, QuestManager)
-│   ├── tile/           # Map loading, rendering, collision registration
-│   └── tile_interactive/# Destructible environment props (IT_DryTree)
+├── src/com/luminasregret/ # Standardized modular reverse-domain package tree
+│   ├── engine/         # Low-level core engine subsystems
+│   │   ├── ai/         # A* Pathfinding (Node.java, PathFinder.java)
+│   │   ├── audio/      # Java Sound API (Sound.java, SoundPool)
+│   │   ├── core/       # Entry point & master loop (Main.java, GamePanel.java, Config.java)
+│   │   ├── gfx/        # Graphic pipeline & caching (UtilityTool.java)
+│   │   ├── input/      # Unified I/O handling (KeyHandler.java, MouseHandler.java)
+│   │   └── physics/    # Zero-GC AABB collision (CollisionChecker.java, CollisionMath.java)
+│   ├── game/           # Game domain & gameplay mechanics
+│   │   ├── entity/     # Dynamic actors (Entity.java, Player.java, NPCs, PlayerDummy)
+│   │   ├── environment/# Day/night lighting cycle (EnvironmentManager.java, Lighting.java)
+│   │   ├── monster/    # AI combat actors (MON_GoblinKing, MON_GreenSlime, MON_Zombie)
+│   │   ├── object/     # Items & world props (Item.java interface, OBJ_* classes)
+│   │   ├── quest/      # State-machine quest engine (QuestType.java, QuestManager.java)
+│   │   ├── tile/       # Tile map rendering & collision (Tile.java, TileManager.java)
+│   │   │   └── interactive/ # Destructible props (InteractiveTile.java, IT_DryTree.java, IT_Trunk.java)
+│   │   └── world/      # World spawners & events (AssetSetter.java)
+│   │       └── event/  # Event bus & cinematics (EventHandler.java, EventRect.java, CutsceneManager.java)
+│   └── ui/             # Dynamic HUD & typography presentation (UI.java)
 └── [Documentation]     # AGENTS.md, Architecture.md, Patterns.md, Roadmap.md, Run.md, Testing.md
 ```
 
@@ -144,5 +153,5 @@ graph TD
   ```
 - **Launch Game**:
   ```powershell
-  java -cp "bin;res" main.Main
+  java -cp "bin;res" com.luminasregret.engine.core.Main
   ```

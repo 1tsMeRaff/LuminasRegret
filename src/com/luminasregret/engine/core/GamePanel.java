@@ -1,0 +1,552 @@
+package com.luminasregret.engine.core;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import javax.swing.JPanel;
+
+import com.luminasregret.engine.audio.Sound;
+import com.luminasregret.engine.gfx.UtilityTool;
+import com.luminasregret.engine.input.KeyHandler;
+import com.luminasregret.engine.input.MouseHandler;
+import com.luminasregret.engine.physics.CollisionChecker;
+import com.luminasregret.engine.ai.PathFinder;
+import com.luminasregret.ui.UI;
+
+import com.luminasregret.game.entity.Entity;
+import com.luminasregret.game.entity.Player;
+import com.luminasregret.game.tile.TileManager;
+import com.luminasregret.game.tile.interactive.InteractiveTile;
+import com.luminasregret.game.environment.EnvironmentManager;
+import com.luminasregret.game.quest.QuestManager;
+import com.luminasregret.game.quest.QuestType;
+import com.luminasregret.game.world.AssetSetter;
+import com.luminasregret.game.world.event.EventHandler;
+import com.luminasregret.game.world.event.CutsceneManager;
+
+@SuppressWarnings({"serial", "this-escape"})
+public final class GamePanel extends JPanel implements Runnable {
+    
+    private static final long serialVersionUID = 1L;
+    
+    // Cached entity sorter to eliminate 60 allocations/sec
+    private static final Comparator<Entity> ENTITY_SORTER = new Comparator<Entity>() {
+        @Override
+        public int compare(Entity e1, Entity e2) {
+            return Integer.compare(e1.worldY, e2.worldY);
+        }
+    };
+    
+    // screen settings
+    final int originalTileSize = 16; //16x16 tile
+    final int scale = 3;
+    
+    public final int tileSize = originalTileSize * scale; // 48x48 tile
+    public final int maxScreenCol = 16;
+    public final int maxScreenRow = 9;
+    public final int screenWidth = tileSize * maxScreenCol; // 768px 
+    public final int screenHeight = tileSize * maxScreenRow; // 432px
+    
+    // WORLD SETTINGS
+    public final int maxWorldCol = 50;
+    public final int maxWorldRow = 50;
+    public final int maxMap = 10;
+    public int currentMap = 0;
+    
+    // Full Screen
+    public int screenWidth2 = screenWidth;
+    public int screenHeight2 = screenHeight;
+    public BufferedImage tempScreen;
+    public Graphics2D g2;
+    public boolean fullScreenOn = false;
+    
+    //FPS
+    int FPS = 60;
+    
+    // System
+    public TileManager tileM = new TileManager(this);
+    public KeyHandler keyH = new KeyHandler(this);
+    public MouseHandler mouseH = new MouseHandler(this);
+    public Sound music = new Sound();
+    public Sound se = new Sound();
+    public CollisionChecker cChecker = new CollisionChecker(this);
+    public AssetSetter aSetter = new AssetSetter(this);
+    public UI ui = new UI(this);
+    public EventHandler eHandler = new EventHandler(this);
+    public Config config = new Config(this);
+    public PathFinder pFinder = new PathFinder(this);
+    public EnvironmentManager eManager = new EnvironmentManager(this);
+    public CutsceneManager csManager = new CutsceneManager(this);
+    public Thread gameThread;
+    
+    // Entity & Object
+    public Player player = new Player(this,keyH);
+    public Entity obj[][] = new Entity[maxMap][20];
+    public Entity npc[][] = new Entity[maxMap][10];
+    public Entity monster[][] = new Entity[maxMap][20];
+    public InteractiveTile iTile[][] = new InteractiveTile[maxMap][500];
+    public Entity projectile[][] = new Entity[maxMap][50];
+    public ArrayList<Entity> particleList = new ArrayList<>();
+    ArrayList<Entity> entityList = new ArrayList<>();
+    
+    // Game State
+    public int gameState;
+    public final int titleState = 0;
+    public final int playState = 1;
+    public final int pauseState = 2;
+    public final int dialogueState = 3;
+    public final int characterState = 4; 
+    public final int optionsState = 5;
+    public final int gameOverState = 6;
+    public final int transitionState = 7;
+    public final int tradeState = 8;
+    public final int cutsceneState = 9;
+    public final int gameClearState = 10;
+    
+    // Quest Manager
+    public final QuestManager qManager = new QuestManager(this);
+    
+    // Other
+    public boolean bossBattleOn = false;
+    
+    public GamePanel() {
+        
+        this.setPreferredSize(new Dimension(screenWidth, screenHeight));
+        this.setBackground(Color.black);
+        this.setDoubleBuffered(true);
+        this.addKeyListener(keyH);
+        this.addMouseListener(mouseH);
+        this.addMouseMotionListener(mouseH);
+        this.setFocusable(true);
+    }
+    
+    public void setupGame() {
+    	
+    	aSetter.setObject();
+    	aSetter.setNPC();
+    	aSetter.setMonster();
+    	aSetter.setInteractiveTile();
+    	eManager.setup();
+    	se.initSoundPool();
+    	gameState = titleState;
+    	playMusic(4);
+    	
+    	tempScreen = new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_RGB);
+    	g2 = (Graphics2D)tempScreen.getGraphics();
+    	g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+    	g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+    	g2.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
+    	g2.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_SPEED);
+    	
+    	if(fullScreenOn == true) {
+    		setFullScreen();
+    	}
+    }
+    
+    public void resetGame(boolean restart) {
+    	
+    	removeTempEntity();
+    	bossBattleOn = false;
+    	player.setDefaultPositions();
+    	player.restoreStatus();
+    	aSetter.setNPC();
+    	aSetter.setMonster();
+    	
+    	if(restart) {
+    		player.setDefaultValues();
+        	player.setItems();
+        	aSetter.setObject();
+        	aSetter.setInteractiveTile();
+        	qManager.setQuest(QuestType.TALK_TO_GUIDE);
+    	}
+    }
+    
+    public void setFullScreen() {
+    	
+    	// GET LOCAL SCREEN DEVICE
+    	GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    	GraphicsDevice gd = ge.getDefaultScreenDevice();
+    	gd.setFullScreenWindow(Main.window);
+
+    	// GET FULL SCREEN WIDTH AND HEIGHT
+    	screenWidth2 = Main.window.getWidth();
+    	screenHeight2 = Main.window.getHeight();
+    }
+
+    public void toggleFullScreen() {
+        fullScreenOn = !fullScreenOn;
+        if (Main.window != null) {
+            Main.window.dispose();
+            Main.window.setUndecorated(fullScreenOn);
+            if (fullScreenOn) {
+                setFullScreen();
+            } else {
+                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                GraphicsDevice gd = ge.getDefaultScreenDevice();
+                gd.setFullScreenWindow(null);
+                screenWidth2 = screenWidth;
+                screenHeight2 = screenHeight;
+                Main.window.pack();
+                Main.window.setLocationRelativeTo(null);
+            }
+            Main.window.setVisible(true);
+        }
+        config.saveConfig();
+    }
+    
+    public void startGameThread() {
+        
+        gameThread = new Thread(this);
+        gameThread.start();
+    }
+
+    @Override
+    public void run() {
+        
+        double drawInterval = 1000000000.0 / FPS;  // 16.666 ms per tick (60 ticks/sec)
+        double delta = 0;
+        long lastTime = System.nanoTime();
+        final int MAX_UPDATES_PER_FRAME = 6; // Catch up physics to maintain 100% real-time speed
+
+        while (gameThread != null) {
+            long currentTime = System.nanoTime();  
+            delta += (currentTime - lastTime) / drawInterval;
+            lastTime = currentTime;
+
+            // Cap delta to prevent freeze if tab was backgrounded for long periods
+            if (delta > MAX_UPDATES_PER_FRAME) {
+                delta = MAX_UPDATES_PER_FRAME;
+            }
+
+            // Catch-up physics simulation so character and game speed never slow down
+            int updateCount = 0;
+            while (delta >= 1 && updateCount < MAX_UPDATES_PER_FRAME) {
+                update();
+                delta--;
+                updateCount++;
+            }
+
+            drawToTempScreen();
+            drawToScreen();
+
+            // Calculate remaining frame budget
+            long frameTime = System.nanoTime() - currentTime;
+            long remainingTime = ((long)drawInterval - frameTime) / 1000000;
+
+            if (remainingTime > 3) {
+                try {
+                    Thread.sleep(remainingTime - 1);
+                } catch (InterruptedException ignored) {}
+            } else {
+                // Yield to browser event loop cooperatively without forcing 15ms setTimeout penalty
+                Thread.yield();
+            }
+        }
+    }
+    
+    public void update() {
+    	
+    	if(gameState == playState) {
+    		// Check events
+    		eHandler.checkEvent();
+    		
+    		//Player
+    		player.update();
+    		
+    		//NPC 
+    		for(int i = 0; i < npc[currentMap].length; i++) {
+    			if(npc[currentMap][i] != null) {
+    				npc[currentMap][i].update();
+    			}
+    		}
+    		
+    		// Monster
+    		for(int i = 0; i < monster[currentMap].length; i++) {
+    			if(monster[currentMap][i] != null) {
+    				if(monster[currentMap][i].alive == true) {
+    					monster[currentMap][i].update();
+    				}
+    				if(monster[currentMap][i].alive == false) {
+    					monster[currentMap][i].checkDrop();
+    					monster[currentMap][i] = null;
+    				}
+    			}
+    		}
+    		
+    		// Projectile
+    		for(int i = 0; i < projectile[currentMap].length; i++) {
+    			if(projectile[currentMap][i] != null) {
+    				if(projectile[currentMap][i].alive == true) {
+    					projectile[currentMap][i].update();
+    				}
+    				if(projectile[currentMap][i].alive == false) {
+    					projectile[currentMap][i] = null;
+    				}
+    			}
+    		}
+    		
+    		// Particles
+    		for(int i = 0; i < particleList.size(); i++) {
+    			if(particleList.get(i) != null) {
+    				if(particleList.get(i).alive == true) {
+    					particleList.get(i).update();
+    				}
+    				if(particleList.get(i).alive == false) {
+    					particleList.remove(i);
+    					i--; // Adjust index after removal
+    				}
+    			}
+    		}
+    		
+    		// Interactive Tiles
+    		for(int i = 0; i  < iTile[currentMap].length; i++) {
+    			if(iTile[currentMap][i] != null) {
+    				iTile[currentMap][i].update();
+    			}
+    		}
+    		
+    		// Environment
+    		eManager.update();
+    	}
+    	else if(gameState == pauseState) {
+    		// Pause logic if needed
+    	}
+    	else if(gameState == dialogueState) {
+            // Dialogue advancement is event-driven via KeyHandler & MouseHandler
+    	}
+        else if(gameState == cutsceneState) {
+            // Update cutscene manager
+            csManager.update();
+            
+            // Also update player for animation if needed
+            player.update();
+            
+            // Update NPCs untuk cutscene
+            for(int i = 0; i < npc[currentMap].length; i++) {
+                if(npc[currentMap][i] != null) {
+                    npc[currentMap][i].update();
+                }
+            }
+        }
+
+        // Update Quest Manager
+        qManager.update();
+    }
+    
+    public void drawToTempScreen() {
+    	
+    	// Debug
+        long drawStart = 0;
+        if(keyH.showDebugText == true) {
+        	drawStart = System.nanoTime();
+        }
+        
+        // Title Screen
+        if(gameState == titleState) {
+        	ui.draw(g2);
+        }
+        else {
+        	//Tile
+        	tileM.draw(g2);
+        	
+        	// INTERACTIVE TILE
+        	for(int i = 0; i < iTile[currentMap].length; i++) {
+        		if(iTile[currentMap][i] != null) {
+        			iTile[currentMap][i].draw(g2);
+        		}
+        	}
+        	
+        	// Add Visible Entities To The List (Frustum Camera Culling to minimize sort overhead)
+        	entityList.add(player);
+        	
+        	for(int i = 0; i < npc[currentMap].length; i++) {
+        		if(npc[currentMap][i] != null && npc[currentMap][i].inCamera()) {
+        			entityList.add(npc[currentMap][i]);
+        		}
+        	}
+        	
+        	for(int i = 0; i < obj[currentMap].length; i ++) {
+        		if(obj[currentMap][i] != null && obj[currentMap][i].inCamera()) {
+        			entityList.add(obj[currentMap][i]);
+        		}
+        	}
+        	
+        	for(int i = 0; i < monster[currentMap].length; i ++) {
+        		if(monster[currentMap][i] != null && monster[currentMap][i].inCamera()) {
+        			entityList.add(monster[currentMap][i]);
+        		}
+        	}
+        	
+        	for(int i = 0; i < projectile[currentMap].length; i ++) {
+        		if(projectile[currentMap][i] != null && projectile[currentMap][i].inCamera()) {
+        			entityList.add(projectile[currentMap][i]);
+        		}
+        	}
+        	
+        	for(int i = 0; i < particleList.size(); i ++) {
+        		if(particleList.get(i) != null && particleList.get(i).inCamera()) {
+        			entityList.add(particleList.get(i));
+        		}
+        	}
+        	
+        	// Sort by Y position for correct drawing order using cached comparator
+        	Collections.sort(entityList, ENTITY_SORTER);
+            
+            // Draw Entities
+        	for(int i = 0; i < entityList.size(); i++) {
+        		entityList.get(i).draw(g2);
+        	}
+        	
+        	// Empty Entity List
+        	entityList.clear();
+        	
+        	// Environment
+        	eManager.draw(g2);
+        	
+        	// Cutscene 
+        	if(gameState == cutsceneState) {
+        		csManager.draw(g2);
+        	}
+        	
+            // UI
+            ui.draw(g2);
+        }
+        
+        //Debug
+        if(keyH.showDebugText == true) {
+        	long drawEnd = System.nanoTime();
+            long passed = drawEnd - drawStart;
+            
+            g2.setFont(new Font("Arial", Font.PLAIN, 20));
+            g2.setColor(Color.white);
+            int x = 10;
+            int y = 200;
+            int lineHeight = 20;
+            
+            g2.drawString("WorldX" + player.worldX, x, y); y += lineHeight;
+            g2.drawString("WorldY" + player.worldY, x, y); y += lineHeight;
+            g2.drawString("Col" + (player.worldX + player.solidArea.x)/tileSize, x, y); y += lineHeight;
+            g2.drawString("Row" + (player.worldY + player.solidArea.y)/tileSize, x, y); y += lineHeight;
+            g2.drawString("Game State: " + gameState, x, y); y += lineHeight;
+            g2.drawString("Boss Battle: " + bossBattleOn, x, y); y += lineHeight;
+            g2.drawString("Draw time = "+ passed, x, y);
+        }
+    }
+    
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (tempScreen != null) {
+            if (screenWidth2 == screenWidth && screenHeight2 == screenHeight) {
+                g.drawImage(tempScreen, 0, 0, null);
+            } else {
+                g.drawImage(tempScreen, 0, 0, screenWidth2, screenHeight2, null);
+            }
+        }
+    }
+
+    public void drawToScreen() {
+        Graphics g = getGraphics();
+        if (g != null) {
+            if (screenWidth2 == screenWidth && screenHeight2 == screenHeight) {
+                g.drawImage(tempScreen, 0, 0, null);
+            } else {
+                g.drawImage(tempScreen, 0, 0, screenWidth2, screenHeight2, null);
+            }
+            g.dispose();
+        } else {
+            repaint();
+        }
+    }
+    
+    public int currentMusicId = -1;
+
+    public void playMusic(int i) {
+        currentMusicId = i;
+    	music.setFile(i);
+    	music.play();
+    	music.loop();
+    }
+    
+    // Metode untuk menghentikan musik
+    public void stopMusic() {
+        music.stop();
+        currentMusicId = -1;
+    }
+
+    public void playAreaMusic() {
+        int targetMusic;
+        if(bossBattleOn) {
+            targetMusic = 3; // Boss theme
+        } else if(currentMap == 1) {
+            targetMusic = 2; // Dungeon theme
+        } else {
+            targetMusic = 0; // Overworld theme
+        }
+
+        if(currentMusicId != targetMusic) {
+            stopMusic();
+            playMusic(targetMusic);
+        }
+    }
+
+    // Metode untuk memutar Sound Effect (sekali main via preloaded pool)
+    public void playSE(int i) {
+        se.playSE(i);
+    }
+    
+    public void advanceDialogue() {
+        if(gameState != dialogueState) {
+            return;
+        }
+
+        if(csManager.isDialogueActive()) {
+            csManager.advanceDialogue();
+            return;
+        }
+
+        if(ui.npc != null) {
+            // Guard: Pastikan pemain masih berada di dekat NPC ini (maks 2.5 tile = 120px)
+            int dx = ui.npc.getCenterX() - player.getCenterX();
+            int dy = ui.npc.getCenterY() - player.getCenterY();
+            if (Math.hypot(dx, dy) <= tileSize * 2.5) {
+                ui.npc.speak();
+            } else {
+                // Pemain sudah menjauh dari NPC, tutup dialog secara aman
+                gameState = playState;
+                ui.npc = null;
+                ui.currentDialogue = "";
+                ui.currentSpeakerName = "";
+            }
+        } else {
+            gameState = playState;
+            ui.currentDialogue = "";
+            ui.currentSpeakerName = "";
+        }
+    }
+
+    public void removeTempEntity() {
+        for(int mapNum = 0; mapNum < maxMap; mapNum++) {
+            for(int i = 0; i < obj[mapNum].length; i++) {
+                if(obj[mapNum][i] != null && obj[mapNum][i].temp == true) {
+                    obj[mapNum][i] = null;
+                }
+            }
+            for(int i = 0; i < monster[mapNum].length; i++) {
+                if(monster[mapNum][i] != null && monster[mapNum][i].temp == true) {
+                    monster[mapNum][i] = null;
+                }
+            }
+        }
+    }
+}
