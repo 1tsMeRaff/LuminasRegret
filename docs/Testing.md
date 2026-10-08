@@ -22,11 +22,13 @@ In accordance with the project's zero-dependency mandate, testing does not rely 
 
 | Test Harness Class | Category | Target Component | Description |
 | :--- | :--- | :--- | :--- |
-| [`CollisionMathSanityTest`](file:///C:/Users/HP/.gemini/antigravity-ide/brain/d6a301ca-73f2-4f3a-beaf-1c250e9c40e6/scratch/CollisionMathSanityTest.java) | Unit / Math | `main.CollisionMath` | Exhaustively checks 72,900 overlapping and non-overlapping AABB coordinate permutations against `java.awt.Rectangle.intersects()`. |
-| [`PathFinderSanityTest`](file:///C:/Users/HP/.gemini/antigravity-ide/brain/d6a301ca-73f2-4f3a-beaf-1c250e9c40e6/scratch/PathFinderSanityTest.java) | Unit / Algorithmic | `ai.PathFinder` & `ai.Node` | Verifies binary min-heap `PriorityQueue` sorting, $F$-cost ordering, and tie-breaking consistency. |
-| [`QuestProgressionTest`](file:///C:/Users/HP/.gemini/antigravity-ide/brain/d6a301ca-73f2-4f3a-beaf-1c250e9c40e6/scratch/QuestProgressionTest.java) | Integration / State | `quest.QuestManager` & `entity.Player` | Simulates the complete narrative loop from `TALK_TO_GUIDE` to `GAME_COMPLETED` and game reset. Runs headless. |
-| [`InteractionSystemSanityTest`](file:///C:/Users/HP/.gemini/antigravity-ide/brain/d6a301ca-73f2-4f3a-beaf-1c250e9c40e6/scratch/InteractionSystemSanityTest.java) | Integration / Input | `main.KeyHandler`, `MouseHandler`, `Player` | Validates keyboard `E` interaction, mouse-click chest opening, locked door key consumption, and directional swings. |
-| [`DialogueWrappingSanityTest`](file:///C:/Users/HP/.gemini/antigravity-ide/brain/d6a301ca-73f2-4f3a-beaf-1c250e9c40e6/scratch/DialogueWrappingSanityTest.java) | UI / Geometry | `main.UI.wrapDialogueText` | Verifies that all NPC dialogues and inventory descriptions remain 100% within subwindow pixel boundaries across all display states. |
+| `CollisionMathSanityTest` | Unit / Math | `com.luminasregret.engine.physics.CollisionMath` | Exhaustively checks 72,900 overlapping and non-overlapping AABB coordinate permutations against `java.awt.Rectangle.intersects()`. |
+| `PathFinderSanityTest` | Unit / Algorithmic | `com.luminasregret.engine.ai.PathFinder` & `Node` | Verifies binary min-heap `PriorityQueue` sorting, $F$-cost ordering, and tie-breaking consistency. |
+| `QuestProgressionTest` | Integration / State | `com.luminasregret.game.quest.QuestManager` & `Player` | Simulates the complete narrative loop from `TALK_TO_GUIDE` to `GAME_COMPLETED` and game reset. Runs headless. |
+| `InteractionSystemSanityTest` | Integration / Input | `KeyHandler`, `MouseHandler`, `Player` | Validates keyboard `E` interaction, mouse-click chest opening, locked door key consumption, and directional swings. |
+| `DialogueWrappingSanityTest` | UI / Geometry | `com.luminasregret.ui.UI.wrapDialogueText` | Verifies that all NPC dialogues and inventory descriptions remain 100% within subwindow pixel boundaries across all display states. |
+| `AudioPerformanceAndPoolSanityTest` | Audio / Latency | `com.luminasregret.engine.audio.Sound` | Validates hot-path polyphony dispatch latency (< 50 µs), volume scale, and sound pool initialization. |
+| `InventoryAndAudioFixSanityTest` | Performance / Cache | `com.luminasregret.game.entity.Inventory` & `Sound` | Validates image scaling cache hit latency (< 50 µs) and rapid inventory weapon swap performance. |
 
 ---
 
@@ -36,15 +38,8 @@ In accordance with the project's zero-dependency mandate, testing does not rely 
 
 #### PowerShell (Windows):
 ```powershell
-# 1. Compile test classes into bin
-javac -cp "bin;res" -d bin "C:\Users\HP\.gemini\antigravity-ide\brain\d6a301ca-73f2-4f3a-beaf-1c250e9c40e6\scratch\*.java"
-
-# 2. Run the complete test suite sequentially
-java -cp bin scratch.CollisionMathSanityTest
-java -cp bin scratch.PathFinderSanityTest
-java "-Djava.awt.headless=true" -cp "bin;res" scratch.QuestProgressionTest
-java -cp "bin;res" scratch.InteractionSystemSanityTest
-java -cp bin scratch.DialogueWrappingSanityTest
+# Jalankan seluruh automated test suite sekaligus via automation script:
+powershell -ExecutionPolicy Bypass -File scripts/run-tests.ps1
 ```
 
 #### Bash / POSIX (Linux / macOS):
