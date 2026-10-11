@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina's Regret | 16-Bit Retro 2D Action-RPG</title>
+    
+    <!-- SEO & Social Meta Tags -->
+    <meta name="description" content="Lumina's Regret adalah game 2D Action-RPG bernuansa retro 16-bit klasik yang dibangun murni menggunakan Java SE 21. Mainkan langsung di browser via WebAssembly!">
+    <meta name="keywords" content="Lumina's Regret, Java RPG, 16-bit, Retro Pixel Art, Action RPG, CheerpJ, WebAssembly, GitHub Pages">
+    <meta name="author" content="1tsMeRaff">
+    
+    <!-- OpenGraph / Discord Embed Cards -->
+    <meta property="og:title" content="Lumina's Regret - 16-Bit Retro Action-RPG">
+    <meta property="og:description" content="Mainkan petualangan klasik 16-bit Lumina's Regret langsung di browser tanpa instalasi!">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://1tsMeRaff.github.io/LuminasRegret/">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <!-- CheerpJ 3/4 Runtime Loader -->
+    <script src="https://cjrtnc.leaningtech.com/4.3/loader.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Ambient Glow Background -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-brand">
+                <span class="brand-crest">✦</span>
+                <span class="brand-text">LUMINA'S REGRET</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#play-section" class="nav-link active">Mainkan</a>
+                <a href="#lore-section" class="nav-link">Kisah</a>
+                <a href="#controls-section" class="nav-link">Kontrol</a>
+                <a href="#features-section" class="nav-link">Fitur</a>
+                <a href="#download-section" class="nav-link btn-download">Unduh JAR</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section & Web Player -->
+        <section id="play-section" class="hero-section">
+            <div class="hero-header">
+                <div class="badge-tag">RETIRED CURSE • PURE JAVA SE 21 • 60 FPS</div>
+                <h1 class="hero-title">Lumina's Regret</h1>
+                <p class="hero-subtitle">
+                    Kutukan kegelapan telah menyelimuti lembah suci. Ambil senjatamu, tebas rintangan, dan rebut kembali Relik Suci dari cengkeraman Goblin King!
+                </p>
+            </div>
+
+            <!-- Arcade Cabinet / CRT Frame -->
+            <div class="arcade-wrapper">
+                <div class="arcade-bezel">
+                    <!-- Top Arcade Header -->
+                    <div class="arcade-topbar">
+                        <div class="arcade-dots">
+                            <span class="dot dot-red"></span>
+                            <span class="dot dot-yellow"></span>
+                            <span class="dot dot-green"></span>
+                        </div>
+                        <div class="arcade-title">LUMINA-OS // 768x432 60FPS CRT MONITOR</div>
+                        <div class="arcade-status">
+                            <span class="pulse-indicator"></span>
+                            <span id="system-status-text">SYSTEM STANDBY</span>
+                        </div>
+                    </div>
+
+                    <!-- Screen Container with Scanline Filter -->
+                    <div class="screen-container" id="screen-container">
+                        <div class="crt-scanlines"></div>
+                        <div class="crt-vignette"></div>
+
+                        <!-- Fullscreen Exit Floating Overlay Button -->
+                        <button id="btn-fs-exit" class="fs-exit-overlay" title="Keluar Mode Layar Penuh">
+                            <span class="fs-exit-icon">✕</span>
+                            <span>Exit Fullscreen</span>
+                        </button>
+
+                        <!-- CheerpJ Canvas Container (Target for Web JVM) -->
+                        <div id="cheerpj-display" class="cheerpj-canvas-wrapper"></div>
+
+                        <!-- Interactive Retro Splash & Audio Unlock Overlay -->
+                        <div id="splash-overlay" class="splash-overlay">
+                            <div class="splash-content">
+                                <div class="pixel-relic-icon">✦</div>
+                                <h2 class="splash-heading">LUMINA'S REGRET</h2>
+                                <p class="splash-desc">Klik tombol di bawah untuk membuka izin audio browser dan memulai WebAssembly JVM.</p>
+                                
+                                <button id="btn-start-game" class="btn-retro-start">
+                                    <span class="start-btn-pulse"></span>
+                                    <span class="start-btn-text">▶ PLAY IN BROWSER</span>
+                                </button>
+                                
+                                <div class="splash-hint">[Klik mouse di dalam layar untuk mengarahkan kontrol keyboard]</div>
+                            </div>
+
+                            <!-- Loading Progress State -->
+                            <div id="loading-state" class="loading-state hidden">
+                                <div class="pixel-spinner"></div>
+                                <div class="loading-message" id="loading-message">Menginisialisasi WebAssembly Engine...</div>
+                                <div class="pixel-progress-bar">
+                                    <div class="pixel-progress-fill" id="pixel-progress-fill"></div>
+                                </div>
+                                <div class="loading-percentage" id="loading-percentage">0%</div>
+                                <div class="loading-subtext">Mengunduh LuminasRegret.jar (~47 MB) ke memori browser...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Arcade Bottom Control Bar -->
+                    <div class="arcade-toolbar">
+                        <div class="toolbar-left">
+                            <span class="key-hint"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Gerak</span>
+                            <span class="key-hint"><kbd>E</kbd> / <kbd>ENTER</kbd> Interaksi</span>
+                            <span class="key-hint"><kbd>J</kbd> / <kbd>Klik</kbd> Serang</span>
+                            <span class="key-hint"><kbd>P</kbd> Pause</span>
+                            <span class="key-hint"><kbd>ESC</kbd> Menu Opsi</span>
+                        </div>
+                        <div class="toolbar-right">
+                            <button id="btn-fullscreen" class="tool-btn" title="Mode Layar Penuh">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                                </svg>
+                                <span>Fullscreen</span>
+                            </button>
+                            <button id="btn-scroll-top" class="tool-btn" title="Fokus Game">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <span>Capture Input</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Story Lore Section -->
+        <section id="lore-section" class="content-section">
+            <div class="section-container">
+                <div class="section-badge">NARASI PETUALANGAN</div>
+                <h2 class="section-title">Kisah Kejatuhan Lumina</h2>
+                
+                <div class="lore-grid">
+                    <div class="lore-card">
+                        <div class="card-icon">🌲</div>
+                        <h3>Desa Terkutuk</h3>
+                        <p>
+                            Lembah suci yang dahulu damai kini diselimuti kabut kutukan. Bicaralah dengan <strong>Sylvia</strong> sang penjaga roh untuk mengetahui petunjuk pencarian kapak pemotong rintangan dan lentera penembus kegelapan.
+                        </p>
+                    </div>
+                    <div class="lore-card">
+                        <div class="card-icon">⚔️</div>
+                        <h3>Boran Sang Pedagang</h3>
+                        <p>
+                            Kunjungi pedagang <strong>Boran</strong> di barat desa. Tukarkan koin emas dari monster dengan perisai besi, lentera dungeon, atau ransum roti pemulih stamina sebelum melangkah ke gua bawah tanah.
+                        </p>
+                    </div>
+                    <div class="lore-card">
+                        <div class="card-icon">👑</div>
+                        <h3>Goblin King</h3>
+                        <p>
+                            Di ruang terdalam Dark Dungeon, Goblin King menjaga Relik Air Mata Lumina. Waspadai amukan fase kedua saat HP-nya tersisa separuh: proyektil sihir terkutuk dan kawanan minion Slime & Zombie!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Controls Guide -->
+        <section id="controls-section" class="content-section bg-alt">
+            <div class="section-container">
+                <div class="section-badge">SKEMA PENGENDALIAN</div>
+                <h2 class="section-title">Sistem Input Konsisten</h2>
+                <p class="section-desc">Mendukung kombinasi lengkap antara tombol Keyboard universal dan interaksi Mouse yang responsif.</p>
+
+                <div class="controls-table-wrapper">
+                    <table class="controls-table">
+                        <thead>
+                            <tr>
+                                <th>Aksi Permainan</th>
+                                <th>Tombol Keyboard</th>
+                                <th>Interaksi Mouse</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Pergerakan Karakter</strong></td>
+                                <td><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> atau <kbd>↑</kbd> <kbd>←</kbd> <kbd>↓</kbd> <kbd>→</kbd></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bicara / Beli / Jual / Konfirmasi</strong></td>
+                                <td><kbd>E</kbd> / <kbd>ENTER</kbd> / <kbd>SPACE</kbd></td>
+                                <td><strong>Klik Kiri</strong> pada NPC / Toko / Peti</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tebasan Pedang / Kapak</strong></td>
+                                <td><kbd>J</kbd></td>
+                                <td><strong>Klik Kiri</strong> ke arah kursor</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tembakan Sihir Proyektil</strong></td>
+                                <td><kbd>K</kbd> (Gunakan 1 Mana)</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tangkisan Perisai (Guard)</strong></td>
+                                <td><kbd>L</kbd></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Manuver Menghindar (Dash)</strong></td>
+                                <td>—</td>
+                                <td><strong>Klik Kanan</strong> ke arah kursor</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Buka Karakter / Tas (Inventory)</strong></td>
+                                <td><kbd>C</kbd></td>
+                                <td><strong>Klik & Hover</strong> pada slot tas</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Menu Opsi / Kembali</strong></td>
+                                <td><kbd>ESCAPE</kbd></td>
+                                <td>Klik tombol kembali</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Features -->
+        <section id="features-section" class="content-section">
+            <div class="section-container">
+                <div class="section-badge">ARSITEKTUR & PERFORMA</div>
+                <h2 class="section-title">Dibangun Dengan Standar Industri</h2>
+
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-tag">100% PURE JAVA SE 21</div>
+                        <h4>Zero External Dependencies</h4>
+                        <p>Hanya menggunakan <code>java.desktop</code> dan <code>java.base</code>. Tanpa Maven/Gradle bloat, bebas dependensi pihak ketiga.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-tag">DETERMINISTIC 60 FPS</div>
+                        <h4>Zero GC Thrashing</h4>
+                        <p>Game loop delta timer presisi tinggi dengan primitive math AABB collision untuk meminimalkan beban garbage collector.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-tag">PHYSICS UPGRADE</div>
+                        <h4>Per-Axis Wall Sliding</h4>
+                        <p>Pemeriksaan collision terpisah pada sumbu X dan Y mencegah pemain tersangkut saat bergerak diagonal menyusuri dinding.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-tag">CC0 DYNAMIC AUDIO</div>
+                        <h4>SNES Orchestral Fantasy</h4>
+                        <p>Aransemen WAV 16-bit PCM terkurasi berganti otomatis antara Overworld, Dungeon, Boss Battle, dan Title Screen.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Direct Download Section -->
+        <section id="download-section" class="content-section download-banner">
+            <div class="section-container">
+                <div class="download-box">
+                    <div class="download-content">
+                        <div class="badge-tag">DESKTOP NATIVE RELEASE</div>
+                        <h2 class="download-heading">Unduh Biner Standalone Desktop</h2>
+                        <p class="download-text">
+                            Ingin memainkan game secara lokal dengan performa 60.0 FPS murni dan latency nol di komputer Anda? Unduh rilis biner resmi <code>LuminasRegret.jar</code> (v1.0.0).
+                        </p>
+                        <div class="download-actions">
+                            <a href="LuminasRegret.jar" download="LuminasRegret.jar" class="btn-download-primary">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                                </svg>
+                                <span>Unduh LuminasRegret.jar (~46.8 MB)</span>
+                            </a>
+                            <a href="https://github.com/1tsMeRaff/LuminasRegret" target="_blank" rel="noopener" class="btn-github-outline">
+                                <span>Lihat di GitHub</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="terminal-guide">
+                        <div class="terminal-bar">
+                            <span class="t-dot t-red"></span>
+                            <span class="t-dot t-yellow"></span>
+                            <span class="t-dot t-green"></span>
+                            <span class="t-title">Terminal / Command Prompt</span>
+                        </div>
+                        <div class="terminal-body">
+                            <code><span class="cmd-prompt">$</span> java -jar LuminasRegret.jar</code>
+                            <div class="t-note"># Membutuhkan Java 21 LTS atau lebih baru terpasang di komputer Anda.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-left">
+                <span class="footer-logo">✦ LUMINA'S REGRET</span>
+                <p>Proyek game 2D Action-RPG open-source di bawah lisensi MIT License.</p>
+            </div>
+            <div class="footer-right">
+                <p>Aset Audio: CC0 Public Domain (RandomMind, Juhani Junkala, Memoraphile)</p>
+                <p>Repositori: <a href="https://github.com/1tsMeRaff/LuminasRegret" target="_blank" rel="noopener">1tsMeRaff/LuminasRegret</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Main Logic Script -->
+    <script src="app.js"></script>
+</body>
+</html>
