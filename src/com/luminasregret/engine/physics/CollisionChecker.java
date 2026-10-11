@@ -4,10 +4,6 @@ import com.luminasregret.engine.core.GamePanel;
 import com.luminasregret.game.entity.Entity;
 import com.luminasregret.game.tile.interactive.InteractiveTile;
 
-import com.luminasregret.game.entity.Entity;
-import com.luminasregret.game.tile.interactive.InteractiveTile;
-import java.awt.Rectangle;
-
 public class CollisionChecker {
     
     GamePanel gp;
@@ -42,7 +38,7 @@ public class CollisionChecker {
                 // Cek tile di atas entity
                 int nextTopRow = (entityTop - entity.speed) / gp.tileSize;
                 
-                if (nextTopRow < 0) {
+                if (nextTopRow < 0 || leftCol < 0 || rightCol >= gp.maxWorldCol) {
                     entity.collisionOn = true;
                     return;
                 }
@@ -60,7 +56,7 @@ public class CollisionChecker {
                 // Cek tile di bawah entity
                 int nextBottomRow = (entityBottom + entity.speed) / gp.tileSize;
                 
-                if (nextBottomRow >= gp.maxWorldRow) {
+                if (nextBottomRow >= gp.maxWorldRow || leftCol < 0 || rightCol >= gp.maxWorldCol) {
                     entity.collisionOn = true;
                     return;
                 }
@@ -78,7 +74,7 @@ public class CollisionChecker {
                 // Cek tile di kiri entity
                 int nextLeftCol = (entityLeft - entity.speed) / gp.tileSize;
                 
-                if (nextLeftCol < 0) {
+                if (nextLeftCol < 0 || topRow < 0 || bottomRow >= gp.maxWorldRow) {
                     entity.collisionOn = true;
                     return;
                 }
@@ -96,7 +92,7 @@ public class CollisionChecker {
                 // Cek tile di kanan entity
                 int nextRightCol = (entityRight + entity.speed) / gp.tileSize;
                 
-                if (nextRightCol >= gp.maxWorldCol) {
+                if (nextRightCol >= gp.maxWorldCol || topRow < 0 || bottomRow >= gp.maxWorldRow) {
                     entity.collisionOn = true;
                     return;
                 }
@@ -326,15 +322,5 @@ public class CollisionChecker {
         int entityCenterY = entity.worldY + entity.solidArea.y + (entity.solidArea.height / 2);
         int tileCenterY = ((entityCenterY / gp.tileSize) * gp.tileSize) + (gp.tileSize / 2);
         return Math.abs(entityCenterY - tileCenterY) <= 2;
-    }
-    
-    // Metode untuk mendapatkan collision area di world coordinates
-    public Rectangle getWorldCollisionArea(Entity entity) {
-        return new Rectangle(
-            entity.worldX + entity.solidArea.x,
-            entity.worldY + entity.solidArea.y,
-            entity.solidArea.width,
-            entity.solidArea.height
-        );
     }
 }

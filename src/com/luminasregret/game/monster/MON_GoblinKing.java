@@ -347,6 +347,9 @@ public class MON_GoblinKing extends Actor {
 //		direction = gp.player.direction;
 		onPath = true;
 		sleep = false;
+		if (!gp.bossBattleOn && gp.csManager.sceneNum == gp.csManager.NA) {
+			gp.eHandler.goblinKing();
+		}
 	}
 	public void checkDrop() {
 		// Akhiri pertarungan boss & buka pintu arena yang terkunci

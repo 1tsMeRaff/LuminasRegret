@@ -763,13 +763,6 @@ public final class Player extends Actor {
     	}
     }
     
-    public void knockBack(Entity entity, int knockBackPower) {
-    	
-    	entity.direction = direction;
-    	entity.speed += 10;
-    	entity.knockBack = true;
-    }
-    
     public void damageInteractiveTile(int i) { //FIXED
         if (i != 999 && gp.iTile[gp.currentMap][i].destructible == true 
         	&& gp.iTile[gp.currentMap][i].isCorrectItem(this) == true) {
@@ -783,11 +776,10 @@ public final class Player extends Actor {
     }
     
     public void damageProjectile(int i) {
-    	
-    	if(i != 999) {
-    		Entity Projectile = gp.projectile[gp.currentMap][i];
-    		projectile.alive = false;
-    		generateParticle(projectile, projectile);
+    	if (i != 999 && gp.projectile[gp.currentMap][i] != null) {
+    		Entity target = gp.projectile[gp.currentMap][i];
+    		target.alive = false;
+    		generateParticle(target, target);
     	}
     }
 

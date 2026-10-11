@@ -102,8 +102,7 @@ public class Sound implements AutoCloseable {
         fcPool[id] = new FloatControl[voiceCount];
 
         for (int v = 0; v < voiceCount; v++) {
-            try {
-                AudioInputStream ais = AudioSystem.getAudioInputStream(seURL[id]);
+            try (AudioInputStream ais = AudioSystem.getAudioInputStream(seURL[id])) {
                 Clip c = AudioSystem.getClip();
                 c.open(ais);
                 sePool[id][v] = c;
@@ -133,8 +132,7 @@ public class Sound implements AutoCloseable {
         }
         currentFileIndex = i;
         closeCurrentClip();
-        try {
-            AudioInputStream ais = AudioSystem.getAudioInputStream(musicURL[i]);
+        try (AudioInputStream ais = AudioSystem.getAudioInputStream(musicURL[i])) {
             clip = AudioSystem.getClip();
             clip.open(ais);
             

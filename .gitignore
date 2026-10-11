@@ -3,6 +3,10 @@
 .agents
 .gemini/
 
+# Testing & Scratches
+test/
+
+
 # Eclipse & IDEs
 /bin/
 .classpath
