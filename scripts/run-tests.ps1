@@ -1,7 +1,7 @@
 # scripts/run-tests.ps1
 $ErrorActionPreference = "Stop"
 
-$scratchDir = "C:\Users\HP\.gemini\antigravity-ide\brain\d6a301ca-73f2-4f3a-beaf-1c250e9c40e6\scratch"
+$testDir = if (Test-Path "test") { "test" } else { Join-Path (Split-Path -Parent $PSScriptRoot) "test" }
 
 Write-Host "Compiling sanity tests..." -ForegroundColor Cyan
 
@@ -13,11 +13,12 @@ $testList = @(
     "InteractionSystemSanityTest.java",
     "InventoryAndAudioFixSanityTest.java",
     "AudioPerformanceAndPoolSanityTest.java",
-    "BossBattleMechanicsSanityTest.java"
+    "BossBattleMechanicsSanityTest.java",
+    "CoreFixesRegressionSanityTest.java"
 )
 
 foreach ($t in $testList) {
-    $fullPath = Join-Path $scratchDir $t
+    $fullPath = Join-Path $testDir $t
     Write-Host "Compiling $t..."
     & javac -encoding UTF-8 -cp "bin;res" -d "bin" $fullPath
     if ($LASTEXITCODE -ne 0) {
@@ -50,5 +51,8 @@ Write-Host "`n--- Running InteractionSystemSanityTest (Headless) ---" -Foregroun
 
 Write-Host "`n--- Running BossBattleMechanicsSanityTest (Headless) ---" -ForegroundColor Yellow
 & java "-Djava.awt.headless=true" -cp "bin;res" scratch.BossBattleMechanicsSanityTest
+
+Write-Host "`n--- Running CoreFixesRegressionSanityTest (Headless) ---" -ForegroundColor Yellow
+& java "-Djava.awt.headless=true" -cp "bin;res" CoreFixesRegressionSanityTest
 
 Write-Host "`n=== ALL TESTS PASSED SUCCESSFULLY! ===" -ForegroundColor Green

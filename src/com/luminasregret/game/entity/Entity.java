@@ -604,62 +604,6 @@ public class Entity implements Item, Updatable, Renderable, Collidable, Damageab
 	    return image;
 	}
 	
-	public void startPathFinding(int goalCol, int goalRow) {
-	    
-	    this.onPath = true;
-	    this.goalCol = goalCol;
-	    this.goalRow = goalRow;
-	    
-	    // Clear path lama
-	    if (gp.pFinder != null) {
-	        gp.pFinder.pathList.clear();
-	    }
-	}
-
-	public void stopPathFinding() {
-	    this.onPath = false;
-	    this.goalCol = -1;
-	    this.goalRow = -1;
-	    
-	    if (gp.pFinder != null) {
-	        gp.pFinder.pathList.clear();
-	    }
-	}
-	
-    public void followPath() {
-        if (gp.pFinder.pathList.isEmpty()) {
-            direction = "down";
-            return;
-        }
-        
-        Node nextNode = gp.pFinder.pathList.get(0);
-        int targetX = nextNode.col * gp.tileSize + gp.tileSize / 2;
-        int targetY = nextNode.row * gp.tileSize + gp.tileSize / 2;
-        
-        int centerX = worldX + solidArea.x + solidArea.width / 2;
-        int centerY = worldY + solidArea.y + solidArea.height / 2;
-        
-        int dx = targetX - centerX;
-        int dy = targetY - centerY;
-        
-        int threshold = gp.tileSize / 4;
-        
-        if(Math.abs(dx) < threshold && Math.abs(dy) < threshold) {
-            gp.pFinder.pathList.remove(0);
-            
-            if(gp.pFinder.pathList.isEmpty()) {
-                return;
-            }
-        }
-        
-        // Tentukan arah
-        if(Math.abs(dx) > Math.abs(dy)) {
-            direction = (dx > 0) ? "right" : "left";
-        } else {
-            direction = (dy > 0) ? "down" : "up";
-        }
-    }
-    
     // PATH FOLLOWING
     public void followImprovedPath() {
     	

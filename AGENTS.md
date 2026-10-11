@@ -38,6 +38,7 @@ LuminasRegret/
 │   ├── player/         # Player walking, attacking, and guarding sprites
 │   ├── sound/          # WAV sound effects and BGM tracks
 │   └── tiles/          # Overworld & dungeon tile textures
+├── test/               # Headless automated sanity & regression test harnesses
 ├── src/com/luminasregret/ # Standardized modular reverse-domain package tree
 │   ├── engine/         # Low-level core engine subsystems
 │   │   ├── ai/         # A* Pathfinding (Node.java, PathFinder.java)
@@ -126,6 +127,7 @@ Game narrative flows through `QuestManager`:
 3. **Item 14 (Comparable specification)**: When sorting or prioritizing (e.g. `ai.Node`), implement `Comparable<T>` with consistent tie-breaking.
 4. **Item 15 & 16 (Encapsulate state)**: Minimize member accessibility. Do not expose public mutable fields across subsystems.
 5. **Item 72 (Standard exceptions)**: Throw `IllegalArgumentException` or `IllegalStateException` rather than raw `RuntimeException`. Never swallow exceptions with empty `catch` blocks.
+6. **Regression Prevention Standard**: Every critical bug fix must be paired with an assert-based test harness in `test/` and registered into `scripts/run-tests.ps1` to prevent regressions. Never point test runners to external or scratch folders outside the repository.
 
 ### 4.2 Dynamic UI & Text Rendering Rule
 - Never render raw dialogue or item descriptions using unmeasured strings or naive `split("\n")`.
@@ -144,7 +146,7 @@ graph TD
     B --> C[Verify Compilation: javac -Xlint:all]
     C -->|If errors or warnings occur| D[Fix Lint Errors & Warnings]
     D --> C
-    C -->|0 errors, 0 warnings| E[Run Automated Sanity Tests in scratch/]
+    C -->|0 errors, 0 warnings| E[Run Automated Sanity Tests in test/]
     E -->|If regression detected| B
     E -->|All tests pass| F[Document Changes & Report to User]
 ```
@@ -154,10 +156,15 @@ graph TD
   ```powershell
   Remove-Item -Recurse -Force bin\* ; javac -Xlint:all -encoding UTF-8 -cp "res" -d bin (Get-ChildItem -Path src -Filter *.java -Recurse | ForEach-Object { $_.FullName })
   ```
-- **Execute Headless Sanity Tests**:
+- **Execute Full Automated Test Suite (All 9 Suites)**:
   ```powershell
+  powershell -ExecutionPolicy Bypass -File scripts/run-tests.ps1
+  ```
+- **Execute Individual Headless Sanity Tests**:
+  ```powershell
+  java "-Djava.awt.headless=true" -cp "bin;res" CoreFixesRegressionSanityTest
   java "-Djava.awt.headless=true" -cp "bin;res" scratch.QuestProgressionTest
-  java -cp "bin;res" scratch.InteractionSystemSanityTest
+  java "-Djava.awt.headless=true" -cp "bin;res" scratch.InteractionSystemSanityTest
   java -cp bin scratch.DialogueWrappingSanityTest
   ```
 - **Launch Game**:

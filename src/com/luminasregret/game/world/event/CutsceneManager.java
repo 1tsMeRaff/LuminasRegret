@@ -60,15 +60,30 @@ public class CutsceneManager {
             if(!dialogueActive) {
                 gp.bossBattleOn = true;
                 
-                // Shut the iron door
+                // Shut the iron door behind player (at arena doorway col 26, row 22, or south hallway)
+                int doorX = (gp.player.worldY <= gp.tileSize * 22) ? gp.tileSize * 26 : gp.tileSize * 25;
+                int doorY = (gp.player.worldY <= gp.tileSize * 22) ? gp.tileSize * 22 : gp.tileSize * 28;
+
+                boolean doorAlreadyThere = false;
                 for(int i = 0; i < gp.obj[gp.currentMap].length; i++) {
-                    if(gp.obj[gp.currentMap][i] == null) {
-                        gp.obj[gp.currentMap][i] = new OBJ_Door1(gp);
-                        gp.obj[gp.currentMap][i].worldX = gp.tileSize * 25;
-                        gp.obj[gp.currentMap][i].worldY = gp.tileSize * 28;
-                        gp.obj[gp.currentMap][i].temp = true;
-                        gp.playSE(21);
+                    if(gp.obj[gp.currentMap][i] != null && 
+                       gp.obj[gp.currentMap][i].worldX == doorX && 
+                       gp.obj[gp.currentMap][i].worldY == doorY) {
+                        doorAlreadyThere = true;
                         break;
+                    }
+                }
+
+                if(!doorAlreadyThere) {
+                    for(int i = 0; i < gp.obj[gp.currentMap].length; i++) {
+                        if(gp.obj[gp.currentMap][i] == null) {
+                            gp.obj[gp.currentMap][i] = new OBJ_Door1(gp);
+                            gp.obj[gp.currentMap][i].worldX = doorX;
+                            gp.obj[gp.currentMap][i].worldY = doorY;
+                            gp.obj[gp.currentMap][i].temp = true;
+                            gp.playSE(21);
+                            break;
+                        }
                     }
                 }
                 
@@ -94,11 +109,20 @@ public class CutsceneManager {
             }
         }
         else if(scenePhase == 1) {
-            // Fase 1: Player bergerak ke atas
-            if(moveCounter < MOVE_DISTANCE) {
+            // Fase 1: Player bergerak ke atas jika belum terlalu dekat dengan boss
+            if(moveCounter < MOVE_DISTANCE && gp.player.worldY > gp.tileSize * 18 + 16) {
                 gp.player.worldY -= 2;
                 moveCounter += 2;
                 
+                // Synchronize player dummy position & direction
+                for(int i = 0; i < gp.npc[gp.currentMap].length; i++) {
+                    if(gp.npc[gp.currentMap][i] instanceof PlayerDummy) {
+                        gp.npc[gp.currentMap][i].worldY = gp.player.worldY;
+                        gp.npc[gp.currentMap][i].direction = "up";
+                        break;
+                    }
+                }
+
                 // Check if player hits top of map
                 if(gp.player.worldY < 0) {
                     gp.player.worldY = 0;

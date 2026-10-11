@@ -137,7 +137,28 @@ public class EventHandler {
 	        else if((hit(1,11,39,"any") || hit(1,12,40,"any")) == true && gp.keyH.actionPressed == true) {
 	            teleport(0,36,35);
 	        }
-	        else if((hit(1,25,27,"any") || hit(1,25,26,"any")) == true) {
+	    }
+
+	    // Boss Battle Trigger (Map 1: Dungeon)
+	    if(gp.currentMap == 1 && !gp.bossBattleOn && gp.csManager.sceneNum == gp.csManager.NA) {
+	        int playerCenterX = gp.player.worldX + gp.player.solidArea.x + gp.player.solidArea.width / 2;
+	        int playerCenterY = gp.player.worldY + gp.player.solidArea.y + gp.player.solidArea.height / 2;
+	        int playerCol = playerCenterX / gp.tileSize;
+	        int playerRow = playerCenterY / gp.tileSize;
+
+	        // 1. Entrance corridor leading to boss doors (cols 24..28, rows 25..27)
+	        boolean inCorridor = (playerRow >= 25 && playerRow <= 27 && playerCol >= 24 && playerCol <= 28);
+
+	        // 2. Boss Arena Chamber bounds (Rows 10..22, Cols 15..35)
+	        boolean inArena = (playerRow >= 10 && playerRow <= 22 && playerCol >= 15 && playerCol <= 35);
+
+	        // 3. Proximity to Goblin King (spawns at col 25, row 13, size 5x5)
+	        int bossCenterX = 25 * gp.tileSize + (gp.tileSize * 5) / 2;
+	        int bossCenterY = 13 * gp.tileSize + (gp.tileSize * 5) / 2;
+	        boolean nearBoss = (Math.abs(playerCenterX - bossCenterX) <= gp.tileSize * 8 &&
+	                            Math.abs(playerCenterY - bossCenterY) <= gp.tileSize * 8);
+
+	        if(inCorridor || inArena || nearBoss) {
 	            goblinKing();
 	        }
 	    }

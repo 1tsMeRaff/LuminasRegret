@@ -2,7 +2,6 @@ package com.luminasregret.game.monster;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.Random;
 
 import com.luminasregret.game.entity.Actor;
 import com.luminasregret.engine.core.GamePanel;
@@ -14,11 +13,10 @@ public class MON_Zombie extends Actor {
 
 	public MON_Zombie(GamePanel gp) {
 		super(gp);
-		// TODO Auto-generated constructor stub
 		this.gp = gp;
 		
 		type = type_monster;
-		name = "Green Slime";
+		name = "Zombie";
 		defaultSpeed = 1;
 		speed = defaultSpeed;
 		maxLife = 4;
