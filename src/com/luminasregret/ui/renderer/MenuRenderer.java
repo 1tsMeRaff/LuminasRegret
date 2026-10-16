@@ -185,37 +185,48 @@ public class MenuRenderer {
     }
 
     private void options_control(Graphics2D g2, int frameX, int frameY) {
-        String text = "Control";
-        int textX = ui.getXforCenteredText(text) - 8;
-        int textY = frameY + gp.tileSize;
+        g2.setFont(ui.fontPixel18Bold);
+        g2.setColor(Color.WHITE);
+        String text = "Kendali Permainan";
+        int textX = ui.getXforCenteredText(text);
+        int textY = frameY + 36;
         g2.drawString(text, textX, textY);
 
-        int itemDy = gp.tileSize - 12;
-        textX = frameX + gp.tileSize - 20;
-        textY += gp.tileSize;
+        g2.setFont(ui.fontPixel13Bold);
+        int itemDy = 24;
+        textX = frameX + 26;
+        textY = frameY + 68;
 
-        g2.drawString("Move", textX, textY); textY += itemDy;
-        g2.drawString("Action", textX, textY); textY += itemDy;
-        g2.drawString("Magic", textX, textY); textY += itemDy;
-        g2.drawString("Inventory", textX, textY); textY += itemDy;
-        g2.drawString("Pause", textX, textY); textY += itemDy;
-        g2.drawString("Options", textX, textY);
+        g2.setColor(new Color(180, 180, 180));
+        g2.drawString("Gerak", textX, textY); textY += itemDy;
+        g2.drawString("Serang", textX, textY); textY += itemDy;
+        g2.drawString("Sihir", textX, textY); textY += itemDy;
+        g2.drawString("Tangkis", textX, textY); textY += itemDy;
+        g2.drawString("Dash", textX, textY); textY += itemDy;
+        g2.drawString("Interaksi", textX, textY); textY += itemDy;
+        g2.drawString("Tas / Info", textX, textY); textY += itemDy;
+        g2.drawString("Jeda / Opsi", textX, textY);
 
-        textX = (frameX + gp.tileSize * 5) - 18;
-        textY = frameY + gp.tileSize * 2;
-        g2.drawString("WASD", textX, textY); textY += itemDy;
+        textX = frameX + (gp.tileSize * 4) - 8;
+        textY = frameY + 68;
+        g2.setColor(Color.WHITE);
+        g2.drawString("WASD / Panah", textX, textY); textY += itemDy;
+        g2.drawString("J / Z / Klik Kiri", textX, textY); textY += itemDy;
+        g2.drawString("K / X / F", textX, textY); textY += itemDy;
+        g2.drawString("L / C (Tahan)", textX, textY); textY += itemDy;
+        g2.drawString("SPASI / SHIFT / Q", textX, textY); textY += itemDy;
         g2.drawString("E / ENTER", textX, textY); textY += itemDy;
-        g2.drawString("F", textX, textY); textY += itemDy;
-        g2.drawString("C", textX, textY); textY += itemDy;
-        g2.drawString("P", textX, textY); textY += itemDy;
-        g2.drawString("ESC", textX, textY);
+        g2.drawString("TAB / B / I", textX, textY); textY += itemDy;
+        g2.drawString("P / ESC", textX, textY);
 
         textX = frameX + gp.tileSize;
-        textY = frameY + gp.tileSize * 7 + 20;
-        g2.drawString("Back", textX, textY);
+        textY = frameY + (gp.tileSize * 7) + 16;
+        g2.setFont(ui.fontPixel16Bold);
+        g2.setColor(Color.WHITE);
+        g2.drawString("Kembali", textX, textY);
         if (ui.commandNum == 0) {
-            g2.drawString(">", textX - 25, textY);
-            if (gp.keyH.enterPressed) {
+            g2.drawString(">", textX - 22, textY);
+            if (gp.keyH.enterPressed || gp.keyH.actionPressed || gp.keyH.attackKeyPressed) {
                 ui.subState = 0;
                 ui.commandNum = 3;
             }

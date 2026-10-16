@@ -30,6 +30,7 @@ public final class Player extends Actor {
     public int dashCoolDown = 0;
     final int dashDuration = 8;     // 0.25 detik
     final int dashCoolDownMax = 40;  // Cooldown dash
+    public boolean guarding = false;
     public Entity nearbyInteractable;
     
     public Player(GamePanel gp, KeyHandler keyH) {
@@ -215,7 +216,23 @@ public final class Player extends Actor {
         if(dashCoolDown > 0) {
             dashCoolDown--;
         }
+
+        // --- AKTIVASI DASH (SPACE / SHIFT / Q) ---
+        if(keyH.dashKeyPressed == true && dashCoolDown == 0 && attackCanceled == false && !attacking) {
+             dashing = true;
+             keyH.dashKeyPressed = false;
+             gp.playSE(0); // Suara lesatan dash (swipe)
+             return;
+        }
+
+        // --- STATUS TANGKISAN PERISAI (TAHAN L) ---
+        if(keyH.guardKeyPressed == true && !attacking && !dashing && currentShield != null) {
+            guarding = true;
+        } else {
+            guarding = false;
+        }
         
+        // --- TEMBAKAN SIHIR JARAK JAUH (K / X / F) ---
         if(gp.keyH.rangeKeyPressed == true && rangeAvailableCounter >= 30) {
             if(projectile.haveResource(this)) {
                 OBJ_Slash newSlash = new OBJ_Slash(gp);
@@ -238,57 +255,66 @@ public final class Player extends Actor {
             }
         }
 
-        // 2. LOGIKA ATTACK
+        // 2. LOGIKA ATTACK SEDANG BERLANGSUNG
         if(attacking == true) {
             attacking();
             return; // KUNCI GERAKAN: Player berhenti sejenak saat mengayunkan pedang/kapak
         }
+
+        // --- DEDICATED MELEE ATTACK (J / Z) ---
+        if(keyH.attackKeyPressed == true) {
+            keyH.attackKeyPressed = false;
+            startAttack();
+        }
         
-        // 3. LOGIKA INTERAKSI & AKSI (KEYBOARD: E / ENTER / SPACE)
+        // 3. LOGIKA INTERAKSI & AKSI (E / ENTER)
         if(keyH.actionPressed == true || keyH.enterPressed == true) {
+            boolean wasEnter = keyH.enterPressed;
             keyH.actionPressed = false;
             keyH.enterPressed = false;
 
             boolean interacted = interactNearest();
-            if(!interacted && attackCanceled == false) {
-                gp.playSE(7);
-                attacking = true;
-                spriteCounter = 0;
+            // Enter fallback to attack jika tidak ada interaksi di dekat pemain
+            if(!interacted && wasEnter && attackCanceled == false) {
+                startAttack();
             }
             attackCanceled = false;
         }
 
-        // 4. MOVEMENT NORMAL & INPUT
+        // 4. MOVEMENT NORMAL & INPUT (WASD + TOMBOL PANAH)
         if(keyH.upPressed == true || keyH.downPressed == true || 
-           keyH.leftPressed == true || keyH.rightPressed == true || keyH.dashKeyPressed == true) {
-            
-            // --- AKTIVASI DASH (Q) ---
-            if(keyH.dashKeyPressed == true && dashCoolDown == 0 && attackCanceled == false) {
-                 dashing = true;
-                 gp.playSE(7); // Sound dash
-                 return;
-            }
+           keyH.leftPressed == true || keyH.rightPressed == true) {
 
-            // Tentukan pergerakan per-sumbu (X dan Y)
+            // Tentukan pergerakan per-sumbu dengan SOCD Neutral
             boolean moveX = false;
             boolean moveY = false;
             String dirX = "";
             String dirY = "";
 
-            if (keyH.upPressed) { moveY = true; dirY = "up"; }
-            else if (keyH.downPressed) { moveY = true; dirY = "down"; }
+            if (keyH.upPressed && keyH.downPressed) {
+                moveY = false;
+            } else if (keyH.upPressed) {
+                moveY = true; dirY = "up";
+            } else if (keyH.downPressed) {
+                moveY = true; dirY = "down";
+            }
 
-            if (keyH.leftPressed) { moveX = true; dirX = "left"; }
-            else if (keyH.rightPressed) { moveX = true; dirX = "right"; }
+            if (keyH.leftPressed && keyH.rightPressed) {
+                moveX = false;
+            } else if (keyH.leftPressed) {
+                moveX = true; dirX = "left";
+            } else if (keyH.rightPressed) {
+                moveX = true; dirX = "right";
+            }
             
-            // Cek apakah player menekan tombol vertikal DAN horizontal bersamaan
-            boolean isMovingDiagonal = (keyH.upPressed || keyH.downPressed) && 
-                                       (keyH.leftPressed || keyH.rightPressed);
+            // Kecepatan gerak (Guard stance memperlambat gerak untuk kontrol presisi)
+            int currentBaseSpeed = guarding ? Math.max(1, defaultSpeed / 2) : defaultSpeed;
+            boolean isMovingDiagonal = moveX && moveY;
             
             if(isMovingDiagonal) {
-                speed = (int)Math.round(defaultSpeed * 0.707); 
+                speed = (int)Math.round(currentBaseSpeed * 0.707); 
             } else {
-                speed = defaultSpeed;
+                speed = currentBaseSpeed;
             }
 
             // --- CEK PER-AXIS COLLISION (WALL SLIDING) ---
@@ -696,13 +722,18 @@ public final class Player extends Actor {
         return false;
     }
 
-    public void attackTowards(int worldTargetX, int worldTargetY) {
-        faceTowards(worldTargetX, worldTargetY);
-        if (!attacking) {
+    public void startAttack() {
+        if (!attacking && !dashing) {
             attacking = true;
             spriteCounter = 0;
-            gp.playSE(7);
+            gp.playSE(7); // Ayunan senjata tebas
         }
+        attackCanceled = false;
+    }
+
+    public void attackTowards(int worldTargetX, int worldTargetY) {
+        faceTowards(worldTargetX, worldTargetY);
+        startAttack();
     }
     
     public void interactNPC(int i) {
@@ -716,10 +747,25 @@ public final class Player extends Actor {
     }
     
     public void contactMonster(int i) {
-    	
     	if(i != 999) {
-    		
-    		if(invincible == false && gp.monster[gp.currentMap][i].dying == false) { //FIXED
+    		if(invincible == false && gp.monster[gp.currentMap][i].dying == false) {
+    			if (guarding && currentShield != null) {
+    				int shieldBonus = currentShield.defenseValue * 2;
+    				int damage = gp.monster[gp.currentMap][i].attack - (defense + shieldBonus);
+    				if (damage <= 0) {
+    					gp.playSE(5); // Suara tangkisan perisai bonk
+    					gp.ui.addMessage("Blocked!");
+    					invincible = true;
+    					invincibleCounter = 25;
+    					return;
+    				} else {
+    					gp.playSE(5);
+    					life -= damage;
+    					invincible = true;
+    					gp.ui.addMessage("Guarded!");
+    					return;
+    				}
+    			}
     			gp.playSE(6);
     			
     			int damage = gp.monster[gp.currentMap][i].attack - defense;

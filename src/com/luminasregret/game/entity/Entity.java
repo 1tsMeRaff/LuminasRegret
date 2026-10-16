@@ -444,6 +444,23 @@ public class Entity implements Item, Updatable, Renderable, Collidable, Damageab
 	
 	public void damagePlayer(int attack) {
 		if(gp.player.invincible == false) {
+			if (gp.player.guarding && gp.player.currentShield != null) {
+				int shieldBonus = gp.player.currentShield.defenseValue * 2;
+				int damage = attack - (gp.player.defense + shieldBonus);
+				if (damage <= 0) {
+					gp.playSE(5); // Suara tangkisan perisai bonk
+					gp.ui.addMessage("Blocked!");
+					gp.player.invincible = true;
+					gp.player.invincibleCounter = 25;
+					return;
+				} else {
+					gp.playSE(5);
+					gp.player.life -= damage;
+					gp.player.invincible = true;
+					gp.ui.addMessage("Guarded!");
+					return;
+				}
+			}
 			gp.playSE(6);
 			
 			int damage = attack - gp.player.defense;
