@@ -144,12 +144,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 4. Prevent Keyboard Page Scrolling during Play
+    function focusGameCanvas() {
+        if (!screenContainer) return;
+        const canvas = screenContainer.querySelector('canvas') || document.getElementById('cheerpj-display');
+        if (canvas) {
+            canvas.setAttribute('tabindex', '0');
+            if (typeof canvas.focus === 'function') {
+                canvas.focus();
+            }
+        }
+    }
+
+    if (screenContainer) {
+        screenContainer.addEventListener('mousedown', () => {
+            focusGameCanvas();
+        });
+    }
+
+    // 4. Prevent Keyboard Page Scrolling & Focus Canvas during Play
     window.addEventListener('keydown', (e) => {
-        const keysToPrevent = ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-        if (keysToPrevent.includes(e.code) || [32, 37, 38, 39, 40].includes(e.keyCode)) {
-            if (screenContainer && (screenContainer.matches(':hover') || document.activeElement.closest('#screen-container'))) {
-                e.preventDefault();
+        const keysToPrevent = ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'];
+        if (keysToPrevent.includes(e.code) || [32, 37, 38, 39, 40, 9].includes(e.keyCode)) {
+            if (gameStarted && screenContainer) {
+                const rect = screenContainer.getBoundingClientRect();
+                const inView = rect.top < window.innerHeight && rect.bottom > 0;
+                if (inView && (screenContainer.matches(':hover') || document.activeElement.closest('#screen-container') || document.activeElement === document.body)) {
+                    e.preventDefault();
+                    focusGameCanvas();
+                }
             }
         }
     }, { passive: false });
