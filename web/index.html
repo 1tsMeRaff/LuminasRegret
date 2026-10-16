@@ -5,142 +5,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lumina's Regret | 16-Bit Retro 2D Action-RPG</title>
     
-    <!-- SEO & Social Meta Tags -->
-    <meta name="description" content="Lumina's Regret adalah game 2D Action-RPG bernuansa retro 16-bit klasik yang dibangun murni menggunakan Java SE 21. Mainkan langsung di browser via WebAssembly!">
+    <!-- SEO & Metadata -->
+    <meta name="description" content="Lumina's Regret adalah game 2D Action-RPG 16-bit klasik dalam Java SE 21 murni tanpa dependensi eksternal. Mainkan langsung di browser via WebAssembly atau unduh biner desktop.">
     <meta name="keywords" content="Lumina's Regret, Java RPG, 16-bit, Retro Pixel Art, Action RPG, CheerpJ, WebAssembly, GitHub Pages">
     <meta name="author" content="1tsMeRaff">
     
-    <!-- OpenGraph / Discord Embed Cards -->
-    <meta property="og:title" content="Lumina's Regret - 16-Bit Retro Action-RPG">
-    <meta property="og:description" content="Mainkan petualangan klasik 16-bit Lumina's Regret langsung di browser tanpa instalasi!">
+    <!-- OpenGraph / Social Embeds -->
+    <meta property="og:title" content="Lumina's Regret | 16-Bit Retro Action-RPG">
+    <meta property="og:description" content="Petualangan 16-bit retro klasik Java SE 21 murni. Mainkan langsung di peramban tanpa instalasi.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://1tsMeRaff.github.io/LuminasRegret/">
+    <meta property="og:image" content="assets/art/hero_key_art.jpg">
     <meta name="twitter:card" content="summary_large_image">
     
-    <!-- Google Fonts -->
+    <!-- Curated Type System: Zodiak (Display) & Hanken Grotesk (Text) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://api.fontshare.com">
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=zodiak@100,300,500,700&display=swap" rel="stylesheet">
     
-    <!-- CheerpJ 3/4 Runtime Loader -->
+    <!-- CheerpJ WebAssembly Engine Loader -->
     <script src="https://cjrtnc.leaningtech.com/4.3/loader.js"></script>
     
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Ambient Glow Background -->
-    <div class="ambient-glow glow-1"></div>
-    <div class="ambient-glow glow-2"></div>
-
     <!-- Navigation Header -->
     <header class="navbar">
         <div class="nav-container">
             <a href="#" class="nav-brand">
-                <span class="brand-crest">✦</span>
-                <span class="brand-text">LUMINA'S REGRET</span>
+                <span class="brand-text">Lumina's Regret</span>
             </a>
             <nav class="nav-links">
                 <a href="#play-section" class="nav-link active">Mainkan</a>
+                <a href="#map-section" class="nav-link">Peta Dunia</a>
+                <a href="#boss-section" class="nav-link">Boss</a>
+                <a href="#soundboard-section" class="nav-link">Suara</a>
                 <a href="#lore-section" class="nav-link">Kisah</a>
+                <a href="#bestiary-section" class="nav-link">Arsenal</a>
                 <a href="#controls-section" class="nav-link">Kontrol</a>
-                <a href="#features-section" class="nav-link">Fitur</a>
-                <a href="#download-section" class="nav-link btn-download">Unduh JAR</a>
+                <a href="#download-section" class="nav-btn-action">Unduh JAR</a>
             </nav>
         </div>
     </header>
 
     <main>
-        <!-- Hero Section & Web Player -->
-        <section id="play-section" class="hero-section">
+        <!-- Hero Section & Key Visual Presentation -->
+        <section id="play-section" class="hero-section reveal-item">
             <div class="hero-header">
-                <div class="badge-tag">RETIRED CURSE • PURE JAVA SE 21 • 60 FPS</div>
                 <h1 class="hero-title">Lumina's Regret</h1>
-                <p class="hero-subtitle">
-                    Kutukan kegelapan telah menyelimuti lembah suci. Ambil senjatamu, tebas rintangan, dan rebut kembali Relik Suci dari cengkeraman Goblin King!
+                <p class="hero-lead">
+                    Game 2D Action-RPG 16-bit klasik dalam Java SE 21 murni tanpa dependensi pihak ketiga. Mainkan langsung di peramban atau unduh biner desktop 60 FPS.
                 </p>
+                <div class="hero-actions">
+                    <a href="#screen-container" class="btn-primary-action hero-cta">
+                        <span>Mainkan di Browser</span>
+                    </a>
+                    <a href="#download-section" class="btn-secondary-action hero-cta">
+                        <span>Unduh Biner JAR</span>
+                    </a>
+                </div>
             </div>
 
-            <!-- Arcade Cabinet / CRT Frame -->
-            <div class="arcade-wrapper">
+            <!-- Key Art Visual Showcase -->
+            <div class="hero-visual-showcase reveal-item">
+                <div class="hero-art-card">
+                    <img src="assets/art/hero_key_art.jpg" alt="Petualang menatap Lembah Terkutuk Lumina di kala senja" width="1280" height="720" class="hero-art-image" fetchpriority="high">
+                    <div class="hero-art-meta">
+                        <div class="hero-art-title">Senja di Lembah Terkutuk</div>
+                        <div class="hero-art-desc">Cahaya Relik Air Mata memandu langkah sang pengelana menembus kabut kuno menuju Dark Dungeon.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Arcade Monitor & CheerpJ Virtual Display -->
+            <div class="arcade-wrapper reveal-item">
                 <div class="arcade-bezel">
-                    <!-- Top Arcade Header -->
+                    <!-- Monitor Top Bar -->
                     <div class="arcade-topbar">
-                        <div class="arcade-dots">
-                            <span class="dot dot-red"></span>
-                            <span class="dot dot-yellow"></span>
-                            <span class="dot dot-green"></span>
-                        </div>
-                        <div class="arcade-title">LUMINA-OS // 768x432 60FPS CRT MONITOR</div>
+                        <div class="arcade-title">Mesin Virtual Web JVM: Resolusi Asli 768 × 432 px</div>
                         <div class="arcade-status">
-                            <span class="pulse-indicator"></span>
-                            <span id="system-status-text">SYSTEM STANDBY</span>
+                            <span class="status-indicator"></span>
+                            <span id="system-status-text">Siap Dijalankan</span>
                         </div>
                     </div>
 
-                    <!-- Screen Container with Scanline Filter -->
+                    <!-- Screen Container with Canvas -->
                     <div class="screen-container" id="screen-container">
                         <div class="crt-scanlines"></div>
-                        <div class="crt-vignette"></div>
 
-                        <!-- Fullscreen Exit Floating Overlay Button -->
-                        <button id="btn-fs-exit" class="fs-exit-overlay" title="Keluar Mode Layar Penuh">
-                            <span class="fs-exit-icon">✕</span>
-                            <span>Exit Fullscreen</span>
+                        <!-- Fullscreen Exit Overlay -->
+                        <button id="btn-fs-exit" class="fs-exit-overlay" title="Kembali ke Tampilan Jendela">
+                            <span>Kembali ke Jendela</span>
                         </button>
 
-                        <!-- CheerpJ Canvas Container (Target for Web JVM) -->
+                        <!-- CheerpJ WebAssembly Canvas Target -->
                         <div id="cheerpj-display" class="cheerpj-canvas-wrapper"></div>
 
-                        <!-- Interactive Retro Splash & Audio Unlock Overlay -->
+                        <!-- Interactive Audio Unlock & Boot Screen -->
                         <div id="splash-overlay" class="splash-overlay">
                             <div class="splash-content">
-                                <div class="pixel-relic-icon">✦</div>
-                                <h2 class="splash-heading">LUMINA'S REGRET</h2>
-                                <p class="splash-desc">Klik tombol di bawah untuk membuka izin audio browser dan memulai WebAssembly JVM.</p>
+                                <div class="splash-visual">
+                                    <img src="assets/sprites/bot1.png" alt="Karakter Utama Lumina" class="splash-sprite" width="48" height="48">
+                                </div>
+                                <h2 class="splash-heading">Mulai di Peramban</h2>
+                                <p class="splash-desc">Klik tombol di bawah untuk mengaktifkan izin audio peramban dan mengunduh bytecode Web JVM.</p>
                                 
-                                <button id="btn-start-game" class="btn-retro-start">
-                                    <span class="start-btn-pulse"></span>
-                                    <span class="start-btn-text">▶ PLAY IN BROWSER</span>
+                                <button id="btn-start-game" class="btn-primary-action">
+                                    <span>Jalankan Game</span>
                                 </button>
                                 
-                                <div class="splash-hint">[Klik mouse di dalam layar untuk mengarahkan kontrol keyboard]</div>
+                                <p class="splash-hint">Klik layar setelah game menyala untuk memfokuskan kendali keyboard.</p>
                             </div>
 
-                            <!-- Loading Progress State -->
+                            <!-- Booting Progress State -->
                             <div id="loading-state" class="loading-state hidden">
-                                <div class="pixel-spinner"></div>
+                                <div class="loading-spinner"></div>
                                 <div class="loading-message" id="loading-message">Menginisialisasi WebAssembly Engine...</div>
                                 <div class="pixel-progress-bar">
                                     <div class="pixel-progress-fill" id="pixel-progress-fill"></div>
                                 </div>
                                 <div class="loading-percentage" id="loading-percentage">0%</div>
-                                <div class="loading-subtext">Mengunduh LuminasRegret.jar (~47 MB) ke memori browser...</div>
+                                <div class="loading-subtext">Mengunduh LuminasRegret.jar ke memori peramban...</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Arcade Bottom Control Bar -->
+                    <!-- Monitor Controls Bar -->
                     <div class="arcade-toolbar">
                         <div class="toolbar-left">
                             <span class="key-hint"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Gerak</span>
-                            <span class="key-hint"><kbd>E</kbd> / <kbd>ENTER</kbd> Interaksi</span>
-                            <span class="key-hint"><kbd>J</kbd> / <kbd>Klik</kbd> Serang</span>
-                            <span class="key-hint"><kbd>P</kbd> Pause</span>
+                            <span class="key-hint"><kbd>E</kbd> Interaksi</span>
+                            <span class="key-hint"><kbd>J</kbd> Tebas</span>
+                            <span class="key-hint"><kbd>K</kbd> Sihir</span>
+                            <span class="key-hint"><kbd>P</kbd> Jeda</span>
                             <span class="key-hint"><kbd>ESC</kbd> Menu Opsi</span>
                         </div>
                         <div class="toolbar-right">
                             <button id="btn-fullscreen" class="tool-btn" title="Mode Layar Penuh">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
-                                </svg>
-                                <span>Fullscreen</span>
+                                <span>Layar Penuh</span>
                             </button>
-                            <button id="btn-scroll-top" class="tool-btn" title="Fokus Game">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
-                                </svg>
-                                <span>Capture Input</span>
+                            <button id="btn-scroll-top" class="tool-btn" title="Fokuskan Kendali Input">
+                                <span>Fokus Input</span>
                             </button>
                         </div>
                     </div>
@@ -148,44 +157,356 @@
             </div>
         </section>
 
-        <!-- Story Lore Section -->
-        <section id="lore-section" class="content-section">
+        <!-- Interactive Cartography Map Section -->
+        <section id="map-section" class="content-section bg-surface reveal-item">
             <div class="section-container">
-                <div class="section-badge">NARASI PETUALANGAN</div>
-                <h2 class="section-title">Kisah Kejatuhan Lumina</h2>
-                
-                <div class="lore-grid">
-                    <div class="lore-card">
-                        <div class="card-icon">🌲</div>
-                        <h3>Desa Terkutuk</h3>
-                        <p>
-                            Lembah suci yang dahulu damai kini diselimuti kabut kutukan. Bicaralah dengan <strong>Sylvia</strong> sang penjaga roh untuk mengetahui petunjuk pencarian kapak pemotong rintangan dan lentera penembus kegelapan.
-                        </p>
+                <div class="section-split-header">
+                    <div>
+                        <h2 class="section-title">Peta Lembah Terkutuk</h2>
+                        <p class="section-lead">Pilih titik penanda pada perkamen kuno untuk mempelajari rahasia wilayah, rintangan alam, dan bahaya yang mengintai.</p>
                     </div>
-                    <div class="lore-card">
-                        <div class="card-icon">⚔️</div>
-                        <h3>Boran Sang Pedagang</h3>
-                        <p>
-                            Kunjungi pedagang <strong>Boran</strong> di barat desa. Tukarkan koin emas dari monster dengan perisai besi, lentera dungeon, atau ransum roti pemulih stamina sebelum melangkah ke gua bawah tanah.
-                        </p>
+                    <div class="map-status-pill" id="map-status-text">Pilih titik wilayah pada peta</div>
+                </div>
+
+                <div class="map-explorer-layout" data-ui="map-explorer">
+                    <!-- Map Canvas Container with Interactive Hotspots -->
+                    <div class="map-viewport">
+                        <img src="assets/art/world_map.jpg" alt="Peta perkamen kuno Lembah Terkutuk Lumina" class="map-parchment" width="1280" height="720" loading="lazy">
+                        
+                        <!-- Hotspot Pins -->
+                        <button class="map-pin active" data-pin="village" style="top: 72%; left: 24%;" aria-label="Desa Aethelard">
+                            <span class="pin-marker"></span>
+                            <span class="pin-tag">Desa Aethelard</span>
+                        </button>
+
+                        <button class="map-pin" data-pin="forest" style="top: 50%; left: 38%;" aria-label="Hutan Rintangan Duri">
+                            <span class="pin-marker"></span>
+                            <span class="pin-tag">Hutan Barat</span>
+                        </button>
+
+                        <button class="map-pin" data-pin="bridge" style="top: 48%; left: 58%;" aria-label="Jembatan Lembah">
+                            <span class="pin-marker"></span>
+                            <span class="pin-tag">Jembatan Lembah</span>
+                        </button>
+
+                        <button class="map-pin" data-pin="dungeon" style="top: 26%; left: 78%;" aria-label="Benteng Dark Dungeon">
+                            <span class="pin-marker"></span>
+                            <span class="pin-tag">Dark Dungeon</span>
+                        </button>
                     </div>
-                    <div class="lore-card">
-                        <div class="card-icon">👑</div>
-                        <h3>Goblin King</h3>
-                        <p>
-                            Di ruang terdalam Dark Dungeon, Goblin King menjaga Relik Air Mata Lumina. Waspadai amukan fase kedua saat HP-nya tersisa separuh: proyektil sihir terkutuk dan kawanan minion Slime & Zombie!
-                        </p>
+
+                    <!-- Dynamic Territory Lore Card -->
+                    <div class="map-lore-panel" id="map-lore-panel" data-ui="lore-card">
+                        <div class="lore-panel-top">
+                            <span class="lore-panel-badge" id="map-zone-threat">Wilayah Aman</span>
+                            <h3 class="lore-panel-title" id="map-zone-name">Desa Aethelard</h3>
+                        </div>
+                        <p class="lore-panel-text" id="map-zone-desc">Pemukiman awal tempat perlindungan warga terakhir. Sylvia sang pemandu roh tinggal di balai kuil untuk memberikan bimbingan pencarian relik dan penaklukan dungeon.</p>
+                        <div class="lore-stats-list">
+                            <div class="lore-stat-item">
+                                <span class="lore-stat-label">Penghuni Penting:</span>
+                                <span class="lore-stat-val" id="map-zone-npc">Sylvia (Pemandu) & Boran (Pedagang)</span>
+                            </div>
+                            <div class="lore-stat-item">
+                                <span class="lore-stat-label">Rintangan Wilayah:</span>
+                                <span class="lore-stat-val" id="map-zone-hazard">Pintu gerbang kayu tertutup</span>
+                            </div>
+                            <div class="lore-stat-item">
+                                <span class="lore-stat-label">Tujuan Utama:</span>
+                                <span class="lore-stat-val" id="map-zone-quest">Dapatkan kapak penebang pohon dan lentera penerang</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Interactive Controls Guide -->
-        <section id="controls-section" class="content-section bg-alt">
+        <!-- Boss Encounter Showcase Section -->
+        <section id="boss-section" class="content-section reveal-item">
             <div class="section-container">
-                <div class="section-badge">SKEMA PENGENDALIAN</div>
-                <h2 class="section-title">Sistem Input Konsisten</h2>
-                <p class="section-desc">Mendukung kombinasi lengkap antara tombol Keyboard universal dan interaksi Mouse yang responsif.</p>
+                <div class="boss-showcase-layout">
+                    <div class="boss-media-box">
+                        <img src="assets/art/boss_battle.jpg" alt="Pertarungan klimaks melawan Goblin King di ruang takhta" width="1280" height="720" class="boss-image" loading="lazy">
+                        <div class="boss-media-caption">
+                            Ruang Takhta Bawah Tanah: Goblin King mengamuk saat menjaga Relik Suci Lumina
+                        </div>
+                    </div>
+
+                    <div class="boss-intel-box">
+                        <h2 class="section-title">Konfrontasi Goblin King</h2>
+                        <p class="boss-lead-text">
+                            Penguasa dungeon bawah tanah yang menguasai kekuatan sihir kuno. Pemain harus menguasai ritme tebasan, tangkisan perisai, dan pergerakan lincah untuk menundukkannya.
+                        </p>
+
+                        <div class="boss-mechanics-list">
+                            <div class="boss-phase-item">
+                                <h3 class="phase-title">Fase Satu: Ayunan Bilah & Panggilan Bala Bantuan</h3>
+                                <p class="phase-desc">Goblin King mendekat dengan ayunan pedang bergerigi jangkauan lebar sambil memanggil kawanan Slime dan Zombie untuk mengapit posisi pemain.</p>
+                            </div>
+
+                            <div class="boss-phase-item">
+                                <h3 class="phase-title">Fase Dua: Amukan Proyektil Sihir Melingkar</h3>
+                                <p class="phase-desc">Saat daya tahan berkurang di bawah 50%, sang raja memicu ledakan amarah: meluncurkan proyektil sihir melingkar beruntun ke seluruh penjuru ruangan.</p>
+                            </div>
+                        </div>
+
+                        <div class="boss-tactics-panel">
+                            <div class="tactic-item">
+                                <span class="tactic-title">Tangkisan Perisai (<kbd>L</kbd>):</span>
+                                <span class="tactic-detail">Tahan perisai untuk menepis benturan tebasan fisik tanpa kehilangan darah.</span>
+                            </div>
+                            <div class="tactic-item">
+                                <span class="tactic-title">Manuver Menghindar (<kbd>Klik Kanan</kbd>):</span>
+                                <span class="tactic-detail">Melesat cepat menjauhi hujan proyektil api dan serang celah punggung musuh.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Audio Console & Jukebox Section -->
+        <section id="soundboard-section" class="content-section bg-surface reveal-item">
+            <div class="section-container">
+                <div class="section-split-header">
+                    <div>
+                        <h2 class="section-title">Gema Suara Lembah</h2>
+                        <p class="section-lead">Dengarkan aransemen musik tema latar (BGM) dan efek suara 16-bit asli langsung dari bank audio game.</p>
+                    </div>
+                    <div class="soundboard-status" id="soundboard-status">Pilih sampel musik atau efek suara</div>
+                </div>
+
+                <!-- Jukebox Mode Tabs -->
+                <div class="jukebox-nav-tabs" role="tablist">
+                    <button class="jukebox-tab active" data-tab="bgm">Musik Tema (BGM)</button>
+                    <button class="jukebox-tab" data-tab="sfx">Efek Suara 16-Bit (SFX)</button>
+                </div>
+
+                <!-- BGM Tracklist Panel -->
+                <div class="sound-console" id="bgm-panel">
+                    <div class="sound-row" data-bgm="overworld">
+                        <div class="track-meta">
+                            <h3 class="track-name">Lembah Lumina</h3>
+                            <p class="track-desc">Tema petualangan ceria di padang terbuka dan tepian sungai (Overworld BGM)</p>
+                        </div>
+                        <button class="track-btn" data-action="toggle">Putar Tema</button>
+                    </div>
+
+                    <div class="sound-row" data-bgm="dungeon">
+                        <div class="track-meta">
+                            <h3 class="track-name">Lorong Bawah Tanah</h3>
+                            <p class="track-desc">Atmosfer sunyi dan mencekam di dalam labirin Dark Dungeon (Dungeon BGM)</p>
+                        </div>
+                        <button class="track-btn" data-action="toggle">Putar Tema</button>
+                    </div>
+
+                    <div class="sound-row" data-bgm="boss">
+                        <div class="track-meta">
+                            <h3 class="track-name">Pertempuran Boss</h3>
+                            <p class="track-desc">Komposisi bertempo cepat penentu takdir Lembah Lumina (Boss Battle BGM)</p>
+                        </div>
+                        <button class="track-btn" data-action="toggle">Putar Tema</button>
+                    </div>
+
+                    <div class="sound-row" data-bgm="title">
+                        <div class="track-meta">
+                            <h3 class="track-name">Tema Permulaan</h3>
+                            <p class="track-desc">Melodi pembuka di layar judul Lumina's Regret (Title Screen BGM)</p>
+                        </div>
+                        <button class="track-btn" data-action="toggle">Putar Tema</button>
+                    </div>
+                </div>
+
+                <!-- SFX Soundboard Panel -->
+                <div class="sound-console hidden" id="sfx-panel">
+                    <div class="sound-row" data-sound="swing">
+                        <div class="track-meta">
+                            <h3 class="track-name">Tebasan Pedang</h3>
+                            <p class="track-desc">Ayunan bilah baja jarak dekat pemain</p>
+                        </div>
+                        <button class="track-btn">Putar Sampel</button>
+                    </div>
+
+                    <div class="sound-row" data-sound="damage">
+                        <div class="track-meta">
+                            <h3 class="track-name">Benturan Kerusakan</h3>
+                            <p class="track-desc">Umpan balik saat menerima serangan monster</p>
+                        </div>
+                        <button class="track-btn">Putar Sampel</button>
+                    </div>
+
+                    <div class="sound-row" data-sound="coin">
+                        <div class="track-meta">
+                            <h3 class="track-name">Koin Perunggu</h3>
+                            <p class="track-desc">Hadiah jarahan setelah mengalahkan musuh</p>
+                        </div>
+                        <button class="track-btn">Putar Sampel</button>
+                    </div>
+
+                    <div class="sound-row" data-sound="levelup">
+                        <div class="track-meta">
+                            <h3 class="track-name">Kenaikan Level</h3>
+                            <p class="track-desc">Peningkatan kapasitas vitalitas dan statistik</p>
+                        </div>
+                        <button class="track-btn">Putar Sampel</button>
+                    </div>
+
+                    <div class="sound-row" data-sound="bonk">
+                        <div class="track-meta">
+                            <h3 class="track-name">Tangkisan Perisai</h3>
+                            <p class="track-desc">Menepis proyektil dan benturan monster</p>
+                        </div>
+                        <button class="track-btn">Putar Sampel</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lore & Atmosphere Section (with Real Archival Art & Loop Video) -->
+        <section id="lore-section" class="content-section reveal-item">
+            <div class="section-container">
+                <div class="lore-dual-grid">
+                    <div class="lore-narrative">
+                        <h2 class="section-title">Kutukan Lembah Suci</h2>
+                        <p class="lore-body-lead">
+                            Kabut kegelapan telah menelan desa kuno. Monster merajalela di perbatasan hutan, dan jalan menuju kuil tertutup oleh rintangan pohon berduri.
+                        </p>
+                        
+                        <div class="lore-chapters">
+                            <div class="chapter-item">
+                                <h3 class="chapter-title">Desa yang Sunyi</h3>
+                                <p class="chapter-desc">Temui Sylvia sang pemandu roh di balai desa untuk mempelajari misteri kapak pemotong rintangan dan lentera penembus kegelapan bawah tanah.</p>
+                            </div>
+                            <div class="chapter-item">
+                                <h3 class="chapter-title">Boran Sang Pedagang</h3>
+                                <p class="chapter-desc">Tukarkan perunggu hasil perburuan dengan perisai besi, lentera gua, serta ransum pemulih stamina di gerbang barat sebelum menuruni tangga dungeon.</p>
+                            </div>
+                            <div class="chapter-item">
+                                <h3 class="chapter-title">Goblin King di Ruang Bawah</h3>
+                                <p class="chapter-desc">Ruang terdalam Dark Dungeon dijaga oleh Goblin King. Waspadai amukan fase kedua saat darahnya menipis: tembakan proyektil sihir dan kawanan minion!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lore-media-column">
+                        <div class="video-frame">
+                            <video autoplay muted loop playsinline preload="metadata" poster="assets/torch-flame-poster.jpg" width="854" height="480">
+                                <source src="assets/torch-flame.webm" type="video/webm">
+                            </video>
+                            <div class="media-caption">Kobaran lentera penuntun di kegelapan gua bawah tanah</div>
+                        </div>
+
+                        <div class="painting-frame">
+                            <img src="assets/saint-christopher-meets-satan-saint-christopher-before.jpg" alt="Lukisan panel abad pertengahan mengenai konfrontasi dengan kegelapan" width="1308" height="2250" loading="lazy" decoding="async">
+                            <div class="media-caption">Panel abad pertengahan: Martin de Soria (1480), Art Institute of Chicago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bestiary & Arsenal Interactive Inspector -->
+        <section id="bestiary-section" class="content-section bg-surface reveal-item">
+            <div class="section-container">
+                <div class="bestiary-header">
+                    <h2 class="section-title">Katalog Karakter dan Monster</h2>
+                    <p class="section-lead">Pilih entitas untuk memeriksa rincian sprite, tingkah laku, dan perannya di dalam petualangan.</p>
+                </div>
+
+                <div class="bestiary-layout">
+                    <div class="bestiary-list" role="tablist">
+                        <button class="entity-tab active" data-entity="player">
+                            <img src="assets/sprites/bot1.png" alt="Pahlawan" width="32" height="32">
+                            <span class="tab-label">Sang Pahlawan</span>
+                        </button>
+                        <button class="entity-tab" data-entity="goblin">
+                            <img src="assets/sprites/goblin_down1.png" alt="Goblin King" width="32" height="32">
+                            <span class="tab-label">Goblin King (Boss)</span>
+                        </button>
+                        <button class="entity-tab" data-entity="zombie">
+                            <img src="assets/sprites/zombie_down1.png" alt="Zombie" width="32" height="32">
+                            <span class="tab-label">Zombie Penjaga</span>
+                        </button>
+                        <button class="entity-tab" data-entity="slime">
+                            <img src="assets/sprites/slimeidle.png" alt="Slime Hijau" width="32" height="32">
+                            <span class="tab-label">Green Slime</span>
+                        </button>
+                        <button class="entity-tab" data-entity="sylvia">
+                            <img src="assets/sprites/down1.png" alt="Sylvia" width="32" height="32">
+                            <span class="tab-label">Sylvia Sang Pemandu</span>
+                        </button>
+                        <button class="entity-tab" data-entity="boran">
+                            <img src="assets/sprites/merchant_down_1.png" alt="Boran" width="32" height="32">
+                            <span class="tab-label">Boran Pedagang</span>
+                        </button>
+                    </div>
+
+                    <div class="bestiary-display">
+                        <div class="display-sprite-box">
+                            <img id="bestiary-img" src="assets/sprites/attdown1.png" alt="Tampilan Sprite Terpilih" width="96" height="96">
+                        </div>
+                        <div class="display-details">
+                            <h3 id="bestiary-name" class="entity-name">Sang Pahlawan</h3>
+                            <p id="bestiary-desc" class="entity-description">Karakter utama yang diberkahi kecepatan gerak, tebasan pedang, tembakan proyektil sihir, dan manuver dash menghindar.</p>
+                            <div class="entity-stats-grid">
+                                <div class="stat-box">
+                                    <span class="stat-title">Peran</span>
+                                    <span id="bestiary-role" class="stat-value">Protagonis Pemain</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="stat-title">Tipe Senjata</span>
+                                    <span id="bestiary-weapon" class="stat-value">Pedang & Kapak Kayu</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="stat-title">Habitat</span>
+                                    <span id="bestiary-habitat" class="stat-value">Desa & Seluruh Wilayah</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Relics & Ancient Armory Section (Real Archival Photography) -->
+        <section id="relics-section" class="content-section reveal-item">
+            <div class="section-container">
+                <h2 class="section-title">Inspirasi Pedang dan Mitologi</h2>
+                <p class="section-lead">Desain persenjataan dan atmosfer Lumina's Regret berakar pada peninggalan sejarah dan manuskrip abad pertengahan.</p>
+
+                <div class="relics-gallery">
+                    <figure class="relic-item">
+                        <img src="assets/cawood-sword-diagonal.jpg" alt="Pedang Cawood abad pertengahan (1100 Masehi)" width="1280" height="1002" loading="lazy" decoding="async">
+                        <figcaption class="relic-caption">
+                            <h3 class="relic-title">Pedang Cawood (1100 Masehi)</h3>
+                            <p class="relic-desc">Bilah baja dengan ukiran Viking dan pelindung melengkung. Koleksi York Museums Trust (CC BY-SA 4.0).</p>
+                        </figcaption>
+                    </figure>
+
+                    <figure class="relic-item">
+                        <img src="assets/albion-hospitaller-medieval-sword-1-6092737619-ii.jpg" alt="Pedang Hospitaller abad pertengahan" width="1920" height="413" loading="lazy" decoding="async">
+                        <figcaption class="relic-caption">
+                            <h3 class="relic-title">Pedang Hospitaller</h3>
+                            <p class="relic-desc">Bilah pedang dua tangan ksatria ordo salib. Koleksi Søren Niedziella (CC BY 2.0).</p>
+                        </figcaption>
+                    </figure>
+
+                    <figure class="relic-item">
+                        <img src="assets/saint-catherine-delivered-from-the-wheel.jpg" alt="Lukisan panel Saint Catherine (1395 Masehi)" width="1920" height="2083" loading="lazy" decoding="async">
+                        <figcaption class="relic-caption">
+                            <h3 class="relic-title">Lukisan Panel (1395 Masehi)</h3>
+                            <p class="relic-desc">Seni tempera minyak Spanyol abad ke-14. Art Institute of Chicago (CC0 Domain Publik).</p>
+                        </figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls Guide Section -->
+        <section id="controls-section" class="content-section reveal-item">
+            <div class="section-container">
+                <h2 class="section-title">Sistem Kendali</h2>
+                <p class="section-lead">Dukungan penuh navigasi keyboard universal dan interaksi mouse responsif.</p>
 
                 <div class="controls-table-wrapper">
                     <table class="controls-table">
@@ -198,44 +519,44 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td><strong>Pergerakan Karakter</strong></td>
-                                <td><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> atau <kbd>↑</kbd> <kbd>←</kbd> <kbd>↓</kbd> <kbd>→</kbd></td>
-                                <td>—</td>
+                                <td>Pergerakan Karakter</td>
+                                <td><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> atau Panah Arah</td>
+                                <td>Menghadap kursor saat serang</td>
                             </tr>
                             <tr>
-                                <td><strong>Bicara / Beli / Jual / Konfirmasi</strong></td>
+                                <td>Bicara / Beli / Buka Peti</td>
                                 <td><kbd>E</kbd> / <kbd>ENTER</kbd> / <kbd>SPACE</kbd></td>
-                                <td><strong>Klik Kiri</strong> pada NPC / Toko / Peti</td>
+                                <td>Klik kiri pada target</td>
                             </tr>
                             <tr>
-                                <td><strong>Tebasan Pedang / Kapak</strong></td>
+                                <td>Tebasan Pedang / Kapak</td>
                                 <td><kbd>J</kbd></td>
-                                <td><strong>Klik Kiri</strong> ke arah kursor</td>
+                                <td>Klik kiri ke arah kursor</td>
                             </tr>
                             <tr>
-                                <td><strong>Tembakan Sihir Proyektil</strong></td>
+                                <td>Tembakan Sihir Bola Api</td>
                                 <td><kbd>K</kbd> (Gunakan 1 Mana)</td>
-                                <td>—</td>
+                                <td>Membidik lurus ke hadapan</td>
                             </tr>
                             <tr>
-                                <td><strong>Tangkisan Perisai (Guard)</strong></td>
+                                <td>Tangkisan Perisai</td>
                                 <td><kbd>L</kbd></td>
-                                <td>—</td>
+                                <td>Tahan untuk memblokir</td>
                             </tr>
                             <tr>
-                                <td><strong>Manuver Menghindar (Dash)</strong></td>
-                                <td>—</td>
-                                <td><strong>Klik Kanan</strong> ke arah kursor</td>
+                                <td>Manuver Menghindar (Dash)</td>
+                                <td>Bebas</td>
+                                <td>Klik kanan ke arah kursor</td>
                             </tr>
                             <tr>
-                                <td><strong>Buka Karakter / Tas (Inventory)</strong></td>
+                                <td>Buka Tas Karakter</td>
                                 <td><kbd>C</kbd></td>
-                                <td><strong>Klik & Hover</strong> pada slot tas</td>
+                                <td>Klik dan pilih slot tas</td>
                             </tr>
                             <tr>
-                                <td><strong>Menu Opsi / Kembali</strong></td>
-                                <td><kbd>ESCAPE</kbd></td>
-                                <td>Klik tombol kembali</td>
+                                <td>Menu Jeda / Pengaturan</td>
+                                <td><kbd>P</kbd> atau <kbd>ESCAPE</kbd></td>
+                                <td>Klik tombol antarmuka</td>
                             </tr>
                         </tbody>
                     </table>
@@ -243,71 +564,54 @@
             </div>
         </section>
 
-        <!-- Technical Features -->
-        <section id="features-section" class="content-section">
+        <!-- Technical Pillars Section -->
+        <section id="tech-section" class="content-section bg-surface reveal-item">
             <div class="section-container">
-                <div class="section-badge">ARSITEKTUR & PERFORMA</div>
-                <h2 class="section-title">Dibangun Dengan Standar Industri</h2>
-
-                <div class="features-grid">
-                    <div class="feature-item">
-                        <div class="feature-tag">100% PURE JAVA SE 21</div>
-                        <h4>Zero External Dependencies</h4>
-                        <p>Hanya menggunakan <code>java.desktop</code> dan <code>java.base</code>. Tanpa Maven/Gradle bloat, bebas dependensi pihak ketiga.</p>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <h3 class="tech-title">Java SE 21 Murni</h3>
+                        <p class="tech-desc">Hanya menggunakan pustaka <code>java.desktop</code> dan <code>java.base</code>. Tanpa Maven, tanpa framework pihak ketiga, kompilasi 0 warning.</p>
                     </div>
-                    <div class="feature-item">
-                        <div class="feature-tag">DETERMINISTIC 60 FPS</div>
-                        <h4>Zero GC Thrashing</h4>
-                        <p>Game loop delta timer presisi tinggi dengan primitive math AABB collision untuk meminimalkan beban garbage collector.</p>
+                    <div class="tech-item">
+                        <h3 class="tech-title">60 FPS Deterministik</h3>
+                        <p class="tech-desc">Game loop delta timer presisi tinggi dengan primitive math AABB collision untuk meminimalkan beban garbage collector saat pertempuran intensif.</p>
                     </div>
-                    <div class="feature-item">
-                        <div class="feature-tag">PHYSICS UPGRADE</div>
-                        <h4>Per-Axis Wall Sliding</h4>
-                        <p>Pemeriksaan collision terpisah pada sumbu X dan Y mencegah pemain tersangkut saat bergerak diagonal menyusuri dinding.</p>
+                    <div class="tech-item">
+                        <h3 class="tech-title">Fisika Wall-Sliding</h3>
+                        <p class="tech-desc">Pemeriksaan tabrakan terpisah pada sumbu horizontal dan vertikal mencegah pemain tersangkut saat bergerak diagonal menyusuri tepian dinding gua.</p>
                     </div>
-                    <div class="feature-item">
-                        <div class="feature-tag">CC0 DYNAMIC AUDIO</div>
-                        <h4>SNES Orchestral Fantasy</h4>
-                        <p>Aransemen WAV 16-bit PCM terkurasi berganti otomatis antara Overworld, Dungeon, Boss Battle, dan Title Screen.</p>
+                    <div class="tech-item">
+                        <h3 class="tech-title">Audio CC0 Terkurasi</h3>
+                        <p class="tech-desc">Aransemen WAV 16-bit PCM terkurasi berganti otomatis antara Overworld, Dungeon, Boss Battle, dan Title Screen dengan tata suara retro klasik.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Direct Download Section -->
-        <section id="download-section" class="content-section download-banner">
+        <!-- Standalone Desktop Download Section -->
+        <section id="download-section" class="content-section reveal-item">
             <div class="section-container">
-                <div class="download-box">
+                <div class="download-layout">
                     <div class="download-content">
-                        <div class="badge-tag">DESKTOP NATIVE RELEASE</div>
-                        <h2 class="download-heading">Unduh Biner Standalone Desktop</h2>
-                        <p class="download-text">
-                            Ingin memainkan game secara lokal dengan performa 60.0 FPS murni dan latency nol di komputer Anda? Unduh rilis biner resmi <code>LuminasRegret.jar</code> (v1.0.0).
+                        <h2 class="section-title">Rilis Biner Desktop</h2>
+                        <p class="section-lead">
+                            Ingin memainkan game secara lokal dengan performa 60.0 FPS murni dan latency nol di komputer Anda? Unduh rilis biner resmi <code>LuminasRegret.jar</code>.
                         </p>
-                        <div class="download-actions">
-                            <a href="LuminasRegret.jar" download="LuminasRegret.jar" class="btn-download-primary">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-                                </svg>
-                                <span>Unduh LuminasRegret.jar (~46.8 MB)</span>
+                        
+                        <div class="download-buttons">
+                            <a href="LuminasRegret.jar" download="LuminasRegret.jar" class="btn-primary-action">
+                                <span>Unduh LuminasRegret.jar (47 MB)</span>
                             </a>
-                            <a href="https://github.com/1tsMeRaff/LuminasRegret" target="_blank" rel="noopener" class="btn-github-outline">
-                                <span>Lihat di GitHub</span>
+                            <a href="https://github.com/1tsMeRaff/LuminasRegret" target="_blank" rel="noopener" class="btn-secondary-action">
+                                <span>Repositori GitHub</span>
                             </a>
                         </div>
                     </div>
-                    
-                    <div class="terminal-guide">
-                        <div class="terminal-bar">
-                            <span class="t-dot t-red"></span>
-                            <span class="t-dot t-yellow"></span>
-                            <span class="t-dot t-green"></span>
-                            <span class="t-title">Terminal / Command Prompt</span>
-                        </div>
-                        <div class="terminal-body">
-                            <code><span class="cmd-prompt">$</span> java -jar LuminasRegret.jar</code>
-                            <div class="t-note"># Membutuhkan Java 21 LTS atau lebih baru terpasang di komputer Anda.</div>
-                        </div>
+
+                    <div class="terminal-card">
+                        <div class="terminal-titlebar">Perintah Eksekusi Terminal</div>
+                        <pre class="terminal-code"><code>java -jar LuminasRegret.jar</code></pre>
+                        <p class="terminal-note">Membutuhkan Java 21 LTS atau lebih baru terpasang di komputer Anda.</p>
                     </div>
                 </div>
             </div>
@@ -317,13 +621,18 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
-            <div class="footer-left">
-                <span class="footer-logo">✦ LUMINA'S REGRET</span>
-                <p>Proyek game 2D Action-RPG open-source di bawah lisensi MIT License.</p>
+            <div class="footer-top">
+                <span class="footer-brand">Lumina's Regret</span>
+                <p class="footer-summary">Proyek game 2D Action-RPG open-source di bawah lisensi MIT License.</p>
             </div>
-            <div class="footer-right">
-                <p>Aset Audio: CC0 Public Domain (RandomMind, Juhani Junkala, Memoraphile)</p>
-                <p>Repositori: <a href="https://github.com/1tsMeRaff/LuminasRegret" target="_blank" rel="noopener">1tsMeRaff/LuminasRegret</a></p>
+            
+            <p class="credits">
+                Gambar dan cuplikan video: <a href="https://commons.wikimedia.org/wiki/File:Fire_juggling_-_hawaii_-_2015_Oct_28.webm" target="_blank" rel="noopener">Fire juggling</a> oleh Nesnad (<a href="https://creativecommons.org/licenses/by/4.0" target="_blank" rel="noopener">CC BY 4.0</a>); <a href="https://www.artic.edu/artworks/15716" target="_blank" rel="noopener">Saint Christopher Meets Satan</a> oleh Martin de Soria, 1480 (<a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0 Domain Publik</a>), Art Institute of Chicago; <a href="https://www.artic.edu/artworks/12683" target="_blank" rel="noopener">Saint Catherine Delivered from the Wheel</a> (<a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0 Domain Publik</a>), Art Institute of Chicago; Aset Audio CC0 oleh RandomMind, Juhani Junkala, dan Memoraphile.
+            </p>
+            
+            <div class="footer-bottom">
+                <span>Hak Cipta 2026 1tsMeRaff</span>
+                <a href="https://github.com/1tsMeRaff/LuminasRegret" target="_blank" rel="noopener">1tsMeRaff/LuminasRegret</a>
             </div>
         </div>
     </footer>

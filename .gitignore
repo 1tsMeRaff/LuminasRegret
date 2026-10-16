@@ -2,6 +2,8 @@
 .agents/
 .agents
 .gemini/
+.taste-skill/
+skills-lock.json
 
 # Testing & Scratches
 test/
