@@ -236,6 +236,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 6b. CRT Scanlines Toggle Controller
+    const btnScanlines = document.getElementById('btn-scanlines');
+    const scanlinesLabel = document.getElementById('scanlines-label');
+    const crtScanlines = document.querySelector('.crt-scanlines');
+
+    if (btnScanlines && crtScanlines) {
+        let scanlinesActive = true;
+        btnScanlines.addEventListener('click', () => {
+            scanlinesActive = !scanlinesActive;
+            if (scanlinesActive) {
+                crtScanlines.style.display = 'block';
+                if (scanlinesLabel) scanlinesLabel.textContent = 'Scanlines: Aktif';
+            } else {
+                crtScanlines.style.display = 'none';
+                if (scanlinesLabel) scanlinesLabel.textContent = 'Scanlines: Nonaktif';
+            }
+        });
+    }
+
     // 7. Interactive Cartography Map Explorer
     const mapPins = document.querySelectorAll('.map-pin');
     const mapZoneThreat = document.getElementById('map-zone-threat');

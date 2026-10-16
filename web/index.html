@@ -145,6 +145,9 @@
                             <span class="key-hint"><kbd>ESC</kbd> Menu Opsi</span>
                         </div>
                         <div class="toolbar-right">
+                            <button id="btn-scanlines" class="tool-btn" title="Toggle Efek Scanlines CRT">
+                                <span id="scanlines-label">Scanlines: Aktif</span>
+                            </button>
                             <button id="btn-fullscreen" class="tool-btn" title="Mode Layar Penuh">
                                 <span>Layar Penuh</span>
                             </button>
@@ -474,8 +477,8 @@
                 <h2 class="section-title">Inspirasi Pedang dan Mitologi</h2>
                 <p class="section-lead">Desain persenjataan dan atmosfer Lumina's Regret berakar pada peninggalan sejarah dan manuskrip abad pertengahan.</p>
 
-                <div class="relics-gallery">
-                    <figure class="relic-item">
+                <div class="relics-showcase">
+                    <figure class="relic-feature">
                         <img src="assets/cawood-sword-diagonal.jpg" alt="Pedang Cawood abad pertengahan (1100 Masehi)" width="1280" height="1002" loading="lazy" decoding="async">
                         <figcaption class="relic-caption">
                             <h3 class="relic-title">Pedang Cawood (1100 Masehi)</h3>
@@ -483,21 +486,23 @@
                         </figcaption>
                     </figure>
 
-                    <figure class="relic-item">
-                        <img src="assets/albion-hospitaller-medieval-sword-1-6092737619-ii.jpg" alt="Pedang Hospitaller abad pertengahan" width="1920" height="413" loading="lazy" decoding="async">
-                        <figcaption class="relic-caption">
-                            <h3 class="relic-title">Pedang Hospitaller</h3>
-                            <p class="relic-desc">Bilah pedang dua tangan ksatria ordo salib. Koleksi Søren Niedziella (CC BY 2.0).</p>
-                        </figcaption>
-                    </figure>
+                    <div class="relic-subgrid">
+                        <figure class="relic-subitem">
+                            <img src="assets/albion-hospitaller-medieval-sword-1-6092737619-ii.jpg" alt="Pedang Hospitaller abad pertengahan" width="1920" height="413" loading="lazy" decoding="async">
+                            <figcaption class="relic-caption">
+                                <h3 class="relic-title">Pedang Hospitaller</h3>
+                                <p class="relic-desc">Bilah pedang dua tangan ksatria ordo salib. Koleksi Søren Niedziella (CC BY 2.0).</p>
+                            </figcaption>
+                        </figure>
 
-                    <figure class="relic-item">
-                        <img src="assets/saint-catherine-delivered-from-the-wheel.jpg" alt="Lukisan panel Saint Catherine (1395 Masehi)" width="1920" height="2083" loading="lazy" decoding="async">
-                        <figcaption class="relic-caption">
-                            <h3 class="relic-title">Lukisan Panel (1395 Masehi)</h3>
-                            <p class="relic-desc">Seni tempera minyak Spanyol abad ke-14. Art Institute of Chicago (CC0 Domain Publik).</p>
-                        </figcaption>
-                    </figure>
+                        <figure class="relic-subitem">
+                            <img src="assets/saint-catherine-delivered-from-the-wheel.jpg" alt="Lukisan panel Saint Catherine (1395 Masehi)" width="1920" height="2083" loading="lazy" decoding="async">
+                            <figcaption class="relic-caption">
+                                <h3 class="relic-title">Lukisan Panel (1395 Masehi)</h3>
+                                <p class="relic-desc">Seni tempera minyak Spanyol abad ke-14. Art Institute of Chicago (CC0 Domain Publik).</p>
+                            </figcaption>
+                        </figure>
+                    </div>
                 </div>
             </div>
         </section>
